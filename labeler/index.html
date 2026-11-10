@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Eval labeler</title>
+<style>
+  body { margin: 0; font: 16px/1.45 system-ui, sans-serif; color: #1a1a1a; }
+  header { display: flex; gap: 12px; align-items: center; padding: 8px 16px; border-bottom: 1px solid #ccc; flex-wrap: wrap; }
+  main { display: grid; grid-template-columns: minmax(0, 3fr) minmax(360px, 2fr); gap: 16px; padding: 12px 16px; }
+  #img { width: 100%; max-height: 80vh; object-fit: contain; background: #eee; cursor: zoom-in; }
+  label { display: block; margin-top: 8px; font-weight: 600; font-size: .9rem; }
+  input, select, textarea, button { font: inherit; }
+  input[type=text], textarea { width: 100%; box-sizing: border-box; }
+  table { border-collapse: collapse; width: 100%; margin-top: 6px; font-size: .9rem; }
+  td, th { border: 1px solid #ccc; padding: 3px; }
+  button { padding: 4px 12px; }
+  .done { color: #1d6b38; } .todo { color: #a3221a; }
+  .muted { color: #555; font-size: .85rem; }
+  :focus-visible { outline: 3px solid #f0a500; }
+</style>
+</head>
+<body>
+<header>
+  <strong>Eval labeler</strong>
+  <button id="prev" title="Alt+Left">◀ Prev</button>
+  <select id="pick" aria-label="image"></select>
+  <button id="next" title="Alt+Right">Next ▶</button>
+  <span id="status" role="status" aria-live="polite"></span>
+  <span class="muted" id="files"></span>
+</header>
+<main>
+  <div>
+    <img id="img" alt="image to label">
+    <p class="muted">Click the image to open it full size. Titles, sources and model outputs are deliberately hidden.</p>
+  </div>
+  <form id="form">
+    <label for="label_source">Label source</label>
+    <input type="text" id="label_source" required>
+    <label for="gate_expected">Expected photo check</label>
+    <select id="gate_expected"></select>
+    <label for="make">Make</label><input type="text" id="make" placeholder="or unknown">
+    <label for="model">Model</label><input type="text" id="model" placeholder="or unknown">
+    <label for="color">Color</label><input type="text" id="color" placeholder="or unknown">
+    <label>Year range</label>
+    <input type="number" id="year_start" aria-label="year from" style="width:7em"> to
+    <input type="number" id="year_end" aria-label="year to" style="width:7em">
+    <label for="camera_view">Camera view (vehicle's point of view)</label>
+    <select id="camera_view"></select>
+    <label for="has_visible_damage">Visible damage?</label>
+    <select id="has_visible_damage"><option value=""></option><option value="y">y</option><option value="n">n</option></select>
+    <label>Damage items (one per damaged part; side = vehicle's own)</label>
+    <table id="dmg"><thead><tr><th>Panel</th><th>Side</th><th>Type</th><th>Sev</th><th>Notes</th><th></th></tr></thead><tbody></tbody></table>
+    <button type="button" id="add">+ Add item</button>
+    <label for="label_notes">Notes</label>
+    <textarea id="label_notes" rows="2"></textarea>
+    <p><button type="submit">Save (Ctrl+S)</button></p>
+  </form>
+</main>
+<script>
+"use strict";
+let V, IDS = [], cur = 0;
+const $ = (id) => document.getElementById(id);
+function opt(sel, values, value, blank = true) {
+  sel.replaceChildren();
+  if (blank) sel.append(new Option("", ""));
+  for (const v of values) sel.append(new Option(String(v), String(v), false, String(v) === String(value)));
+  sel.value = value ?? "";
+}
+function dmgRow(d = {}) {
+  const tr = document.createElement("tr");
+  for (const [k, vals] of [["panel", V.panel], ["side", V.side], ["damage_type", V.damage_type], ["severity", V.severity]]) {
+    const s = document.createElement("select"); s.dataset.k = k; s.setAttribute("aria-label", k);
+    opt(s, vals, d[k] ?? "", false); if (d[k] === undefined) s.value = vals[0];
+    const td = document.createElement("td"); td.append(s); tr.append(td);
+  }
+  const n = document.createElement("input"); n.type = "text"; n.dataset.k = "label_notes"; n.value = d.label_notes || ""; n.setAttribute("aria-label", "item notes");
+  const td = document.createElement("td"); td.append(n); tr.append(td);
+  const rm = document.createElement("button"); rm.type = "button"; rm.textContent = "✕"; rm.setAttribute("aria-label", "remove item");
+  rm.onclick = () => tr.remove(); const td2 = document.createElement("td"); td2.append(rm); tr.append(td2);
+  $("dmg").tBodies[0].append(tr);
+}
+async function refreshIds() {
+  const r = await (await fetch("/api/ids")).json(); IDS = r.ids;
+  $("files").textContent = `→ ${r.files.images_csv} + ${r.files.damage_csv}`;
+  const p = $("pick"); const keep = p.value; p.replaceChildren();
+  IDS.forEach((x, i) => p.append(new Option(`${x.image_id} ${x.labeled ? "✓" : "·"}`, String(i))));
+  p.value = keep || String(cur);
+}
+async function load(i) {
+  cur = (i + IDS.length) % IDS.length; $("pick").value = String(cur);
+  const id = IDS[cur].image_id;
+  $("img").src = `/api/image/${id}`; $("img").onclick = () => window.open(`/api/image/${id}`, "_blank");
+  const L = await (await fetch(`/api/labels/${id}`)).json();
+  $("label_source").value = L.label_source;
+  opt($("gate_expected"), V.gate_expected, L.gate_expected);
+  opt($("camera_view"), V.camera_view, L.camera_view);
+  for (const k of ["make", "model", "color", "year_start", "year_end", "label_notes"]) $(k).value = L[k] ?? "";
+  $("has_visible_damage").value = L.has_visible_damage || "";
+  $("dmg").tBodies[0].replaceChildren(); (L.damage || []).forEach(dmgRow);
+  $("status").textContent = `${id}: ${IDS[cur].labeled ? "has labels" : "not labeled yet"}`;
+}
+async function save(ev) {
+  if (ev) ev.preventDefault();
+  const id = IDS[cur].image_id, num = (k) => ($(k).value === "" ? null : Number($(k).value));
+  const body = { label_source: $("label_source").value, gate_expected: $("gate_expected").value, make: $("make").value.trim(),
+    model: $("model").value.trim(), color: $("color").value.trim(), year_start: num("year_start"), year_end: num("year_end"),
+    camera_view: $("camera_view").value, has_visible_damage: $("has_visible_damage").value, label_notes: $("label_notes").value,
+    damage: [...$("dmg").tBodies[0].rows].map((tr) => Object.fromEntries([...tr.querySelectorAll("[data-k]")].map((e) =>
+      [e.dataset.k, e.dataset.k === "severity" ? Number(e.value) : e.value]))) };
+  const r = await fetch(`/api/labels/${id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const j = await r.json();
+  $("status").textContent = r.ok ? `Saved ${id} (${j.damage_rows} damage rows)` : `NOT saved: ${JSON.stringify(j.detail)}`;
+  if (r.ok) await refreshIds();
+}
+$("form").addEventListener("submit", save);
+$("add").onclick = () => dmgRow();
+$("prev").onclick = () => load(cur - 1);
+$("next").onclick = () => load(cur + 1);
+$("pick").onchange = () => load(Number($("pick").value));
+document.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); save(); }
+  if (e.altKey && e.key === "ArrowRight") load(cur + 1);
+  if (e.altKey && e.key === "ArrowLeft") load(cur - 1);
+});
+(async () => { V = await (await fetch("/api/vocab")).json(); await refreshIds(); load(0); })();
+</script>
+</body>
+</html>

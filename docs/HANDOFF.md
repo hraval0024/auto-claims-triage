@@ -59,3 +59,9 @@ Started in Phase 1 and filled in as facts are verified. The full handoff is comp
 - Cost is shown as one range, low to high; `mid_usd` is never displayed. Severity-4 claims show "Cost not estimable" plus the partial range labeled "partial, excludes severity-4 items".
 - The LLM baseline appears only if the server flag `LLM_BASELINE_ENABLED` is on; the UI never asks for it.
 - Every model-derived string is inserted as text (`textContent`), never as HTML, so text read from a photo can't inject markup (`tests/test_review.py` checks app.js has no `.innerHTML`).
+
+### Eval set and labeling (Phase 4 prep)
+
+- 30 real Wikimedia Commons images (`eval/manifest.json`: id, title, link, license, author, sha256). Files live in `data/eval/` (gitignored), fetched by `scripts/fetch_eval.py`. None match a DEV image by sha256 or perceptual hash (`eval/dev_overlap_check.txt`).
+- Labels come from the candidate (not an adjuster). No model pre-fill; titles (which often name the make and model) are hidden from the labeling page.
+- `labeler/` is a local page (127.0.0.1 only) that shows the image next to dropdowns for the allowed values in `eval/labels/VOCAB.md` and saves to the two CSVs. It takes `--images-csv/--damage-csv`, so each independent labeler and the adjudicated set can use separate files. Planned use: adjudicating disagreements between independent labels.
