@@ -18,13 +18,14 @@ WORKDIR /app
 COPY pyproject.toml uv.lock .python-version ./
 RUN uv sync --frozen --no-dev --no-install-project
 
-# Application code only (tests, eval, docs, data are excluded by .dockerignore).
+# Application code and the entrypoint only (tests, eval, docs, data are excluded by .dockerignore).
 COPY app ./app
+COPY docker/entrypoint.py ./docker/entrypoint.py
 
-# Run as an unprivileged user. /data is where Railway mounts the volume.
-RUN useradd --system --uid 10001 --no-create-home appuser \
-    && mkdir -p /data && chown appuser /data
-USER appuser
+# Unprivileged app user with a fixed uid/gid (the entrypoint drops to these).
+RUN groupadd --system --gid 10001 appuser \
+    && useradd --system --uid 10001 --gid 10001 --no-create-home appuser \
+    && mkdir -p /data && chown 10001:10001 /data
 
 # Defaults for Railway; override with service variables. Secrets are NOT set here.
 ENV PORT=8000 \
@@ -32,6 +33,7 @@ ENV PORT=8000 \
     TRUST_PROXY_HOPS=1
 
 EXPOSE 8000
-# exec: uvicorn is PID 1 and gets SIGTERM on redeploy. No access log (the app logs its own
-# JSON lines without query strings); no Server header.
-CMD ["sh", "-c", "exec /app/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port ${PORT} --no-access-log --no-server-header"]
+# Starts as root ONLY so docker/entrypoint.py can hand the (root-owned) Railway volume at
+# DATA_DIR to uid 10001; it then drops privileges for good and execs uvicorn as PID 1
+# (--no-access-log, --no-server-header). The app never runs as root.
+CMD ["/app/.venv/bin/python", "/app/docker/entrypoint.py"]

@@ -58,9 +58,17 @@ Detecting a stock or press photo from pixels alone is unreliable: a well-lit ori
 Stated honestly so they can be raised in the demo; update as each is verified live.
 
 - **Docker image never built.** Docker is not installed on the dev machine (not installed without asking). Replayed instead: a context with only what `.dockerignore` allows, the same frozen no-dev `uv sync`, and the exact CMD with env vars only. Not covered: the base image, the ghcr.io uv copy, the non-root user, Railway's builder.
-- **Volume permissions for a non-root container on Railway:** unknown. If `/data` is root-owned, startup fails with "DATA_DIR '/data' is not writable" (fail fast, by design).
+- **Volume permissions for a non-root container on Railway: FAILED on first deploy, fixed (see F3).**
 - **Railway proxy hop count:** `TRUST_PROXY_HOPS=1` assumes Railway's edge appends the real client IP as the last X-Forwarded-For entry. If that's wrong, per-IP limits either lump all users into one bucket (too strict) or trust a forgeable entry (too loose). Not verifiable from my side without the deployment.
 - **Rate limits and the concurrency cap are in memory, per instance:** they reset on restart and would not hold with more than 1 replica (railway.json pins 1). The daily call and spend caps are in SQLite and do survive restarts.
 - **Login brute-force protection is only a per-IP rate limit (10/min)**; no lockout, no CAPTCHA. A 24-character random code makes guessing impractical; a short code would not.
 - **URL input from Railway:** the rehearsal fetched a Wikimedia image fine from a home IP with the generic User-Agent; from a datacenter IP Wikimedia may block it (it blocked a burst earlier, F-note in Phase 1). Set `URL_FETCH_USER_AGENT` if so.
 - **Cold-start time and live p50/p95:** pending the live check (step 12).
+
+## F3: First Railway deploys failed at startup (config + volume permissions)
+
+- **Date:** 2026-11-10, first Railway deploys.
+- **Failure 1:** `Configuration error: DATA_DIR 'data' is not writable.` The Railway variable was set to `data` (the local-dev value from `.env.example`), which resolves to `/app/data`; the non-root user can't create it. Fix: `DATA_DIR=/data` (absolute). Fail-fast worked as designed: the app refused to start instead of running without a database.
+- **Failure 2:** after the fix, `DATA_DIR '/data' is not writable.` Railway mounts the volume root-owned and the image ran as uid 10001 (`USER appuser`). This was listed as an untested risk before deploying.
+- **Fix (candidate chose option A):** the container starts as root only to run `docker/entrypoint.py`, which chowns `DATA_DIR` to 10001 (never following symlinks), drops privileges permanently, refuses to continue if still root, and execs uvicorn. The app never runs as root. Rejected: running the whole container as root (simpler, weaker isolation); an unconfirmed Railway setting.
+- **Verification:** root path unit-tested with recorded OS calls (`tests/test_entrypoint.py`); non-root path run for real locally. Live confirmation pending the redeploy.

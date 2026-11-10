@@ -25,10 +25,11 @@ Mount a volume at `/data`. It holds `app.db`: request audit log, corrections, da
 model-output cache, idempotency keys. No images are ever written. Without the volume, all of this
 resets on every redeploy, including the daily caps.
 
-The container runs as a non-root user (uid 10001). If the deploy log says `DATA_DIR '/data' is not
-writable` (or `/healthz` returns 503), the volume is mounted root-owned. I don't know Railway's
-current recommended fix for certain; check Railway's volume docs (they have documented running the
-container as root via a service variable for this case) before choosing.
+Railway mounts the volume root-owned. The container therefore starts as root ONLY to run
+`docker/entrypoint.py`, which hands `DATA_DIR` to uid/gid 10001 (never following symlinks),
+permanently drops privileges, refuses to continue if still root, and execs uvicorn. The app
+process never runs as root. `DATA_DIR` must be the absolute path `/data` (a relative `data`
+resolves to `/app/data`, which the app user can't create).
 
 ## Redeploy
 
@@ -61,6 +62,7 @@ Results go to `runs/phase5/`; the code is never printed or saved.
 | `ENV ... UV_PYTHON_DOWNLOADS=never, UV_PROJECT_ENVIRONMENT=/app/.venv` | Use the image's Python; venv at a fixed path | Replayed locally (same flags). |
 | `COPY pyproject.toml uv.lock .python-version` + `uv sync --frozen --no-dev --no-install-project` | Exact locked runtime deps, cached layer | Replayed locally: syncs, no pytest in the runtime env. |
 | `COPY app ./app` | Only the app; `.dockerignore` drops tests, eval, data, images, docs, `.git`, `.env*` | Replayed: `app/` imports nothing outside itself. |
-| `useradd ... appuser`, `chown appuser /data`, `USER appuser` | Non-root | Untested: volume permissions on Railway (see Volume). |
+| `groupadd/useradd ... 10001` | Unprivileged app user with a fixed uid/gid | No `USER` line: the entrypoint drops to 10001 after fixing volume ownership. |
+| `COPY docker/entrypoint.py` | Root -> chown DATA_DIR -> drop to 10001 -> exec uvicorn | Root path unit-tested with recorded OS calls (no sudo/Docker here); non-root path run for real. |
 | `ENV PORT=8000 DATA_DIR=/data TRUST_PROXY_HOPS=1` | Defaults; Railway injects `PORT` | No secrets in the image. |
-| `CMD sh -c "exec uvicorn ... --port ${PORT} --no-access-log --no-server-header"` | Shell expands `PORT`; `exec` makes uvicorn PID 1 for clean SIGTERM | Replayed locally with env only: refuses to start without secrets; with secrets serves `/healthz`, 401s, real claim. |
+| `CMD python docker/entrypoint.py` | Entrypoint reads `PORT`, execs uvicorn as PID 1 (`--no-access-log --no-server-header`) | Replayed locally via the entrypoint: `/healthz` writable, startup logged. |
