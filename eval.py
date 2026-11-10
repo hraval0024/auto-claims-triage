@@ -26,6 +26,7 @@ import subprocess
 import sys
 import threading
 import time
+import unicodedata
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
@@ -37,6 +38,9 @@ MODELS = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]
 REPEAT_IDS = ["eval_002", "eval_005", "eval_008", "eval_011", "eval_014",
               "eval_017", "eval_021", "eval_024", "eval_028", "eval_032"]
 REPEATS = 3  # total runs per subset image (run 1 = the main pass)
+# Label audit (candidate, after viewing results): labels that contradict the photographer's Commons
+# title or look off. Used ONLY for a sensitivity view; the label files are not edited.
+AUDIT_IDS = ["eval_016", "eval_017", "eval_023", "eval_029", "eval_030", "eval_033"]
 VOLUME_ASSUMPTION = 10_000  # claims/month, ASSUMPTION for the cost-at-volume line
 
 ROOT = Path(__file__).resolve().parent
@@ -54,8 +58,17 @@ COLOR_GROUPS = {"white": "white", "cream": "white", "ivory": "white", "black": "
                 "orange": "orange", "purple": "purple", "pink": "pink"}
 
 
+HARNESS_VERSION = "eval_v2"  # v2 (F5): symmetric Unicode folding (strip accents, casefold) before matching
+
+
+def fold(s: str) -> str:
+    """Applied identically to labels and predictions: 'Citroën' -> 'citroen'."""
+    decomposed = unicodedata.normalize("NFKD", s or "")
+    return "".join(c for c in decomposed if not unicodedata.combining(c)).casefold()
+
+
 def norm(s: str) -> str:
-    return re.sub(r"[^a-z0-9]", "", (s or "").lower())
+    return re.sub(r"[^a-z0-9]", "", fold(s))
 
 
 def is_unknown(s: str) -> bool:
@@ -74,7 +87,7 @@ def model_match(label: str, pred: str) -> bool:
 
 
 def colors(s: str) -> set:
-    return {COLOR_GROUPS[w] for w in re.findall(r"[a-z]+", (s or "").lower()) if w in COLOR_GROUPS}
+    return {COLOR_GROUPS[w] for w in re.findall(r"[a-z]+", fold(s)) if w in COLOR_GROUPS}
 
 
 def color_match(label: str, pred: str) -> bool:
@@ -242,7 +255,15 @@ def pct(a, b):
     return None if not b else round(100 * a / b, 1)
 
 
-def metrics(out_dir: Path) -> dict:
+def year_match(lab: dict, veh: dict) -> bool:
+    yr = veh.get("year_range") or {}
+    if yr.get("start") is None or yr.get("end") is None:
+        return False
+    return max(int(lab["year_start"]), yr["start"]) <= min(int(lab["year_end"]), yr["end"])  # ranges overlap
+
+
+def metrics(out_dir: Path, only: set | None = None, exclude: set | None = None) -> dict:
+    """only: restrict image-level quality metrics to these ids (common subset); exclude: drop these ids."""
     imgs, dmg, manifest = load_labels()
     recs = [json.loads(line) for line in open(out_dir / "runs.jsonl")]
     meta = json.loads((out_dir / "meta.json").read_text())
@@ -265,8 +286,10 @@ def metrics(out_dir: Path) -> dict:
                      "label_pass_model_pass": conf[(True, True)], "label_pass_model_fail": conf[(True, False)],
                      "label_fail_model_pass": conf[(False, True)], "label_fail_model_fail": conf[(False, False)], "disagreements": wrong}
 
-        both = [i for i, r in res.items() if imgs[i]["should_pass_gate"] == "yes" and (r or {}).get("status") == "ok"]
+        both = [i for i, r in res.items() if imgs[i]["should_pass_gate"] == "yes" and (r or {}).get("status") == "ok"
+                and (only is None or i in only) and (exclude is None or i not in exclude)]
         m["n_both_pass"] = len(both)
+        m["both_pass_ids"] = sorted(both)
 
         # vehicle attributes: denominator = both-pass images whose label is not unknown
         for attr, fn in (("make", make_match), ("model", model_match), ("color", color_match)):
@@ -276,6 +299,13 @@ def metrics(out_dir: Path) -> dict:
             m[attr] = {"denominator": len(den), "correct": len(correct), "acc_pct": pct(len(correct), len(den)),
                        "model_said_unknown": len(pred_unknown),
                        "misses": [{"id": i, "label": imgs[i][attr], "model": res[i]["vehicle"][attr]["value"]} for i in den if i not in correct]}
+
+        yden = [i for i in both if imgs[i]["year_start"] and imgs[i]["year_end"]]
+        yok = [i for i in yden if year_match(imgs[i], res[i]["vehicle"])]
+        m["year"] = {"denominator": len(yden), "correct": len(yok), "acc_pct": pct(len(yok), len(yden)),
+                     "rule": "predicted year range overlaps the labeled range; no predicted range = miss",
+                     "misses": [{"id": i, "label": f"{imgs[i]['year_start']}-{imgs[i]['year_end']}",
+                                 "model": f"{res[i]['vehicle']['year_range'].get('start')}-{res[i]['vehicle']['year_range'].get('end')}"} for i in yden if i not in yok]}
 
         # damage: per-image sets (micro), panel-level matching for side/severity
         tp_p = fp_p = fn_p = tp_t = fp_t = fn_t = 0
@@ -399,41 +429,71 @@ def metrics(out_dir: Path) -> dict:
                               "cost_range_same_pct": pct(same(lambda x: json.dumps([(x.get("cost") or {}).get(k) for k in ("status", "low_usd", "high_usd")])), len(full)),
                               "panel_set_jaccard_mean": round(mean(jac), 3) if jac else None}
         M[model] = m
+    meta = dict(meta, label_source_now=sorted({r["label_source"] for r in imgs.values()}))
     return {"meta": meta, "models": M}
 
 
 # ---------------------------------------------------------------- report
+def _commit() -> str:
+    return subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+
+
 def report(out_dir: Path) -> str:
-    R = metrics(out_dir)
-    (out_dir / "summary.json").write_text(json.dumps(R, indent=2) + "\n")
-    meta, M = R["meta"], R["models"]
-    short = {m: m.replace("claude-", "").replace("-5-5", " 5.5") for m in M}
-    rows = [
-        ("Gate agreement (should-pass vs did-pass)", lambda m: f"{m['gate']['agree']}/{m['gate']['denominator']}"),
-        ("Make accuracy", lambda m: f"{m['make']['acc_pct']}% ({m['make']['correct']}/{m['make']['denominator']})"),
-        ("Model accuracy", lambda m: f"{m['model']['acc_pct']}% ({m['model']['correct']}/{m['model']['denominator']})"),
-        ("Color accuracy", lambda m: f"{m['color']['acc_pct']}% ({m['color']['correct']}/{m['color']['denominator']})"),
+    full = metrics(out_dir)
+    meta, M = full["meta"], full["models"]
+    common = set.intersection(*(set(m["both_pass_ids"]) for m in M.values())) if M else set()
+    sub = metrics(out_dir, only=common)["models"]
+    sens = metrics(out_dir, exclude=set(AUDIT_IDS))["models"]
+    asrun_path = out_dir / "summary_v1_asrun.json"
+    asrun = json.loads(asrun_path.read_text())["models"] if asrun_path.exists() else None
+    summary = {"meta": meta, "harness_version": HARNESS_VERSION, "scored_with_commit": _commit(),
+               "models": M, "common_subset": {"ids": sorted(common), "n": len(common), "models": sub},
+               "sensitivity_excluding_audit": {"excluded_ids": AUDIT_IDS, "models": sens}}
+    (out_dir / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+    short = {m: m.replace("claude-", "").replace("-5-5", " 5.5").capitalize() for m in M}
+    acc = lambda k: lambda m: f"{m[k]['acc_pct']}% ({m[k]['correct']}/{m[k]['denominator']})"  # noqa: E731
+    quality = [
+        ("Make accuracy", acc("make")), ("Model accuracy", acc("model")), ("Color accuracy", acc("color")),
+        ("Year range overlaps label", acc("year")),
         ("Panel precision / recall", lambda m: f"{m['panel']['precision_pct']}% / {m['panel']['recall_pct']}%"),
         ("Damage-type precision / recall", lambda m: f"{m['damage_type']['precision_pct']}% / {m['damage_type']['recall_pct']}%"),
         ("Side agreement (matched L/R panels)", lambda m: f"{m['side']['agree_pct']}% (n={m['side']['denominator'].split()[0]})"),
         ("Severity exact / within 1 / weighted kappa", lambda m: f"{m['severity']['exact_pct']}% / {m['severity']['within1_pct']}% / {m['severity']['weighted_kappa']}"),
         ("Sev-3 panels found / at sev 3+", lambda m: f"{m['severe_recall']['sev3']['panel_found_pct']}% / {m['severe_recall']['sev3']['found_at_sev3plus_pct']}% (n={m['severe_recall']['sev3']['labeled_panels']})"),
-        ("Sev-4 panels found / at sev 4", lambda m: f"{m['severe_recall']['sev4']['panel_found_pct']}% / {m['severe_recall']['sev4']['found_at_sev4_pct']}% (n={m['severe_recall']['sev4']['labeled_panels']})"),
-        ("Cost range high/low (median)", lambda m: f"{m['cost']['range_ratio_median']}x"),
-        ("Baseline guess outside engine range", lambda m: f"{m['cost']['baseline_point_outside_engine_range']['pct']}% ({m['cost']['baseline_point_outside_engine_range']['count']}/{m['cost']['baseline_point_outside_engine_range']['denominator'].split()[0]})"),
-        ("Routing: request_more_photos share", lambda m: f"{m['routing']['request_more_photos_pct']}%"),
-        ("Latency p50 / max (s, uncached, n)", lambda m: f"{m['latency_s']['main_p50']} / {m['latency_s']['main_max']} (n={m['latency_s']['main_n']})"),
-        ("Cost per claim (extraction mean)", lambda m: f"${m['cost_per_claim_usd']['extraction_mean']}"),
-        ("Repeatability: routing / max sev same", lambda m: f"{m['repeatability']['routing_same_pct']}% / {m['repeatability']['max_severity_same_pct']}%"),
+        ("Sev-4 panels found / rated 4", lambda m: f"{m['severe_recall']['sev4']['panel_found_pct']}% / {m['severe_recall']['sev4']['found_at_sev4_pct']}% (n={m['severe_recall']['sev4']['labeled_panels']})"),
     ]
-    lines = [f"# Eval results {out_dir.name}",
-             f"Commit {meta['commit']} | {meta['n_images']} images (Wikimedia Commons, see eval/manifest.json; DEV images excluded) | "
-             f"prompt {meta['prompt_version']} schema {meta['schema_version']} rules {meta['rules_version']} cost {meta['cost_table_version']} | effort {meta['effort']}",
-             f"SMALL SET: n={meta['n_images']}. Labels: {meta['label_source']} -> AGREEMENT with one other model, NOT accuracy against adjusters.",
-             "Cost accuracy: N/A: no public ground truth.", "",
-             "| Metric | " + " | ".join(short.values()) + " |", "|---|" + "---|" * len(M)]
-    for name, fn in rows:
-        lines.append(f"| {name} | " + " | ".join(fn(M[m]) for m in M) + " |")
+    whole = [
+        ("Gate agreement (all 34)", lambda m: f"{m['gate']['agree']}/{m['gate']['denominator']}"),
+        ("Images assessed by labels AND model", lambda m: str(m["n_both_pass"])),
+        ("Cost range high/low (median)", lambda m: f"{m['cost']['range_ratio_median']}x"),
+        ("Free-guess point outside engine range", lambda m: f"{m['cost']['baseline_point_outside_engine_range']['pct']}% ({m['cost']['baseline_point_outside_engine_range']['count']}/{m['cost']['baseline_point_outside_engine_range']['denominator'].split()[0]})"),
+        ("request_more_photos share (all 34)", lambda m: f"{m['routing']['request_more_photos_pct']}%"),
+        ("Latency p50 / max, s (uncached, n)", lambda m: f"{m['latency_s']['main_p50']} / {m['latency_s']['main_max']} (n={m['latency_s']['main_n']})"),
+        ("Cost per claim (extraction mean)", lambda m: f"${m['cost_per_claim_usd']['extraction_mean']}"),
+        ("Repeatability: same routing / same max severity", lambda m: f"{m['repeatability']['routing_same_pct']}% / {m['repeatability']['max_severity_same_pct']}%"),
+    ]
+    hdr = "| Metric | " + " | ".join(f"{short[m]} all | {short[m]} common" for m in M) + " |"
+    lines = [f"# Eval results {out_dir.name} (scored with {HARNESS_VERSION} at {_commit()[:7]})",
+             f"Run commit {meta['commit']} | {meta['n_images']} images (Wikimedia Commons; DEV excluded) | prompt {meta['prompt_version']} "
+             f"schema {meta['schema_version']} rules {meta['rules_version']} cost {meta['cost_table_version']} | effort {meta['effort']}",
+             f"SMALL SET: n={meta['n_images']}. Labels: {meta['label_source_now']} -> AGREEMENT with one other model, NOT accuracy against adjusters.",
+             f"Common subset: {len(common)} images assessed by the labels and all three models: {', '.join(sorted(common))}.",
+             "Cost accuracy: N/A: no public ground truth.", "", hdr, "|---|" + "---|---|" * len(M)]
+    for name, fn in quality:
+        lines.append(f"| {name} | " + " | ".join(f"{fn(M[m])} | {fn(sub[m])}" for m in M) + " |")
+    for name, fn in whole:
+        lines.append(f"| {name} | " + " | ".join(f"{fn(M[m])} | -" for m in M) + " |")
+    lines += ["", f"## Sensitivity: excluding audited labels {', '.join(AUDIT_IDS)}", "",
+              "| Metric | " + " | ".join(short.values()) + " |", "|---|" + "---|" * len(M)]
+    for name, fn in quality[:4]:
+        lines.append(f"| {name} | " + " | ".join(fn(sens[m]) for m in M) + " |")
+    if asrun:
+        lines += ["", "## F5 before / after (eval_v1 as run -> eval_v2, same saved runs, no new model calls)", "",
+                  "| Metric | " + " | ".join(short.values()) + " |", "|---|" + "---|" * len(M)]
+        for k in ("make", "model", "color"):
+            lines.append(f"| {k.capitalize()} accuracy | " + " | ".join(
+                f"{asrun[m][k]['acc_pct']}% ({asrun[m][k]['correct']}/{asrun[m][k]['denominator']}) -> {M[m][k]['acc_pct']}% ({M[m][k]['correct']}/{M[m][k]['denominator']})"
+                for m in M) + " |")
     text = "\n".join(lines) + "\n"
     (out_dir / "report.md").write_text(text)
     return text
