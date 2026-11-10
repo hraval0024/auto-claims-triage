@@ -54,13 +54,30 @@ def test_severity_4_is_not_estimable_but_subtotal_kept():
     e = estimate([item(Panel.fender, 4), item(Panel.headlamp, 3)], make="Nissan")
     assert e.status == "not_estimable"
     assert e.low_usd is None and e.mid_usd is None and e.high_usd is None
-    assert e.estimable_subtotal_low_usd and e.estimable_subtotal_high_usd
+    assert e.partial_low_usd and e.partial_high_usd
+    assert e.partial_label == "partial, excludes severity-4 items"
     assert any("severity 4" in r for r in e.not_estimable_reasons)
+
+
+def test_all_severity4_claim_still_labeled_partial():
+    e = estimate([item(Panel.fender, 4)], make="Nissan")
+    assert e.status == "not_estimable" and e.partial_label == "partial, excludes severity-4 items"
+    assert e.partial_low_usd == 0 and e.partial_high_usd == 0
+
+
+def test_claim_minimum_applies_per_claim_not_per_item():
+    tiny = estimate([item(Panel.tire, 1)], make="Toyota")  # $0-$0 row
+    assert tiny.low_usd == 100 and tiny.high_usd == 100 and tiny.claim_minimum_applied
+    two_small = estimate([item(Panel.headlamp, 1), item(Panel.taillamp, 1, Side.right)], make="Toyota")
+    assert two_small.low_usd == 100  # one floor for the claim, not $100 per item
+    big = estimate([item(Panel.front_bumper, 3, Side.center)], make="Toyota")
+    assert not big.claim_minimum_applied and big.low_usd > 100
 
 
 def test_pillar_is_never_priced():
     e = estimate([item(Panel.pillar, 1)], make="Ford")
     assert e.status == "not_estimable"
+    assert e.partial_label.startswith("partial, excludes severity-4 items") and "pillar" in e.partial_label
 
 
 def test_same_part_priced_once_at_highest_severity():
@@ -104,6 +121,8 @@ def test_response_is_labeled_as_assumption():
     assert e.is_assumption and "assumption" in e.assumption_notice.lower()
     assert e.cost_table_version == "cost_table_v1"
     assert any("not real pricing" in c for c in e.caveats)
+    assert any("not calibrated intervals" in c for c in e.caveats)
+    assert any("ADAS" in c and "EV" in c for c in e.caveats)
 
 
 @pytest.mark.parametrize("make", ["Toyota", "BMW", "unknown"])

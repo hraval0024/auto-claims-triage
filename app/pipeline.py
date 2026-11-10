@@ -1,7 +1,8 @@
-"""Claim pipeline: intake -> prechecks -> model (gate + extraction) -> gate enforcement -> merge.
+"""Claim pipeline: intake -> prechecks -> model (gate + extraction) -> gate enforcement -> merge
+-> deterministic cost -> routing [-> optional LLM free-guess baseline, eval only].
 
 The gate is enforced in CODE: if no photo passes, no vehicle or damage is returned, whatever
-the model wrote. Phase 2 adds cost and routing after the merge step.
+the model wrote. Every outcome, including errors and gate failures, gets a routing decision.
 """
 
 import time
@@ -9,10 +10,12 @@ import uuid
 from collections import defaultdict
 from datetime import datetime, timezone
 
-from app.config import COST_TABLE_VERSION, PROMPT_VERSION, SCHEMA_VERSION, settings
+from app.config import COST_TABLE_VERSION, LLM_BASELINE_PROMPT_VERSION, PROMPT_VERSION, SCHEMA_VERSION, settings
+from app.cost_engine import estimate
 from app.intake import IntakeError, prepare_image
-from app.llm import LLMError, UsageTally, call_model
+from app.llm import LLMError, UsageTally, call_model, guess_cost
 from app.prechecks import run_prechecks
+from app.routing import route
 from app.schemas import (
     BLOCKING_GATE_CODES,
     Audit,
@@ -20,6 +23,7 @@ from app.schemas import (
     Confidence,
     GateCode,
     GateResult,
+    LLMBaseline,
     MergedDamageItem,
     ModelOutput,
     Usage,
@@ -45,6 +49,8 @@ def run_claim(
     effort: str | None = None,
     include_raw: bool = False,
     request_id: str | None = None,
+    region: str | None = None,
+    include_llm_baseline: bool | None = None,
 ) -> ClaimResult:
     t0 = time.monotonic()
     model_id = model_id or settings.model_id
@@ -68,6 +74,8 @@ def run_claim(
     )
 
     def finish(**kw) -> ClaimResult:
+        kw["routing"] = route(kw["status"], kw.get("damage", []), kw.get("cost"), kw.get("flags", []),
+                              kw.get("conflicts", []), kw["gate"].reasons)
         return ClaimResult(audit=audit, prechecks=prechecks, latency_ms=int((time.monotonic() - t0) * 1000), **kw)
 
     # Photos blocked by deterministic prechecks never reach the model (saves a paid call).
@@ -122,6 +130,16 @@ def run_claim(
 
     damage, conflicts = merge_damage(out, set(usable))
     conflicts += vehicle_conflicts(out, set(usable))
+    cost = estimate(damage, make=out.vehicle.make.value, region=region)
+
+    baseline = None
+    if settings.llm_baseline_enabled if include_llm_baseline is None else include_llm_baseline:
+        try:
+            guess, btally = guess_cost([prepared[i].jpeg_bytes for i in usable], model_id=model_id, effort=effort)
+            baseline = LLMBaseline(guess=guess, usage=_usage(btally), prompt_version=LLM_BASELINE_PROMPT_VERSION)
+        except LLMError as e:  # a failed baseline never affects the main result
+            baseline = LLMBaseline(guess=None, error=str(e), usage=_usage(e.usage), prompt_version=LLM_BASELINE_PROMPT_VERSION)
+
     return finish(
         status="ok",
         gate=GateResult(passed=True, usable_photo_indices=usable, reasons=reasons, retake_advice=advice),
@@ -131,6 +149,8 @@ def run_claim(
         not_assessable=out.not_assessable,
         conflicts=conflicts,
         flags=flags,
+        cost=cost,
+        llm_baseline=baseline,
         usage=usage,
         raw_model_output=raw,
     )

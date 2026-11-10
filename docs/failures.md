@@ -46,3 +46,9 @@ Detecting a stock or press photo from pixels alone is unreliable: a well-lit ori
 - **Output:** `center hood deformation`, severity 4 (medium confidence). The rubric reserves level 4 for damage reaching structure or safety systems; a buckled hood alone would usually be level 3 (replace).
 - **Why it matters:** severity 4 makes the claim "cost not estimable" and sends it to a human, so an over-call costs adjuster time, not money.
 - **Status:** to review by the candidate. Not a bug until the candidate decides. Note: this image is being replaced by a CC-licensed screenshot, so the case may need re-running.
+
+## Dataset skew note: DEV images are mostly severe crashes
+
+- The Phase 1 DEV images skew toward severe damage (crushed front ends, a roof collapse, a pole impact). After the Phase 2 re-run **no case is routed to `fast_track_candidate`**, so the fast-track path has only been exercised by unit tests, never by a real photo.
+- The low-confidence route (`request_more_photos` because most findings are low confidence) has also not fired on a real photo that passed the photo check.
+- **Implication for Phase 4:** the eval set needs minor-damage images (scuffs, small dents, a single cracked lamp) and some ambiguous-but-passing photos. Otherwise the fast-track and low-confidence rules stay untested on real data.

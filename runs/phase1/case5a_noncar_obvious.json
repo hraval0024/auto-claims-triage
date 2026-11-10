@@ -1,13 +1,13 @@
 {
   "status": "gate_failed",
   "audit": {
-    "request_id": "90be939b-62b3-48bb-94f6-fc557a98e599",
-    "timestamp": "2026-11-10T03:02:01.191296Z",
+    "request_id": "ca83da26-e914-4de8-90e2-f77a20f091eb",
+    "timestamp": "2026-11-10T03:50:07.353454Z",
     "model_id": "claude-sonnet-5-5",
     "model_effort": "medium",
     "prompt_version": "extract_v2",
     "schema_version": "1.1.0",
-    "cost_table_version": "none",
+    "cost_table_version": "cost_table_v1",
     "input_hashes": [
       "f5c0509c078fcb47e6813db53111ae4697bccdae06983534b4cc9af03bdfb312"
     ]
@@ -19,7 +19,7 @@
       "Photo 0: no vehicle is the subject of the photo (The photo shows a golden-colored dog lying on grass; no vehicle is visible.)"
     ],
     "retake_advice": [
-      "Photo 0: Send photos of the damaged vehicle: a wide daylight shot of the whole car from a corner, plus close-ups of each damaged panel from about 2 meters."
+      "Photo 0: Send photos of the damaged vehicle: a wide daylight shot of the whole car from a corner, plus close-ups of each damaged panel from about 2 meters, straight on."
     ]
   },
   "prechecks": [
@@ -40,16 +40,25 @@
   "conflicts": [],
   "flags": [],
   "error": null,
+  "cost": null,
+  "routing": {
+    "outcome": "request_more_photos",
+    "reasons": [
+      "The photos could not be assessed: Photo 0: no vehicle is the subject of the photo (The photo shows a golden-colored dog lying on grass; no vehicle is visible.)"
+    ],
+    "rules_version": "routing_v1"
+  },
+  "llm_baseline": null,
   "usage": {
     "model_id": "claude-sonnet-5-5",
     "input_tokens": 2393,
-    "cache_write_tokens": 5321,
-    "cache_read_tokens": 0,
-    "output_tokens": 374,
-    "cost_usd": 0.02183,
+    "cache_write_tokens": 0,
+    "cache_read_tokens": 5321,
+    "output_tokens": 367,
+    "cost_usd": 0.00899,
     "attempts": 1
   },
-  "latency_ms": 3669,
+  "latency_ms": 3063,
   "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
   "raw_model_output": {
     "photos": [
@@ -62,7 +71,7 @@
             "detail": "The photo shows a golden-colored dog lying on grass; no vehicle is visible."
           }
         ],
-        "retake_advice": "Send photos of the damaged vehicle: a wide daylight shot of the whole car from a corner, plus close-ups of each damaged panel from about 2 meters.",
+        "retake_advice": "Send photos of the damaged vehicle: a wide daylight shot of the whole car from a corner, plus close-ups of each damaged panel from about 2 meters, straight on.",
         "vehicle_make_seen": "unknown",
         "vehicle_color_seen": "unknown",
         "license_plate_visible": false,
@@ -92,12 +101,7 @@
     "damage": [],
     "damage_summary": "No vehicle is visible in the photo, so no damage can be assessed.",
     "not_assessable": [
-      "entire vehicle",
-      "exterior panels",
-      "underbody",
-      "frame",
-      "airbags",
-      "interior"
+      "all vehicle areas - no vehicle shown"
     ]
   }
 }

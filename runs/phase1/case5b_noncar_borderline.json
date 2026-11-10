@@ -1,13 +1,13 @@
 {
   "status": "gate_failed",
   "audit": {
-    "request_id": "c7c21466-1b71-4da7-8f2b-b0b4319047b3",
-    "timestamp": "2026-11-10T03:02:04.857136Z",
+    "request_id": "24b7a61d-1100-49ea-ade5-18a8c28440cf",
+    "timestamp": "2026-11-10T03:50:10.400625Z",
     "model_id": "claude-sonnet-5-5",
     "model_effort": "medium",
     "prompt_version": "extract_v2",
     "schema_version": "1.1.0",
-    "cost_table_version": "none",
+    "cost_table_version": "cost_table_v1",
     "input_hashes": [
       "b3855f3e5c707ab3440f18e90116d3ce18b3ef20dbb39bc0acc08fc84460410e"
     ]
@@ -16,10 +16,10 @@
     "passed": false,
     "usable_photo_indices": [],
     "reasons": [
-      "Photo 0: no vehicle is the subject of the photo (The subject is a small scale model car on a indoor table next to packaging foam, not a real road vehicle.)"
+      "Photo 0: no vehicle is the subject of the photo (The subject is a small scale model car on an indoor table, with packaging and chairs behind it, not a road vehicle.)"
     ],
     "retake_advice": [
-      "Photo 0: Send photos of the actual damaged vehicle, taken outdoors in daylight: the full vehicle from each corner plus close-ups of each damaged area from about 2 meters."
+      "Photo 0: Send photos of the actual damaged vehicle, taken outdoors in daylight: the whole car from each corner plus close-ups of each damaged area from about 2 meters."
     ]
   },
   "prechecks": [
@@ -40,16 +40,25 @@
   "conflicts": [],
   "flags": [],
   "error": null,
+  "cost": null,
+  "routing": {
+    "outcome": "request_more_photos",
+    "reasons": [
+      "The photos could not be assessed: Photo 0: no vehicle is the subject of the photo (The subject is a small scale model car on an indoor table, with packaging and chairs behind it, not a road vehicle.)"
+    ],
+    "rules_version": "routing_v1"
+  },
+  "llm_baseline": null,
   "usage": {
     "model_id": "claude-sonnet-5-5",
     "input_tokens": 2393,
     "cache_write_tokens": 0,
     "cache_read_tokens": 5321,
-    "output_tokens": 389,
-    "cost_usd": 0.00921,
+    "output_tokens": 387,
+    "cost_usd": 0.00919,
     "attempts": 1
   },
-  "latency_ms": 4312,
+  "latency_ms": 3443,
   "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
   "raw_model_output": {
     "photos": [
@@ -59,10 +68,10 @@
         "issues": [
           {
             "code": "not_a_vehicle",
-            "detail": "The subject is a small scale model car on a indoor table next to packaging foam, not a real road vehicle."
+            "detail": "The subject is a small scale model car on an indoor table, with packaging and chairs behind it, not a road vehicle."
           }
         ],
-        "retake_advice": "Send photos of the actual damaged vehicle, taken outdoors in daylight: the full vehicle from each corner plus close-ups of each damaged area from about 2 meters.",
+        "retake_advice": "Send photos of the actual damaged vehicle, taken outdoors in daylight: the whole car from each corner plus close-ups of each damaged area from about 2 meters.",
         "vehicle_make_seen": "Tesla",
         "vehicle_color_seen": "red",
         "license_plate_visible": false,
@@ -90,13 +99,12 @@
       }
     },
     "damage": [],
-    "damage_summary": "No assessable vehicle: the photo shows a scale model car on a table, and no damage is visible.",
+    "damage_summary": "No assessable vehicle: the photo shows a scale model car on a table, so no damage can be assessed.",
     "not_assessable": [
-      "actual claimed vehicle",
+      "all vehicle areas",
       "underbody",
       "frame",
       "airbags",
-      "suspension",
       "interior"
     ]
   }

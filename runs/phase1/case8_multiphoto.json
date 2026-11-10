@@ -1,13 +1,13 @@
 {
   "status": "ok",
   "audit": {
-    "request_id": "10afed61-8208-47de-8af5-c4e044a38a97",
-    "timestamp": "2026-11-10T02:50:49.273514Z",
+    "request_id": "dfed0aff-5f2b-4a50-8847-34edc7888319",
+    "timestamp": "2026-11-10T03:50:37.752804Z",
     "model_id": "claude-sonnet-5-5",
     "model_effort": "medium",
     "prompt_version": "extract_v2",
     "schema_version": "1.1.0",
-    "cost_table_version": "none",
+    "cost_table_version": "cost_table_v1",
     "input_hashes": [
       "9bdf8d518ebe10f364446d2c1e2bdcdcc3c34371976f3bd64edec79979b2ed34",
       "568aed1f4790a165b2de5d8298a0ddff92fc7a4c3c2e91a3a3734ae7ca8b5ba4"
@@ -48,7 +48,7 @@
       "confidence": "high"
     },
     "model": {
-      "value": "C-Class sedan",
+      "value": "C-Class sedan (W203)",
       "confidence": "medium"
     },
     "color": {
@@ -73,8 +73,8 @@
         1
       ],
       "cues": [
-        "Front right wheel is turned or tilted and appears pushed back against the damaged fender area, which suggests possible suspension involvement.",
-        "Front right wheel looks turned and pushed back into the damaged arch, which suggests possible suspension damage."
+        "right front wheel appears turned and pushed back into the wheel arch, suggesting possible suspension involvement",
+        "right front wheel visibly angled inward under the damaged fender"
       ],
       "severity_conflict": false
     },
@@ -83,14 +83,14 @@
       "side": "right",
       "damage_type": "deformation",
       "severity": 3,
-      "confidence": "medium",
+      "confidence": "low",
       "photo_indices": [
         0,
         1
       ],
       "cues": [
-        "Front right fender crumpled at the far end of the car and pushed toward the wheel; seen at an oblique angle.",
-        "Front right fender crushed with creases and buckled metal near the headlamp and wheel arch; gap to the door looks uneven."
+        "right front fender crumpled and pushed back toward the door, uneven gap, creased metal",
+        "right front fender crushed and torn at the front edge, partially visible from behind"
       ],
       "severity_conflict": false
     },
@@ -104,12 +104,12 @@
         1
       ],
       "cues": [
-        "Right end of the bumper cover is torn, crushed and scraped, with parts hanging or missing."
+        "bumper cover at right corner torn and crumpled with scuffed black fragments hanging, lower section pushed in"
       ],
       "severity_conflict": false
     }
   ],
-  "damage_summary": "Front right corner of the car is crushed, with a deformed fender, a torn and crushed bumper end, and a front wheel that looks displaced. The car is stopped against a lamp post on grass.",
+  "damage_summary": "Right front corner of the car is damaged: the bumper is torn and crumpled, the fender is crushed and pushed back, and the right front wheel appears turned or pushed back after hitting a lamp post. The headlamp looks intact in the photos.",
   "not_assessable": [
     "underbody",
     "frame",
@@ -117,21 +117,106 @@
     "airbags",
     "engine bay",
     "interior",
-    "right headlamp internals"
+    "left side"
   ],
   "conflicts": [],
   "flags": [],
   "error": null,
+  "cost": {
+    "status": "not_estimable",
+    "low_usd": null,
+    "mid_usd": null,
+    "high_usd": null,
+    "partial_low_usd": 1220.0,
+    "partial_high_usd": 6610.0,
+    "partial_label": "partial, excludes severity-4 items",
+    "claim_minimum_applied": false,
+    "not_estimable_reasons": [
+      "right wheel: severity 4 (structural or safety)"
+    ],
+    "lines": [
+      {
+        "panel": "wheel",
+        "side": "right",
+        "severity": 4,
+        "operation": null,
+        "low_usd": null,
+        "high_usd": null,
+        "driver": "Not estimable: severity 4 (structural or safety). A human must assess."
+      },
+      {
+        "panel": "fender",
+        "side": "right",
+        "severity": 3,
+        "operation": "replace",
+        "low_usd": 670.0,
+        "high_usd": 3200.0,
+        "driver": "replace right fender (severity 3): body 1.5-4.0 h, refinish 2.5-4.5 h at $68/h, parts $200-1500 x class multiplier 1.6-1.6"
+      },
+      {
+        "panel": "front_bumper",
+        "side": "right",
+        "severity": 3,
+        "operation": "replace",
+        "low_usd": 550.0,
+        "high_usd": 2080.0,
+        "driver": "replace right front_bumper (severity 3): body 1.0-2.5 h, refinish 2.5-4.0 h at $68/h, parts $150-900 x class multiplier 1.6-1.6"
+      }
+    ],
+    "vehicle_class": "luxury_truck",
+    "region": "standard",
+    "labor_rate_usd_per_hour": 68.0,
+    "hidden_damage_uplift_applied": true,
+    "caveats": [
+      "Stand-in table, not real pricing: every value marked 'assumption' is a placeholder pending real estimating data (CCC / Mitchell / Audatex).",
+      "Bounds, not calibrated intervals: low and high are the table's plausible bounds for the visible damage. They are not a statistical confidence interval, and how often real costs fall inside them has not been measured.",
+      "Hidden damage: only visible damage is priced. The high end includes an uplift when any item needs replacement, but structural, mechanical and underbody damage are not priced.",
+      "Parts type: the low end assumes aftermarket or repaired parts; the high end assumes OEM parts.",
+      "Region: labor uses the configured region tier; real body shop rates vary a lot by state.",
+      "Missing cost drivers, not included: ADAS sensor recalibration, paint blending into adjacent panels, taxes, rental and towing, storage, sublet work, and EV-specific work (battery inspection, high-voltage safety procedures)."
+    ],
+    "cost_table_version": "cost_table_v1",
+    "is_assumption": true,
+    "assumption_notice": "Stand-in pricing table: every number is an assumption, not real estimating data. Not a payout amount."
+  },
+  "routing": {
+    "outcome": "adjuster_review",
+    "reasons": [
+      "Severity-4 damage (right wheel): cost not estimable from photos.",
+      "Replacement-level damage reported with low confidence (right wheel, right fender)."
+    ],
+    "rules_version": "routing_v1"
+  },
+  "llm_baseline": {
+    "guess": {
+      "low_usd": 1500,
+      "point_usd": 2800,
+      "high_usd": 4500,
+      "rationale": "An older Mercedes C-Class (W203) hit a lamp post with front-right damage: a crumpled bumper cover, fender and headlight area, and a possibly bent wheel or suspension. Parts and labor for the visible damage likely run about $2-3k, higher if the suspension or radiator support is bent, and the car's low value makes it a possible write-off."
+    },
+    "error": null,
+    "usage": {
+      "model_id": "claude-sonnet-5-5",
+      "input_tokens": 4752,
+      "cache_write_tokens": 0,
+      "cache_read_tokens": 0,
+      "output_tokens": 154,
+      "cost_usd": 0.01104,
+      "attempts": 1
+    },
+    "prompt_version": "llm_baseline_v1",
+    "notice": "LLM free-guess baseline for evaluation only. Never used for pricing or routing, and not shown in the main UI."
+  },
   "usage": {
     "model_id": "claude-sonnet-5-5",
     "input_tokens": 4307,
     "cache_write_tokens": 0,
     "cache_read_tokens": 5321,
-    "output_tokens": 1757,
-    "cost_usd": 0.02672,
+    "output_tokens": 1714,
+    "cost_usd": 0.02629,
     "attempts": 1
   },
-  "latency_ms": 14576,
+  "latency_ms": 17098,
   "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
   "raw_model_output": {
     "photos": [
@@ -144,7 +229,7 @@
         "vehicle_color_seen": "black",
         "license_plate_visible": false,
         "person_face_visible": false,
-        "embedded_text_seen": "Yellow tape reading 'SECURITY NO PARKING' across the car; background road signs (20 speed limit, humps) and a notice board. None addresses an AI."
+        "embedded_text_seen": "Yellow tape reading 'SECURITY NO PARKING' wrapped around the car; road signs (20 mph, humps) and a notice board in the background."
       },
       {
         "photo_index": 1,
@@ -155,7 +240,7 @@
         "vehicle_color_seen": "black",
         "license_plate_visible": false,
         "person_face_visible": false,
-        "embedded_text_seen": "Yellow tape partly reading 'SECURITY', a lamp post marked 'FGBA023', and a small sign. None addresses an AI."
+        "embedded_text_seen": "Yellow tape reading 'SECURITY NO PARKING' across the car; orange 'FGBA023' label on the lamp post."
       }
     ],
     "vehicle": {
@@ -164,7 +249,7 @@
         "confidence": "high"
       },
       "model": {
-        "value": "C-Class sedan",
+        "value": "C-Class sedan (W203)",
         "confidence": "medium"
       },
       "color": {
@@ -179,40 +264,22 @@
     },
     "damage": [
       {
-        "photo_index": 0,
-        "panel": "fender",
-        "side": "right",
-        "damage_type": "deformation",
-        "severity": 3,
-        "confidence": "medium",
-        "cues": "Front right fender crumpled at the far end of the car and pushed toward the wheel; seen at an oblique angle."
-      },
-      {
-        "photo_index": 0,
-        "panel": "wheel",
-        "side": "right",
-        "damage_type": "misalignment",
-        "severity": 4,
-        "confidence": "low",
-        "cues": "Front right wheel is turned or tilted and appears pushed back against the damaged fender area, which suggests possible suspension involvement."
-      },
-      {
-        "photo_index": 1,
-        "panel": "fender",
-        "side": "right",
-        "damage_type": "deformation",
-        "severity": 3,
-        "confidence": "high",
-        "cues": "Front right fender crushed with creases and buckled metal near the headlamp and wheel arch; gap to the door looks uneven."
-      },
-      {
         "photo_index": 1,
         "panel": "front_bumper",
         "side": "right",
         "damage_type": "tear_puncture",
         "severity": 3,
         "confidence": "medium",
-        "cues": "Right end of the bumper cover is torn, crushed and scraped, with parts hanging or missing."
+        "cues": "bumper cover at right corner torn and crumpled with scuffed black fragments hanging, lower section pushed in"
+      },
+      {
+        "photo_index": 1,
+        "panel": "fender",
+        "side": "right",
+        "damage_type": "deformation",
+        "severity": 3,
+        "confidence": "medium",
+        "cues": "right front fender crumpled and pushed back toward the door, uneven gap, creased metal"
       },
       {
         "photo_index": 1,
@@ -221,10 +288,28 @@
         "damage_type": "misalignment",
         "severity": 4,
         "confidence": "low",
-        "cues": "Front right wheel looks turned and pushed back into the damaged arch, which suggests possible suspension damage."
+        "cues": "right front wheel appears turned and pushed back into the wheel arch, suggesting possible suspension involvement"
+      },
+      {
+        "photo_index": 0,
+        "panel": "fender",
+        "side": "right",
+        "damage_type": "deformation",
+        "severity": 3,
+        "confidence": "low",
+        "cues": "right front fender crushed and torn at the front edge, partially visible from behind"
+      },
+      {
+        "photo_index": 0,
+        "panel": "wheel",
+        "side": "right",
+        "damage_type": "misalignment",
+        "severity": 4,
+        "confidence": "low",
+        "cues": "right front wheel visibly angled inward under the damaged fender"
       }
     ],
-    "damage_summary": "Front right corner of the car is crushed, with a deformed fender, a torn and crushed bumper end, and a front wheel that looks displaced. The car is stopped against a lamp post on grass.",
+    "damage_summary": "Right front corner of the car is damaged: the bumper is torn and crumpled, the fender is crushed and pushed back, and the right front wheel appears turned or pushed back after hitting a lamp post. The headlamp looks intact in the photos.",
     "not_assessable": [
       "underbody",
       "frame",
@@ -232,7 +317,7 @@
       "airbags",
       "engine bay",
       "interior",
-      "right headlamp internals"
+      "left side"
     ]
   }
 }

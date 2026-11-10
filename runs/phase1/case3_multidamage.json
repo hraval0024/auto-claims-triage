@@ -1,13 +1,13 @@
 {
   "status": "ok",
   "audit": {
-    "request_id": "7bf6e300-dbd7-4402-8137-44ed76c8d5dc",
-    "timestamp": "2026-11-10T02:50:26.334956Z",
+    "request_id": "5e9821c4-6344-4433-81e1-63fd7b81bbd6",
+    "timestamp": "2026-11-10T03:49:49.596647Z",
     "model_id": "claude-sonnet-5-5",
     "model_effort": "medium",
     "prompt_version": "extract_v2",
     "schema_version": "1.1.0",
-    "cost_table_version": "none",
+    "cost_table_version": "cost_table_v1",
     "input_hashes": [
       "9ea4b3b47b0ab275a01bd0c121854622e5e57d17a873e4ccab60d36255b099a5"
     ]
@@ -37,16 +37,16 @@
       "confidence": "high"
     },
     "model": {
-      "value": "H-1 / Grand Starex",
-      "confidence": "medium"
+      "value": "unknown",
+      "confidence": "low"
     },
     "color": {
       "value": "yellow",
       "confidence": "high"
     },
     "year_range": {
-      "start": 2007,
-      "end": 2017,
+      "start": null,
+      "end": null,
       "confidence": "low"
     }
   },
@@ -61,21 +61,7 @@
         0
       ],
       "cues": [
-        "pillars and door opening visibly buckled, roof structure collapsed onto door openings"
-      ],
-      "severity_conflict": false
-    },
-    {
-      "panel": "quarter_panel",
-      "side": "left",
-      "damage_type": "deformation",
-      "severity": 4,
-      "confidence": "medium",
-      "photo_indices": [
-        0
-      ],
-      "cues": [
-        "rear upper body crushed and buckled together with roof and door, debris on top"
+        "pillars and door opening buckled, roof line collapsed onto the cabin, door frame twisted"
       ],
       "severity_conflict": false
     },
@@ -89,7 +75,7 @@
         0
       ],
       "cues": [
-        "rear side door area crushed with upper body panel collapsed, adjacent to crushed roof and quarter panel"
+        "rear door and adjacent quarter area crushed and buckled together with the roof, bricks embedded"
       ],
       "severity_conflict": false
     },
@@ -103,40 +89,40 @@
         0
       ],
       "cues": [
-        "roof crushed inward and collapsed under fallen bricks and wall debris, roofline buckled"
+        "roof crushed and caved in, collapsed under fallen brick wall, bricks resting on the cabin"
       ],
       "severity_conflict": false
     },
     {
       "panel": "side_glass",
       "side": "left",
-      "damage_type": "missing_part",
+      "damage_type": "shatter",
       "severity": 3,
       "confidence": "medium",
       "photo_indices": [
         0
       ],
       "cues": [
-        "side glass absent over door openings, glass fragments on ground"
+        "side glass absent with broken glass fragments on the ground"
       ],
       "severity_conflict": false
     },
     {
       "panel": "windshield",
       "side": "center",
-      "damage_type": "shatter",
+      "damage_type": "crack",
       "severity": 3,
       "confidence": "high",
       "photo_indices": [
         0
       ],
       "cues": [
-        "windshield heavily cracked and caved in at the top"
+        "windshield cracked and crazed across its surface, distorted by the roof collapse"
       ],
       "severity_conflict": false
     }
   ],
-  "damage_summary": "The van's roof, pillars and left side upper body are crushed under fallen brick wall debris, with a cracked windshield and missing side glass. Front bumper, hood and headlamp appear intact, but the structural damage requires human assessment.",
+  "damage_summary": "The vehicle's roof and upper body are crushed under a collapsed brick wall, with buckled pillars and door openings, a cracked windshield, and broken side glass. The front end (bumper, grille, headlamp) looks intact from this angle.",
   "not_assessable": [
     "underbody",
     "frame",
@@ -144,7 +130,7 @@
     "suspension",
     "interior",
     "engine bay",
-    "right side",
+    "right side of vehicle",
     "rear of vehicle"
   ],
   "conflicts": [],
@@ -152,16 +138,122 @@
     "license_plate_visible"
   ],
   "error": null,
+  "cost": {
+    "status": "not_estimable",
+    "low_usd": null,
+    "mid_usd": null,
+    "high_usd": null,
+    "partial_low_usd": 540.0,
+    "partial_high_usd": 4260.0,
+    "partial_label": "partial, excludes severity-4 items",
+    "claim_minimum_applied": false,
+    "not_estimable_reasons": [
+      "left pillar: severity 4 (structural or safety)",
+      "left rear_door: severity 4 (structural or safety)",
+      "center roof: severity 4 (structural or safety)"
+    ],
+    "lines": [
+      {
+        "panel": "pillar",
+        "side": "left",
+        "severity": 4,
+        "operation": null,
+        "low_usd": null,
+        "high_usd": null,
+        "driver": "Not estimable: severity 4 (structural or safety). A human must assess."
+      },
+      {
+        "panel": "rear_door",
+        "side": "left",
+        "severity": 4,
+        "operation": null,
+        "low_usd": null,
+        "high_usd": null,
+        "driver": "Not estimable: severity 4 (structural or safety). A human must assess."
+      },
+      {
+        "panel": "roof",
+        "side": "center",
+        "severity": 4,
+        "operation": null,
+        "low_usd": null,
+        "high_usd": null,
+        "driver": "Not estimable: severity 4 (structural or safety). A human must assess."
+      },
+      {
+        "panel": "side_glass",
+        "side": "left",
+        "severity": 3,
+        "operation": "replace",
+        "low_usd": 270.0,
+        "high_usd": 1700.0,
+        "driver": "replace left side_glass (severity 3): body 1.0-3.0 h, refinish 0.0-0.0 h at $68/h, parts $200-1500 x class multiplier 1.0-1.0"
+      },
+      {
+        "panel": "windshield",
+        "side": "center",
+        "severity": 3,
+        "operation": "replace",
+        "low_usd": 270.0,
+        "high_usd": 1700.0,
+        "driver": "replace center windshield (severity 3): body 1.0-3.0 h, refinish 0.0-0.0 h at $68/h, parts $200-1500 x class multiplier 1.0-1.0"
+      }
+    ],
+    "vehicle_class": "mainstream",
+    "region": "standard",
+    "labor_rate_usd_per_hour": 68.0,
+    "hidden_damage_uplift_applied": true,
+    "caveats": [
+      "Stand-in table, not real pricing: every value marked 'assumption' is a placeholder pending real estimating data (CCC / Mitchell / Audatex).",
+      "Bounds, not calibrated intervals: low and high are the table's plausible bounds for the visible damage. They are not a statistical confidence interval, and how often real costs fall inside them has not been measured.",
+      "Hidden damage: only visible damage is priced. The high end includes an uplift when any item needs replacement, but structural, mechanical and underbody damage are not priced.",
+      "Parts type: the low end assumes aftermarket or repaired parts; the high end assumes OEM parts.",
+      "Region: labor uses the configured region tier; real body shop rates vary a lot by state.",
+      "Missing cost drivers, not included: ADAS sensor recalibration, paint blending into adjacent panels, taxes, rental and towing, storage, sublet work, and EV-specific work (battery inspection, high-voltage safety procedures)."
+    ],
+    "cost_table_version": "cost_table_v1",
+    "is_assumption": true,
+    "assumption_notice": "Stand-in pricing table: every number is an assumption, not real estimating data. Not a payout amount."
+  },
+  "routing": {
+    "outcome": "possible_total_loss",
+    "reasons": [
+      "3 parts have structural or safety-level damage (severity 4).",
+      "Severity-4 damage to the cabin structure (left pillar, center roof).",
+      "Possible total loss only: an adjuster must confirm against the vehicle's value."
+    ],
+    "rules_version": "routing_v1"
+  },
+  "llm_baseline": {
+    "guess": {
+      "low_usd": 9000,
+      "point_usd": 14000,
+      "high_usd": 20000,
+      "rationale": "A Hyundai Starex-type van has a crushed roof, pillars, and rear body section from collapsed brick wall debris, plus broken glass and damaged doors. Repair would involve major structural and roof work and is likely near or past the van's value, so it would probably be a total loss."
+    },
+    "error": null,
+    "usage": {
+      "model_id": "claude-sonnet-5-5",
+      "input_tokens": 2614,
+      "cache_write_tokens": 0,
+      "cache_read_tokens": 0,
+      "output_tokens": 127,
+      "cost_usd": 0.0065,
+      "attempts": 1
+    },
+    "prompt_version": "llm_baseline_v1",
+    "notice": "LLM free-guess baseline for evaluation only. Never used for pricing or routing, and not shown in the main UI."
+  },
   "usage": {
     "model_id": "claude-sonnet-5-5",
-    "input_tokens": 2169,
+    "input_tokens": 4392,
     "cache_write_tokens": 0,
-    "cache_read_tokens": 5321,
-    "output_tokens": 869,
-    "cost_usd": 0.01356,
-    "attempts": 1
+    "cache_read_tokens": 10642,
+    "output_tokens": 1202,
+    "cost_usd": 0.02187,
+    "attempts": 2
   },
-  "latency_ms": 6281,
+  "latency_ms": 13693,
   "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
   "raw_model_output": {
     "photos": [
@@ -174,7 +266,7 @@
         "vehicle_color_seen": "yellow",
         "license_plate_visible": true,
         "person_face_visible": false,
-        "embedded_text_seen": "Korean text on a red stop-style sign on the door (children's vehicle stop sign), a small warning sticker on the building wall, and a printed banner on the ground."
+        "embedded_text_seen": "Korean text on a red stop-sign shaped sticker on the door (reads roughly 'children stop'), a yellow warning sticker on the brick wall, and a license plate reading 72 2576; a banner with partial text lies on the ground."
       }
     ],
     "vehicle": {
@@ -183,16 +275,16 @@
         "confidence": "high"
       },
       "model": {
-        "value": "H-1 / Grand Starex",
-        "confidence": "medium"
+        "value": "unknown",
+        "confidence": "low"
       },
       "color": {
         "value": "yellow",
         "confidence": "high"
       },
       "year_range": {
-        "start": 2007,
-        "end": 2017,
+        "start": null,
+        "end": null,
         "confidence": "low"
       }
     },
@@ -204,7 +296,7 @@
         "damage_type": "deformation",
         "severity": 4,
         "confidence": "high",
-        "cues": "roof crushed inward and collapsed under fallen bricks and wall debris, roofline buckled"
+        "cues": "roof crushed and caved in, collapsed under fallen brick wall, bricks resting on the cabin"
       },
       {
         "photo_index": 0,
@@ -213,16 +305,16 @@
         "damage_type": "deformation",
         "severity": 4,
         "confidence": "high",
-        "cues": "pillars and door opening visibly buckled, roof structure collapsed onto door openings"
+        "cues": "pillars and door opening buckled, roof line collapsed onto the cabin, door frame twisted"
       },
       {
         "photo_index": 0,
         "panel": "windshield",
         "side": "center",
-        "damage_type": "shatter",
+        "damage_type": "crack",
         "severity": 3,
         "confidence": "high",
-        "cues": "windshield heavily cracked and caved in at the top"
+        "cues": "windshield cracked and crazed across its surface, distorted by the roof collapse"
       },
       {
         "photo_index": 0,
@@ -231,28 +323,19 @@
         "damage_type": "deformation",
         "severity": 4,
         "confidence": "medium",
-        "cues": "rear side door area crushed with upper body panel collapsed, adjacent to crushed roof and quarter panel"
-      },
-      {
-        "photo_index": 0,
-        "panel": "quarter_panel",
-        "side": "left",
-        "damage_type": "deformation",
-        "severity": 4,
-        "confidence": "medium",
-        "cues": "rear upper body crushed and buckled together with roof and door, debris on top"
+        "cues": "rear door and adjacent quarter area crushed and buckled together with the roof, bricks embedded"
       },
       {
         "photo_index": 0,
         "panel": "side_glass",
         "side": "left",
-        "damage_type": "missing_part",
+        "damage_type": "shatter",
         "severity": 3,
         "confidence": "medium",
-        "cues": "side glass absent over door openings, glass fragments on ground"
+        "cues": "side glass absent with broken glass fragments on the ground"
       }
     ],
-    "damage_summary": "The van's roof, pillars and left side upper body are crushed under fallen brick wall debris, with a cracked windshield and missing side glass. Front bumper, hood and headlamp appear intact, but the structural damage requires human assessment.",
+    "damage_summary": "The vehicle's roof and upper body are crushed under a collapsed brick wall, with buckled pillars and door openings, a cracked windshield, and broken side glass. The front end (bumper, grille, headlamp) looks intact from this angle.",
     "not_assessable": [
       "underbody",
       "frame",
@@ -260,7 +343,7 @@
       "suspension",
       "interior",
       "engine bay",
-      "right side",
+      "right side of vehicle",
       "rear of vehicle"
     ]
   }

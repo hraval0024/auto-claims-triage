@@ -14,6 +14,7 @@ from app.config import settings
 from app.schemas import CostEstimate, CostLine, MergedDamageItem
 
 TABLE_PATH = Path(__file__).parent / "cost_table_v1.yaml"
+PARTIAL_LABEL = "partial, excludes severity-4 items"
 
 
 @lru_cache
@@ -60,13 +61,15 @@ def estimate(
         if key not in parts or it.severity > parts[key].severity:
             parts[key] = it
 
-    lines, not_estimable = [], []
+    lines, not_estimable, unpriceable_panels = [], [], []
     lo_sum = hi_sum = 0.0
     any_replace = False
     for (panel, side), it in sorted(parts.items(), key=lambda kv: (-kv[1].severity, kv[0][0])):
         pclass = t["_panel_class"].get(panel.value, "not_estimable")
         if it.severity >= 4 or pclass == "not_estimable":
             why = "severity 4 (structural or safety)" if it.severity >= 4 else f"{panel.value} is never priced from a photo"
+            if it.severity < 4:
+                unpriceable_panels.append(panel.value)
             not_estimable.append(f"{side.value} {panel.value}: {why}")
             lines.append(CostLine(panel=panel, side=side, severity=it.severity, operation=None,
                                   low_usd=None, high_usd=None, driver=f"Not estimable: {why}. A human must assess."))
@@ -93,15 +96,22 @@ def estimate(
 
     if not parts:
         return CostEstimate(status="no_damage", low_usd=0.0, mid_usd=0.0, high_usd=0.0,
-                            estimable_subtotal_low_usd=None, estimable_subtotal_high_usd=None,
+                            partial_low_usd=None, partial_high_usd=None, partial_label=None,
                             not_estimable_reasons=[], **common)
     if not_estimable:
-        # No total: the unpriced part has no upper bound we can defend.
+        # No total: the unpriced part has no upper bound we can defend. The priced part is
+        # reported, always labeled as partial.
+        label = PARTIAL_LABEL
+        if unpriceable_panels:
+            label += " and items on panels never priced from a photo (" + ", ".join(sorted(set(unpriceable_panels))) + ")"
         return CostEstimate(status="not_estimable", low_usd=None, mid_usd=None, high_usd=None,
-                            estimable_subtotal_low_usd=_round10(lo_sum) if lo_sum else None,
-                            estimable_subtotal_high_usd=_round10(hi_total) if hi_sum else None,
-                            not_estimable_reasons=not_estimable, **common)
+                            partial_low_usd=_round10(lo_sum), partial_high_usd=_round10(hi_total),
+                            partial_label=label, not_estimable_reasons=not_estimable, **common)
+    floor = t["claim_minimum_usd"]["value"]
     low, high = _round10(lo_sum), _round10(hi_total)
+    applied = low < floor
+    low = max(low, floor)  # per-claim minimum on the low end
+    high = max(high, low)
     return CostEstimate(status="estimated", low_usd=low, mid_usd=_round10((low + high) / 2), high_usd=high,
-                        estimable_subtotal_low_usd=None, estimable_subtotal_high_usd=None,
-                        not_estimable_reasons=[], **common)
+                        partial_low_usd=None, partial_high_usd=None, partial_label=None,
+                        claim_minimum_applied=applied, not_estimable_reasons=[], **common)

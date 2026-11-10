@@ -9,7 +9,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 # Pinned in code, recorded on every response (auditability).
 PROMPT_VERSION = "extract_v2"  # v2: camera_view before side (F1 fix)
 SCHEMA_VERSION = "1.1.0"  # 1.1: PhotoAssessment.camera_view
-COST_TABLE_VERSION = "none"  # set when the Phase 2 table lands
+COST_TABLE_VERSION = "cost_table_v1"
+LLM_BASELINE_PROMPT_VERSION = "llm_baseline_v1"
 
 # USD per million tokens: (input, output, cache_write_5min, cache_read). Source: Anthropic list
 # prices as cached in the claude-api reference on 2026-11-03 (cache write = 1.25x input; cache
@@ -47,6 +48,10 @@ class Settings(BaseSettings):
     # URL fetch (SSRF guard)
     url_fetch_timeout_s: float = 10.0
     url_max_redirects: int = 3
+
+    # LLM free-guess cost baseline: a SEPARATE call, for eval comparison only. Off by default;
+    # its number never feeds the cost table or routing.
+    llm_baseline_enabled: bool = False
 
     daily_spend_cap_usd: float = 5.00
 

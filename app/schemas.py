@@ -162,6 +162,13 @@ class ModelOutput(Strict):
     )
 
 
+class LLMCostGuess(Strict):
+    low_usd: int
+    point_usd: int
+    high_usd: int
+    rationale: str
+
+
 # ---------- What the API returns ----------
 
 class PrecheckResult(BaseModel):
@@ -230,8 +237,11 @@ class CostEstimate(BaseModel):
         description="Midpoint of low and high. Used for routing and eval only; the UI shows low-high."
     )
     high_usd: float | None
-    estimable_subtotal_low_usd: float | None  # when not_estimable: the part we could price
-    estimable_subtotal_high_usd: float | None
+    # When not_estimable: the part we could price, always labeled as partial.
+    partial_low_usd: float | None
+    partial_high_usd: float | None
+    partial_label: str | None  # "partial, excludes severity-4 items" (+ any unpriceable panels)
+    claim_minimum_applied: bool = False
     not_estimable_reasons: list[str]
     lines: list[CostLine]
     vehicle_class: str
@@ -256,6 +266,17 @@ class RoutingDecision(BaseModel):
     rules_version: str
 
 
+class LLMBaseline(BaseModel):
+    guess: LLMCostGuess | None
+    error: str | None = None
+    usage: "Usage | None" = None
+    prompt_version: str
+    notice: str = (
+        "LLM free-guess baseline for evaluation only. Never used for pricing or routing, "
+        "and not shown in the main UI."
+    )
+
+
 class ClaimResult(BaseModel):
     status: Literal["ok", "gate_failed", "error"]
     audit: Audit
@@ -268,7 +289,10 @@ class ClaimResult(BaseModel):
     conflicts: list[str] = []
     flags: list[str] = []  # e.g. embedded_instruction_text, license_plate_visible
     error: str | None = None
-    usage: Usage | None = None
+    cost: CostEstimate | None = None
+    routing: RoutingDecision
+    llm_baseline: LLMBaseline | None = None  # only when the baseline flag is on
+    usage: Usage | None = None  # the main extraction call(s); the baseline reports its own
     latency_ms: int
     boundary_notice: str = (
         "Triage aid only. This system never decides coverage, liability, denial or payment. "

@@ -50,6 +50,11 @@ luxury_makes:
   makes: [acura, audi, bmw, cadillac, genesis, infiniti, jaguar, land rover, lexus, lincoln,
           maserati, mercedes-benz, porsche, tesla, volvo, alfa romeo]
 
+claim_minimum_usd:  # per CLAIM, not per item: low (and high) are never below this
+  value: 100
+  source: assumption
+  confidence: low
+
 hidden_damage_uplift:  # added to the HIGH end only
   applies_when: any priced item has severity 3
   high_pct: 25
@@ -116,7 +121,8 @@ rows:
 
 caveats:  # always returned with an estimate
   - "Stand-in table, not real pricing: every value marked 'assumption' is a placeholder pending real estimating data (CCC / Mitchell / Audatex)."
+  - "Bounds, not calibrated intervals: low and high are the table's plausible bounds for the visible damage. They are not a statistical confidence interval, and how often real costs fall inside them has not been measured."
   - "Hidden damage: only visible damage is priced. The high end includes an uplift when any item needs replacement, but structural, mechanical and underbody damage are not priced."
   - "Parts type: the low end assumes aftermarket or repaired parts; the high end assumes OEM parts."
   - "Region: labor uses the configured region tier; real body shop rates vary a lot by state."
-  - "Not included: ADAS sensor calibration, blend into adjacent panels, sublet, towing, storage, rental, taxes."
+  - "Missing cost drivers, not included: ADAS sensor recalibration, paint blending into adjacent panels, taxes, rental and towing, storage, sublet work, and EV-specific work (battery inspection, high-voltage safety procedures)."

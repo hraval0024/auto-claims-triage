@@ -1,13 +1,13 @@
 {
   "status": "ok",
   "audit": {
-    "request_id": "424fcf35-3198-463a-ba14-2183966e7867",
-    "timestamp": "2026-11-10T02:50:16.139712Z",
+    "request_id": "837b6ed4-921d-4001-9be6-04e1d6e9a3da",
+    "timestamp": "2026-11-10T03:49:35.828530Z",
     "model_id": "claude-sonnet-5-5",
     "model_effort": "medium",
     "prompt_version": "extract_v2",
     "schema_version": "1.1.0",
-    "cost_table_version": "none",
+    "cost_table_version": "cost_table_v1",
     "input_hashes": [
       "ccce1d6734b47119c5dc04239fe95efcfbf16f847d4344a8a10ffda7e8307db7"
     ]
@@ -61,7 +61,21 @@
         0
       ],
       "cues": [
-        "bumper cover absent, bare reinforcement bar and radiator support exposed, rust and paint wear on bar"
+        "bumper cover absent, bare reinforcement bar and radiator support exposed, rusty/primer metal"
+      ],
+      "severity_conflict": false
+    },
+    {
+      "panel": "grille",
+      "side": "center",
+      "damage_type": "misalignment",
+      "severity": 3,
+      "confidence": "medium",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "grille chrome surround bent at right edge, pulled away from surrounding structure"
       ],
       "severity_conflict": false
     },
@@ -70,53 +84,121 @@
       "side": "center",
       "damage_type": "dent",
       "severity": 3,
-      "confidence": "low",
+      "confidence": "medium",
       "photo_indices": [
         0
       ],
       "cues": [
-        "hood front edge wavy with creases and chipped paint near the leading edge, hood appears buckled; between levels so higher level chosen"
-      ],
-      "severity_conflict": false
-    },
-    {
-      "panel": "headlamp",
-      "side": "right",
-      "damage_type": "misalignment",
-      "severity": 2,
-      "confidence": "low",
-      "photo_indices": [
-        0
-      ],
-      "cues": [
-        "right headlamp appears intact but is hazed and the surrounding mounting area is exposed with no bumper cover support"
+        "hood front edge buckled with wavy creases, paint chipped along leading edge, hood sits uneven above grille"
       ],
       "severity_conflict": false
     }
   ],
-  "damage_summary": "The front bumper cover is missing, exposing the reinforcement bar and radiator support, and the hood leading edge looks creased and buckled. The right headlamp looks intact, and the grille is present.",
+  "damage_summary": "Front bumper cover is missing, exposing the reinforcement bar and components behind it, and the hood leading edge is buckled with the grille surround bent. Headlamp appears intact.",
   "not_assessable": [
     "underbody",
     "frame rails",
     "radiator and cooling system",
     "airbags",
     "suspension",
-    "engine bay components",
-    "left side of the front end"
+    "engine bay components"
   ],
   "conflicts": [],
   "flags": [],
   "error": null,
+  "cost": {
+    "status": "estimated",
+    "low_usd": 1080.0,
+    "mid_usd": 3400.0,
+    "high_usd": 5720.0,
+    "partial_low_usd": null,
+    "partial_high_usd": null,
+    "partial_label": null,
+    "claim_minimum_applied": false,
+    "not_estimable_reasons": [],
+    "lines": [
+      {
+        "panel": "front_bumper",
+        "side": "center",
+        "severity": 3,
+        "operation": "replace",
+        "low_usd": 460.0,
+        "high_usd": 1540.0,
+        "driver": "replace center front_bumper (severity 3): body 1.0-2.5 h, refinish 2.5-4.0 h at $68/h, parts $150-900 x class multiplier 1.0-1.0"
+      },
+      {
+        "panel": "grille",
+        "side": "center",
+        "severity": 3,
+        "operation": "replace",
+        "low_usd": 70.0,
+        "high_usd": 730.0,
+        "driver": "replace center grille (severity 3): body 0.3-1.0 h, refinish 0.0-0.5 h at $68/h, parts $50-600 x class multiplier 1.0-1.0"
+      },
+      {
+        "panel": "hood",
+        "side": "center",
+        "severity": 3,
+        "operation": "replace",
+        "low_usd": 550.0,
+        "high_usd": 2300.0,
+        "driver": "replace center hood (severity 3): body 1.5-4.0 h, refinish 2.5-4.5 h at $68/h, parts $200-1500 x class multiplier 1.0-1.0"
+      }
+    ],
+    "vehicle_class": "mainstream",
+    "region": "standard",
+    "labor_rate_usd_per_hour": 68.0,
+    "hidden_damage_uplift_applied": true,
+    "caveats": [
+      "Stand-in table, not real pricing: every value marked 'assumption' is a placeholder pending real estimating data (CCC / Mitchell / Audatex).",
+      "Bounds, not calibrated intervals: low and high are the table's plausible bounds for the visible damage. They are not a statistical confidence interval, and how often real costs fall inside them has not been measured.",
+      "Hidden damage: only visible damage is priced. The high end includes an uplift when any item needs replacement, but structural, mechanical and underbody damage are not priced.",
+      "Parts type: the low end assumes aftermarket or repaired parts; the high end assumes OEM parts.",
+      "Region: labor uses the configured region tier; real body shop rates vary a lot by state.",
+      "Missing cost drivers, not included: ADAS sensor recalibration, paint blending into adjacent panels, taxes, rental and towing, storage, sublet work, and EV-specific work (battery inspection, high-voltage safety procedures)."
+    ],
+    "cost_table_version": "cost_table_v1",
+    "is_assumption": true,
+    "assumption_notice": "Stand-in pricing table: every number is an assumption, not real estimating data. Not a payout amount."
+  },
+  "routing": {
+    "outcome": "adjuster_review",
+    "reasons": [
+      "Estimated range reaches $5,720, above the $2,500 fast-track limit.",
+      "The cost range is wide (high is 5.3x the low), so the estimate is too uncertain to automate."
+    ],
+    "rules_version": "routing_v1"
+  },
+  "llm_baseline": {
+    "guess": {
+      "low_usd": 1200,
+      "point_usd": 2000,
+      "high_usd": 3200,
+      "rationale": "Older Chrysler Cirrus/Stratus with the front bumper cover missing, a bent hood, and a visible exposed reinforcement bar, with possible radiator/condenser and headlight damage. The estimate covers a replacement bumper cover and parts, a hood repair or replacement, paint, and labor; the car's low value may make it a total loss."
+    },
+    "error": null,
+    "usage": {
+      "model_id": "claude-sonnet-5-5",
+      "input_tokens": 2278,
+      "cache_write_tokens": 0,
+      "cache_read_tokens": 0,
+      "output_tokens": 152,
+      "cost_usd": 0.00608,
+      "attempts": 1
+    },
+    "prompt_version": "llm_baseline_v1",
+    "notice": "LLM free-guess baseline for evaluation only. Never used for pricing or routing, and not shown in the main UI."
+  },
   "usage": {
     "model_id": "claude-sonnet-5-5",
     "input_tokens": 1833,
-    "cache_write_tokens": 0,
-    "cache_read_tokens": 5321,
-    "output_tokens": 601,
-    "cost_usd": 0.01021,
+    "cache_write_tokens": 5321,
+    "cache_read_tokens": 0,
+    "output_tokens": 571,
+    "cost_usd": 0.02268,
     "attempts": 1
   },
-  "latency_ms": 4487,
+  "latency_ms": 8619,
   "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
   "raw_model_output": {
     "photos": [
@@ -159,7 +241,7 @@
         "damage_type": "missing_part",
         "severity": 3,
         "confidence": "high",
-        "cues": "bumper cover absent, bare reinforcement bar and radiator support exposed, rust and paint wear on bar"
+        "cues": "bumper cover absent, bare reinforcement bar and radiator support exposed, rusty/primer metal"
       },
       {
         "photo_index": 0,
@@ -167,28 +249,27 @@
         "side": "center",
         "damage_type": "dent",
         "severity": 3,
-        "confidence": "low",
-        "cues": "hood front edge wavy with creases and chipped paint near the leading edge, hood appears buckled; between levels so higher level chosen"
+        "confidence": "medium",
+        "cues": "hood front edge buckled with wavy creases, paint chipped along leading edge, hood sits uneven above grille"
       },
       {
         "photo_index": 0,
-        "panel": "headlamp",
-        "side": "right",
+        "panel": "grille",
+        "side": "center",
         "damage_type": "misalignment",
-        "severity": 2,
-        "confidence": "low",
-        "cues": "right headlamp appears intact but is hazed and the surrounding mounting area is exposed with no bumper cover support"
+        "severity": 3,
+        "confidence": "medium",
+        "cues": "grille chrome surround bent at right edge, pulled away from surrounding structure"
       }
     ],
-    "damage_summary": "The front bumper cover is missing, exposing the reinforcement bar and radiator support, and the hood leading edge looks creased and buckled. The right headlamp looks intact, and the grille is present.",
+    "damage_summary": "Front bumper cover is missing, exposing the reinforcement bar and components behind it, and the hood leading edge is buckled with the grille surround bent. Headlamp appears intact.",
     "not_assessable": [
       "underbody",
       "frame rails",
       "radiator and cooling system",
       "airbags",
       "suspension",
-      "engine bay components",
-      "left side of the front end"
+      "engine bay components"
     ]
   }
 }

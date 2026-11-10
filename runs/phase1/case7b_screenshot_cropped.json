@@ -1,13 +1,13 @@
 {
   "status": "ok",
   "audit": {
-    "request_id": "19c99af6-2235-4af1-8af9-dcfd9b93d640",
-    "timestamp": "2026-11-10T03:02:09.162704Z",
+    "request_id": "b6012e1d-bed3-4917-b6dd-12082d77fcb7",
+    "timestamp": "2026-11-10T03:50:28.974011Z",
     "model_id": "claude-sonnet-5-5",
     "model_effort": "medium",
     "prompt_version": "extract_v2",
     "schema_version": "1.1.0",
-    "cost_table_version": "none",
+    "cost_table_version": "cost_table_v1",
     "input_hashes": [
       "c245c43c36d0bd6d3482b269df641f8c0d5b5af787e2c19e8c14fb7642e868f1"
     ]
@@ -52,6 +52,20 @@
   },
   "damage": [
     {
+      "panel": "fender",
+      "side": "right",
+      "damage_type": "deformation",
+      "severity": 4,
+      "confidence": "medium",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "right fender crushed and buckled, adjacent to hood, headlamp and bumper, several adjacent panels crushed together, engine bay exposed"
+      ],
+      "severity_conflict": false
+    },
+    {
       "panel": "hood",
       "side": "center",
       "damage_type": "deformation",
@@ -61,21 +75,7 @@
         0
       ],
       "cues": [
-        "hood buckled and crumpled with sharp creases, lifted and pushed out of position, front corners crushed"
-      ],
-      "severity_conflict": false
-    },
-    {
-      "panel": "fender",
-      "side": "right",
-      "damage_type": "deformation",
-      "severity": 3,
-      "confidence": "medium",
-      "photo_indices": [
-        0
-      ],
-      "cues": [
-        "right fender crumpled with creases and scratches, pushed out of position next to the hood"
+        "hood buckled with sharp creases and crumpled upward, edges pushed out of position, gaps at both fender areas opened up"
       ],
       "severity_conflict": false
     },
@@ -84,12 +84,12 @@
       "side": "left",
       "damage_type": "deformation",
       "severity": 3,
-      "confidence": "low",
+      "confidence": "medium",
       "photo_indices": [
         0
       ],
       "cues": [
-        "left front corner area opened up beside the hood, with the fender and hood edge buckled and exposing the inner structure"
+        "left fender area near hood edge bent open with exposed gap above the headlamp, hood corner lifted"
       ],
       "severity_conflict": false
     },
@@ -103,7 +103,21 @@
         0
       ],
       "cues": [
-        "bumper cover crushed and torn, lower section hanging, plate area buckled, large area affected"
+        "bumper cover crushed and torn, pushed in on the vehicle's right, lower section hanging, plate area distorted"
+      ],
+      "severity_conflict": false
+    },
+    {
+      "panel": "grille",
+      "side": "center",
+      "damage_type": "misalignment",
+      "severity": 3,
+      "confidence": "low",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "grille surround shifted and distorted on the right side next to crushed bumper and headlamp"
       ],
       "severity_conflict": false
     },
@@ -117,48 +131,148 @@
         0
       ],
       "cues": [
-        "right headlamp broken and displaced, with debris and a bent trim piece across it"
-      ],
-      "severity_conflict": false
-    },
-    {
-      "panel": "grille",
-      "side": "center",
-      "damage_type": "misalignment",
-      "severity": 2,
-      "confidence": "low",
-      "photo_indices": [
-        0
-      ],
-      "cues": [
-        "grille kidneys appear intact but the surrounding panel is distorted"
+        "right headlamp broken and fragmented with a bent bar across it, housing displaced"
       ],
       "severity_conflict": false
     }
   ],
-  "damage_summary": "Severe front-end collision damage: the hood is buckled and lifted, the bumper is crushed and torn, and the right headlamp is broken, with both front corners crumpled. Damage may reach the structure, so a human adjuster should assess it.",
+  "damage_summary": "Severe front-end collision damage: hood buckled and creased, right headlamp shattered, bumper crushed and torn, and right fender crushed with several adjacent panels involved. Structural involvement is likely and needs human assessment.",
   "not_assessable": [
-    "frame and rail condition",
+    "underbody",
+    "frame rails",
     "radiator and engine bay components",
     "airbags",
-    "suspension and alignment",
-    "underbody"
+    "suspension",
+    "cooling system"
   ],
   "conflicts": [],
   "flags": [
     "license_plate_visible"
   ],
   "error": null,
+  "cost": {
+    "status": "not_estimable",
+    "low_usd": null,
+    "mid_usd": null,
+    "high_usd": null,
+    "partial_low_usd": 1500.0,
+    "partial_high_usd": 11090.0,
+    "partial_label": "partial, excludes severity-4 items",
+    "claim_minimum_applied": false,
+    "not_estimable_reasons": [
+      "right fender: severity 4 (structural or safety)",
+      "center hood: severity 4 (structural or safety)"
+    ],
+    "lines": [
+      {
+        "panel": "fender",
+        "side": "right",
+        "severity": 4,
+        "operation": null,
+        "low_usd": null,
+        "high_usd": null,
+        "driver": "Not estimable: severity 4 (structural or safety). A human must assess."
+      },
+      {
+        "panel": "hood",
+        "side": "center",
+        "severity": 4,
+        "operation": null,
+        "low_usd": null,
+        "high_usd": null,
+        "driver": "Not estimable: severity 4 (structural or safety). A human must assess."
+      },
+      {
+        "panel": "fender",
+        "side": "left",
+        "severity": 3,
+        "operation": "replace",
+        "low_usd": 670.0,
+        "high_usd": 3200.0,
+        "driver": "replace left fender (severity 3): body 1.5-4.0 h, refinish 2.5-4.5 h at $68/h, parts $200-1500 x class multiplier 1.6-1.6"
+      },
+      {
+        "panel": "front_bumper",
+        "side": "center",
+        "severity": 3,
+        "operation": "replace",
+        "low_usd": 550.0,
+        "high_usd": 2080.0,
+        "driver": "replace center front_bumper (severity 3): body 1.0-2.5 h, refinish 2.5-4.0 h at $68/h, parts $150-900 x class multiplier 1.6-1.6"
+      },
+      {
+        "panel": "grille",
+        "side": "center",
+        "severity": 3,
+        "operation": "replace",
+        "low_usd": 100.0,
+        "high_usd": 1090.0,
+        "driver": "replace center grille (severity 3): body 0.3-1.0 h, refinish 0.0-0.5 h at $68/h, parts $50-600 x class multiplier 1.6-1.6"
+      },
+      {
+        "panel": "headlamp",
+        "side": "right",
+        "severity": 3,
+        "operation": "replace",
+        "low_usd": 180.0,
+        "high_usd": 2500.0,
+        "driver": "replace right headlamp (severity 3): body 0.3-1.5 h, refinish 0.0-0.0 h at $68/h, parts $100-1500 x class multiplier 1.6-1.6"
+      }
+    ],
+    "vehicle_class": "luxury_truck",
+    "region": "standard",
+    "labor_rate_usd_per_hour": 68.0,
+    "hidden_damage_uplift_applied": true,
+    "caveats": [
+      "Stand-in table, not real pricing: every value marked 'assumption' is a placeholder pending real estimating data (CCC / Mitchell / Audatex).",
+      "Bounds, not calibrated intervals: low and high are the table's plausible bounds for the visible damage. They are not a statistical confidence interval, and how often real costs fall inside them has not been measured.",
+      "Hidden damage: only visible damage is priced. The high end includes an uplift when any item needs replacement, but structural, mechanical and underbody damage are not priced.",
+      "Parts type: the low end assumes aftermarket or repaired parts; the high end assumes OEM parts.",
+      "Region: labor uses the configured region tier; real body shop rates vary a lot by state.",
+      "Missing cost drivers, not included: ADAS sensor recalibration, paint blending into adjacent panels, taxes, rental and towing, storage, sublet work, and EV-specific work (battery inspection, high-voltage safety procedures)."
+    ],
+    "cost_table_version": "cost_table_v1",
+    "is_assumption": true,
+    "assumption_notice": "Stand-in pricing table: every number is an assumption, not real estimating data. Not a payout amount."
+  },
+  "routing": {
+    "outcome": "adjuster_review",
+    "reasons": [
+      "Severity-4 damage (right fender, center hood): cost not estimable from photos.",
+      "Replacement-level damage reported with low confidence (center grille)."
+    ],
+    "rules_version": "routing_v1"
+  },
+  "llm_baseline": {
+    "guess": {
+      "low_usd": 5500,
+      "point_usd": 8000,
+      "high_usd": 12000,
+      "rationale": "Front-end collision on an older BMW 1-series: crumpled hood, damaged bumper cover and reinforcement, broken right headlight, and bent fender/radiator support, with possible hidden structural and cooling damage. Repair needs many parts plus paint and labor, and the cost is close to the car's value, so it may be totaled."
+    },
+    "error": null,
+    "usage": {
+      "model_id": "claude-sonnet-5-5",
+      "input_tokens": 2521,
+      "cache_write_tokens": 0,
+      "cache_read_tokens": 0,
+      "output_tokens": 145,
+      "cost_usd": 0.00649,
+      "attempts": 1
+    },
+    "prompt_version": "llm_baseline_v1",
+    "notice": "LLM free-guess baseline for evaluation only. Never used for pricing or routing, and not shown in the main UI."
+  },
   "usage": {
     "model_id": "claude-sonnet-5-5",
     "input_tokens": 2076,
     "cache_write_tokens": 0,
     "cache_read_tokens": 5321,
-    "output_tokens": 821,
-    "cost_usd": 0.01289,
+    "output_tokens": 855,
+    "cost_usd": 0.01323,
     "attempts": 1
   },
-  "latency_ms": 7859,
+  "latency_ms": 8736,
   "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
   "raw_model_output": {
     "photos": [
@@ -201,7 +315,7 @@
         "damage_type": "deformation",
         "severity": 4,
         "confidence": "medium",
-        "cues": "hood buckled and crumpled with sharp creases, lifted and pushed out of position, front corners crushed"
+        "cues": "hood buckled with sharp creases and crumpled upward, edges pushed out of position, gaps at both fender areas opened up"
       },
       {
         "photo_index": 0,
@@ -210,7 +324,7 @@
         "damage_type": "deformation",
         "severity": 3,
         "confidence": "high",
-        "cues": "bumper cover crushed and torn, lower section hanging, plate area buckled, large area affected"
+        "cues": "bumper cover crushed and torn, pushed in on the vehicle's right, lower section hanging, plate area distorted"
       },
       {
         "photo_index": 0,
@@ -219,16 +333,16 @@
         "damage_type": "shatter",
         "severity": 3,
         "confidence": "high",
-        "cues": "right headlamp broken and displaced, with debris and a bent trim piece across it"
+        "cues": "right headlamp broken and fragmented with a bent bar across it, housing displaced"
       },
       {
         "photo_index": 0,
         "panel": "fender",
         "side": "right",
         "damage_type": "deformation",
-        "severity": 3,
+        "severity": 4,
         "confidence": "medium",
-        "cues": "right fender crumpled with creases and scratches, pushed out of position next to the hood"
+        "cues": "right fender crushed and buckled, adjacent to hood, headlamp and bumper, several adjacent panels crushed together, engine bay exposed"
       },
       {
         "photo_index": 0,
@@ -236,26 +350,27 @@
         "side": "left",
         "damage_type": "deformation",
         "severity": 3,
-        "confidence": "low",
-        "cues": "left front corner area opened up beside the hood, with the fender and hood edge buckled and exposing the inner structure"
+        "confidence": "medium",
+        "cues": "left fender area near hood edge bent open with exposed gap above the headlamp, hood corner lifted"
       },
       {
         "photo_index": 0,
         "panel": "grille",
         "side": "center",
         "damage_type": "misalignment",
-        "severity": 2,
+        "severity": 3,
         "confidence": "low",
-        "cues": "grille kidneys appear intact but the surrounding panel is distorted"
+        "cues": "grille surround shifted and distorted on the right side next to crushed bumper and headlamp"
       }
     ],
-    "damage_summary": "Severe front-end collision damage: the hood is buckled and lifted, the bumper is crushed and torn, and the right headlamp is broken, with both front corners crumpled. Damage may reach the structure, so a human adjuster should assess it.",
+    "damage_summary": "Severe front-end collision damage: hood buckled and creased, right headlamp shattered, bumper crushed and torn, and right fender crushed with several adjacent panels involved. Structural involvement is likely and needs human assessment.",
     "not_assessable": [
-      "frame and rail condition",
+      "underbody",
+      "frame rails",
       "radiator and engine bay components",
       "airbags",
-      "suspension and alignment",
-      "underbody"
+      "suspension",
+      "cooling system"
     ]
   }
 }

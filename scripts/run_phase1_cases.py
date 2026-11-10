@@ -32,9 +32,10 @@ def main() -> None:
         if not all(p.exists() for p in paths):
             print(f"SKIP {case}: missing {[str(p) for p in paths if not p.exists()]}")
             continue
-        r = run_claim([p.read_bytes() for p in paths], include_raw=True)
+        r = run_claim([p.read_bytes() for p in paths], include_raw=True, include_llm_baseline=True)
         (OUT / f"{case}.json").write_text(r.model_dump_json(indent=2) + "\n")
-        print(f"{case:26} status={r.status:11} {r.latency_ms / 1000:5.1f}s ${r.usage.cost_usd if r.usage else 0:.4f}")
+        spend = (r.usage.cost_usd if r.usage else 0) + (r.llm_baseline.usage.cost_usd if r.llm_baseline and r.llm_baseline.usage else 0)
+        print(f"{case:26} status={r.status:11} {r.latency_ms / 1000:5.1f}s ${spend:.4f}")
 
 
 if __name__ == "__main__":

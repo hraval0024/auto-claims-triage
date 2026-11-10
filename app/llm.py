@@ -20,14 +20,16 @@ import anthropic
 from anthropic.lib._parse._transform import transform_schema  # same transform messages.parse uses
 from pydantic import ValidationError
 
-from app.config import MODEL_PRICES_USD_PER_MTOK, PROMPT_VERSION, settings
-from app.schemas import ModelOutput
+from app.config import LLM_BASELINE_PROMPT_VERSION, MODEL_PRICES_USD_PER_MTOK, PROMPT_VERSION, settings
+from app.schemas import LLMCostGuess, ModelOutput
 
 _PROMPT_DIR = Path(__file__).parent / "prompts"
 SYSTEM_PROMPT = (_PROMPT_DIR / f"{PROMPT_VERSION}.md").read_text().replace(
     "{rubric}", (_PROMPT_DIR / "rubric_v1.md").read_text()
 )
 OUTPUT_SCHEMA = transform_schema(ModelOutput.model_json_schema())
+BASELINE_PROMPT = (_PROMPT_DIR / f"{LLM_BASELINE_PROMPT_VERSION}.md").read_text()
+BASELINE_SCHEMA = transform_schema(LLMCostGuess.model_json_schema())
 
 
 class LLMError(Exception):
@@ -171,3 +173,37 @@ def _short_error(e: Exception) -> str:
         errs = e.errors()[:3]
         return "; ".join(f"{'.'.join(map(str, x['loc']))}: {x['msg']}" for x in errs)
     return str(e)[:300]
+
+
+def guess_cost(
+    images_jpeg: list[bytes], *, model_id: str | None = None, effort: str | None = None,
+    client: anthropic.Anthropic | None = None,
+) -> tuple[LLMCostGuess, UsageTally]:
+    """LLM free-guess cost: the BASELINE the deterministic engine is compared against in the eval.
+    One attempt, no validation retry: a failed baseline is reported, never repaired."""
+    model_id = model_id or settings.model_id
+    client = client or get_client()
+    tally = UsageTally(model_id=model_id, attempts=1)
+    content = []
+    for i, data in enumerate(images_jpeg):
+        content.append({"type": "text", "text": f"Photo {i}:"})
+        content.append({"type": "image", "source": {"type": "base64", "media_type": "image/jpeg",
+                                                    "data": base64.standard_b64encode(data).decode()}})
+    content.append({"type": "text", "text": "Give your repair cost guess."})
+    try:
+        resp = client.messages.create(
+            model=model_id, max_tokens=4000, system=BASELINE_PROMPT,
+            messages=[{"role": "user", "content": content}],
+            output_config={"effort": effort or settings.model_effort,
+                           "format": {"type": "json_schema", "schema": BASELINE_SCHEMA}},
+        )
+    except (anthropic.APIStatusError, anthropic.APIConnectionError, anthropic.APITimeoutError) as e:
+        raise LLMError("Baseline call failed.", tally) from e
+    tally.add(resp.usage)
+    if resp.stop_reason != "end_turn":
+        raise LLMError(f"Baseline call stopped early ({resp.stop_reason}).", tally)
+    text = next((b.text for b in resp.content if b.type == "text"), "")
+    try:
+        return LLMCostGuess.model_validate_json(text), tally
+    except ValidationError as e:
+        raise LLMError("Baseline output failed validation.", tally) from e

@@ -1,13 +1,13 @@
 {
   "status": "gate_failed",
   "audit": {
-    "request_id": "83b8c287-94bc-4364-b105-535fcab80c6f",
-    "timestamp": "2026-11-10T02:50:44.515201Z",
+    "request_id": "6d1f973e-aecd-433e-9dd2-18e279b03951",
+    "timestamp": "2026-11-10T03:50:24.301569Z",
     "model_id": "claude-sonnet-5-5",
     "model_effort": "medium",
     "prompt_version": "extract_v2",
     "schema_version": "1.1.0",
-    "cost_table_version": "none",
+    "cost_table_version": "cost_table_v1",
     "input_hashes": [
       "4674f6390233ee8e30d17a891113b01c244872d53511f58ba1d70ebbb5650446"
     ]
@@ -16,10 +16,10 @@
     "passed": false,
     "usable_photo_indices": [],
     "reasons": [
-      "Photo 0: looks like a screenshot or stock photo, not an original photo (Browser address bar, website header with navigation and phone number are visible around the image, indicating a screenshot of a web page.)"
+      "Photo 0: looks like a screenshot or stock photo, not an original photo (Image is a browser screenshot showing a URL bar and a body shop website header with navigation menu, so it is likely a web-sourced photo.)"
     ],
     "retake_advice": [
-      "Photo 0: Send an original photo taken directly of the vehicle, in daylight, from the front, front-left and front-right at about 2-3 meters, not a screenshot of a web page."
+      "Photo 0: Send an original photo taken directly of the claimed vehicle, in daylight from about 2-3 meters, front and front corners, not a screenshot of a web page."
     ]
   },
   "prechecks": [
@@ -42,16 +42,25 @@
     "license_plate_visible"
   ],
   "error": null,
+  "cost": null,
+  "routing": {
+    "outcome": "request_more_photos",
+    "reasons": [
+      "The photos could not be assessed: Photo 0: looks like a screenshot or stock photo, not an original photo (Image is a browser screenshot showing a URL bar and a body shop website header with navigation menu, so it is likely a web-sourced photo.)"
+    ],
+    "rules_version": "routing_v1"
+  },
+  "llm_baseline": null,
   "usage": {
     "model_id": "claude-sonnet-5-5",
     "input_tokens": 2505,
     "cache_write_tokens": 0,
     "cache_read_tokens": 5321,
-    "output_tokens": 492,
-    "cost_usd": 0.01046,
+    "output_tokens": 485,
+    "cost_usd": 0.01039,
     "attempts": 1
   },
-  "latency_ms": 4740,
+  "latency_ms": 4695,
   "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
   "raw_model_output": {
     "photos": [
@@ -61,15 +70,15 @@
         "issues": [
           {
             "code": "likely_screenshot_or_stock",
-            "detail": "Browser address bar, website header with navigation and phone number are visible around the image, indicating a screenshot of a web page."
+            "detail": "Image is a browser screenshot showing a URL bar and a body shop website header with navigation menu, so it is likely a web-sourced photo."
           }
         ],
-        "retake_advice": "Send an original photo taken directly of the vehicle, in daylight, from the front, front-left and front-right at about 2-3 meters, not a screenshot of a web page.",
+        "retake_advice": "Send an original photo taken directly of the claimed vehicle, in daylight from about 2-3 meters, front and front corners, not a screenshot of a web page.",
         "vehicle_make_seen": "BMW",
         "vehicle_color_seen": "gray",
         "license_plate_visible": true,
         "person_face_visible": false,
-        "embedded_text_seen": "Browser URL bar (brightonpanelworks.com.au news page), banner 'Call Us - 24/7 +613 9555 3522', logo 'BPW Brighton Panel Works', menu items Home, About, Services, Courtesy Cars."
+        "embedded_text_seen": "Browser address bar with a body shop URL, a banner reading 'Call Us - 24/7' with a phone number, a logo 'BPW Brighton Panel Works', and menu items Home, About, Services, Courtesy Cars."
       }
     ],
     "vehicle": {
@@ -92,14 +101,14 @@
       }
     },
     "damage": [],
-    "damage_summary": "The image is a screenshot of a web page, so it cannot be relied on as claim evidence; no damage observations were recorded, although a front-end collision appears to be shown.",
+    "damage_summary": "Photo appears to be a screenshot of a web page rather than an original claim photo, so no damage observations were recorded; a replacement original photo is needed.",
     "not_assessable": [
       "underbody",
       "frame",
       "airbags",
       "suspension",
-      "interior",
-      "engine bay"
+      "engine bay",
+      "interior"
     ]
   }
 }
