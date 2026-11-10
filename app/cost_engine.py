@@ -72,7 +72,7 @@ def estimate(
                 unpriceable_panels.append(panel.value)
             not_estimable.append(f"{side.value} {panel.value}: {why}")
             lines.append(CostLine(panel=panel, side=side, severity=it.severity, operation=None,
-                                  low_usd=None, high_usd=None, driver=f"Not estimable: {why}. A human must assess."))
+                                  low_usd=None, high_usd=None, driver=f"Not estimable: {side.value} {panel.value}, {why}. A human must assess."))
             continue
         row = t["_rows"][(pclass, it.severity)]
         (b_lo, b_hi), (r_lo, r_hi), (p_lo, p_hi) = row["body_hours"], row["refinish_hours"], row["parts_usd"]

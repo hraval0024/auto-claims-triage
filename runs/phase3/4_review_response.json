@@ -1,0 +1,86 @@
+{
+  "request_id": "f05368ce-b044-4152-989b-cb8d53992c4e",
+  "decision": "accept",
+  "corrections": [
+    {
+      "field": "vehicle.model",
+      "original": "Cirrus",
+      "corrected": "Cirrus LX"
+    },
+    {
+      "field": "damage[1].severity",
+      "original": "3",
+      "corrected": "2"
+    },
+    {
+      "field": "damage[2].severity",
+      "original": "2",
+      "corrected": "3"
+    }
+  ],
+  "logged_at": "2026-11-10T04:22:55.197723+00:00",
+  "cost": {
+    "status": "estimated",
+    "low_usd": 1030.0,
+    "mid_usd": 3090.0,
+    "high_usd": 5150.0,
+    "partial_low_usd": null,
+    "partial_high_usd": null,
+    "partial_label": null,
+    "claim_minimum_applied": false,
+    "not_estimable_reasons": [],
+    "lines": [
+      {
+        "panel": "front_bumper",
+        "side": "center",
+        "severity": 3,
+        "operation": "replace",
+        "low_usd": 460.0,
+        "high_usd": 1540.0,
+        "driver": "replace center front_bumper (severity 3): body 1.0-2.5 h, refinish 2.5-4.0 h at $68/h, parts $150-900 x class multiplier 1.0-1.0"
+      },
+      {
+        "panel": "hood",
+        "side": "center",
+        "severity": 3,
+        "operation": "replace",
+        "low_usd": 550.0,
+        "high_usd": 2300.0,
+        "driver": "replace center hood (severity 3): body 1.5-4.0 h, refinish 2.5-4.5 h at $68/h, parts $200-1500 x class multiplier 1.0-1.0"
+      },
+      {
+        "panel": "grille",
+        "side": "center",
+        "severity": 2,
+        "operation": "repair",
+        "low_usd": 20.0,
+        "high_usd": 280.0,
+        "driver": "repair center grille (severity 2): body 0.3-1.0 h, refinish 0.0-0.5 h at $68/h, parts $0-150 x class multiplier 1.0-1.0"
+      }
+    ],
+    "vehicle_class": "mainstream",
+    "region": "standard",
+    "labor_rate_usd_per_hour": 68.0,
+    "hidden_damage_uplift_applied": true,
+    "caveats": [
+      "Stand-in table, not real pricing: every value marked 'assumption' is a placeholder pending real estimating data (CCC / Mitchell / Audatex).",
+      "Bounds, not calibrated intervals: low and high are the table's plausible bounds for the visible damage. They are not a statistical confidence interval, and how often real costs fall inside them has not been measured.",
+      "Hidden damage: only visible damage is priced. The high end includes an uplift when any item needs replacement, but structural, mechanical and underbody damage are not priced.",
+      "Parts type: the low end assumes aftermarket or repaired parts; the high end assumes OEM parts.",
+      "Region: labor uses the configured region tier; real body shop rates vary a lot by state.",
+      "Missing cost drivers, not included: ADAS sensor recalibration, paint blending into adjacent panels, taxes, rental and towing, storage, sublet work, and EV-specific work (battery inspection, high-voltage safety procedures)."
+    ],
+    "cost_table_version": "cost_table_v1",
+    "is_assumption": true,
+    "assumption_notice": "Stand-in pricing table: every number is an assumption, not real estimating data. Not a payout amount."
+  },
+  "routing": {
+    "outcome": "adjuster_review",
+    "reasons": [
+      "Estimated range reaches $5,150, above the $2,500 fast-track limit.",
+      "The cost range is wide (high is 5.0x the low), so the estimate is too uncertain to automate."
+    ],
+    "rules_version": "routing_v1"
+  },
+  "note": "Re-priced and re-routed with the adjuster's corrections (adjuster-set items count as high confidence)."
+}

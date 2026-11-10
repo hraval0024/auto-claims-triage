@@ -55,6 +55,9 @@ class Settings(BaseSettings):
 
     daily_spend_cap_usd: float = 5.00
 
+    # SQLite file for the request audit log and corrections log (no images stored).
+    db_path: str = "data/app.db"
+
     # Body-shop labor rate, USD/hour. Source: 2026 "Who Pays for What?" survey, median
     # non-DRP body labor rate (~$68/h). Rates vary a lot by state; regional tiers that
     # adjust this (Phase 2) are ASSUMPTIONS with no source. Do not substitute the

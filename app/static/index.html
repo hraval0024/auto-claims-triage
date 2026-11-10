@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Claims Triage</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>Vehicle damage claims triage <span class="tag">prototype</span></h1>
+  <p class="boundary" id="boundary">Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.</p>
+</header>
+
+<main>
+  <section aria-labelledby="submit-h">
+    <h2 id="submit-h">1. Submit photos for one claim</h2>
+    <form id="claim-form">
+      <div class="row">
+        <label for="files">Upload photos (JPEG, PNG or WebP; up to 5)</label>
+        <input id="files" name="files" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+      </div>
+      <div class="row">
+        <label for="urls">Or paste image URLs (one per line)</label>
+        <textarea id="urls" name="urls" rows="2" placeholder="https://..."></textarea>
+      </div>
+      <div class="row inline">
+        <label for="region">Region (labor rate tier)</label>
+        <select id="region" name="region">
+          <option value="standard" selected>standard</option>
+          <option value="low_cost">low_cost</option>
+          <option value="high_cost">high_cost</option>
+        </select>
+        <button type="submit" id="submit-btn">Assess claim</button>
+      </div>
+      <p id="form-status" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <section id="result" hidden aria-labelledby="result-h">
+    <h2 id="result-h">2. Result</h2>
+    <div id="summary-bar" class="summary-bar"></div>
+    <div id="routing"></div>
+    <div id="gate"></div>
+    <div id="flags"></div>
+    <div id="conflicts"></div>
+
+    <div id="assessment">
+      <h3>Vehicle</h3>
+      <table id="vehicle-table" class="grid"></table>
+
+      <h3>Damage</h3>
+      <table id="damage-table" class="grid"></table>
+      <button type="button" id="add-item">+ Add damage item</button>
+
+      <h3><label for="summary-text">Damage summary</label></h3>
+      <textarea id="summary-text" rows="2"></textarea>
+
+      <h3><label for="na-text">Not visible / cannot assess (one per line)</label></h3>
+      <textarea id="na-text" rows="3"></textarea>
+    </div>
+
+    <h3>Estimated repair cost</h3>
+    <div id="cost"></div>
+    <details id="cost-details">
+      <summary>How this estimate was built</summary>
+      <div id="cost-built"></div>
+    </details>
+
+    <div id="baseline"></div>
+
+    <div class="review-actions">
+      <h3>3. Adjuster review</h3>
+      <p class="hint">Edit any field above, then accept (corrections are logged and the estimate is re-priced) or reject.</p>
+      <label for="review-region">Region for re-pricing</label>
+      <select id="review-region"></select>
+      <button type="button" id="accept-btn">Accept with my corrections</button>
+      <button type="button" id="reject-btn" class="secondary">Reject result</button>
+      <p id="review-status" role="status" aria-live="polite"></p>
+    </div>
+
+    <details>
+      <summary>Audit details</summary>
+      <pre id="audit"></pre>
+    </details>
+  </section>
+
+  <section aria-labelledby="log-h">
+    <h2 id="log-h">Corrections log <button type="button" id="refresh-log" class="secondary small">Refresh</button></h2>
+    <p class="hint">Every adjuster correction: original value, corrected value, timestamp, request id. This log is eval data.</p>
+    <table id="log-table" class="grid"></table>
+  </section>
+</main>
+<script src="/static/app.js"></script>
+</body>
+</html>

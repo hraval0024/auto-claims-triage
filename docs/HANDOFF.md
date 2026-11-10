@@ -44,3 +44,18 @@ Started in Phase 1 and filled in as facts are verified. The full handoff is comp
 - **Status: DEFERRED (candidate decision, 2026-11-10).** No real image so far has passed the photo check with mostly low-confidence findings. Case 2 (Pohang) reached `request_more_photos` only by failing the photo check, and the candidate ruled that it does not count.
 - **Covered by unit tests:** `tests/test_routing.py::test_mostly_low_confidence_minor_damage_requests_photos` and `::test_no_damage_found_requests_photos`.
 - **Plan:** look for a real passing-photo, mostly-low-confidence case in the live runs and the Phase 4 eval set. Do not tune the prompt to produce one. If none appears by Phase 6, state it as untested on real data.
+
+### Human in the loop: review endpoint and corrections log (Phase 3)
+
+- `POST /api/claims/{request_id}/review` takes `decision` (accept/reject) plus the adjuster's version of the vehicle, damage items (with `orig_index`, `removed`, or new items), summary, not-assessable list and region.
+- **Originals come from the stored result**, not from the client: `app/store.py` saves each ClaimResult (no image bytes, no raw model output, no URLs) in SQLite at `data/app.db`. `app/review.py` diffs against it and writes one corrections row per changed field: field, original, corrected, timestamp, request id. Dropping an item without marking it `removed` is rejected (422).
+- On accept, the claim is re-priced and re-routed from the corrected items; items set by an adjuster count as high confidence. A reject logs the decision without re-pricing.
+- `GET /api/corrections` returns the log; the UI shows it. This log is eval data.
+- **Production difference:** on Railway the filesystem is wiped on redeploy, so `data/app.db` needs a volume (details pending from the candidate). A real deployment would use a managed database and add reviewer identity (no auth in scope).
+
+### UI (Phase 3)
+
+- One page (`app/static/`, no build step) served by the same FastAPI app at `/`.
+- Cost is shown as one range, low to high; `mid_usd` is never displayed. Severity-4 claims show "Cost not estimable" plus the partial range labeled "partial, excludes severity-4 items".
+- The LLM baseline appears only if the server flag `LLM_BASELINE_ENABLED` is on; the UI never asks for it.
+- Every model-derived string is inserted as text (`textContent`), never as HTML, so text read from a photo can't inject markup (`tests/test_review.py` checks app.js has no `.innerHTML`).
