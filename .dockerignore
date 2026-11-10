@@ -1,9 +1,34 @@
+# Secrets
 .env
 .env.*
-.git
-.venv
-__pycache__
-data
-eval/data
+
+# Local data, images and eval material (never shipped in the image)
+data/
+eval/
+samples/
+runs/
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.heic
 *.db
+*.sqlite*
+
+# Repo, tooling, caches
+.git
+.gitignore
+.venv
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+tests/
+scripts/
+labeler/
+docs/
+*.md
 .DS_Store
+.vscode/
+.idea/
