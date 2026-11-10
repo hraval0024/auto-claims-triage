@@ -47,6 +47,14 @@ session stops working at once; users re-enter the new code.
 2. Set `ANTHROPIC_API_KEY` in Railway to the new key; redeploy; check `/healthz` and one claim.
 3. Revoke the old key in the Console.
 
+## Versions to expect
+
+Every claim's audit details record the versions it ran with. Current: `schema_version` **1.3.0**,
+`routing.rules_version` **routing_v1.1** (adds secondary `routing.notes`, e.g. "Better photos of the
+right wheel and right fender would help", without changing any outcome), `prompt_version`
+extract_v2, `cost_table_version` cost_table_v1. After a deploy, one claim's audit details confirm
+which code is live.
+
 ## Check a deployment
 
 `LIVE_URL=https://<domain> APP_ACCESS_CODE=<code> uv run python -m scripts.live_check main`

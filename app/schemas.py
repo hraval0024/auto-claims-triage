@@ -265,6 +265,9 @@ RoutingOutcome = Literal["fast_track_candidate", "adjuster_review", "request_mor
 class RoutingDecision(BaseModel):
     outcome: RoutingOutcome
     reasons: list[str]  # every rule that fired, in plain English
+    # Secondary recommendations that do NOT change the outcome (routing_v1.1+), e.g. ask for
+    # better photos while the claim still goes to an adjuster.
+    notes: list[str] = []
     rules_version: str
 
 

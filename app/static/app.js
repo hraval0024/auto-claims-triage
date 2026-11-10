@@ -141,6 +141,8 @@ function renderRouting(routing) {
   n.append(
     el("h3", {}, "Recommended next step: ", el("span", { class: `badge ${routing.outcome}` }, OUTCOME_TEXT[routing.outcome] || routing.outcome)),
     el("ul", {}, routing.reasons.map((r) => el("li", {}, r))),
+    (routing.notes || []).length ? el("div", { class: "box warn" }, el("strong", {}, "Also recommended"),
+      el("ul", {}, routing.notes.map((x) => el("li", {}, x)))) : null,
     el("p", { class: "muted" }, `Rules ${routing.rules_version}. A recommendation, not a decision.`),
   );
 }

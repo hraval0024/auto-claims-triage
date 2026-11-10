@@ -78,3 +78,11 @@ Started in Phase 1 and filled in as facts are verified. The full handoff is comp
 - Cost protection: per-IP rate limits, concurrency cap, daily model-call and USD caps in a SQLite ledger (fail closed), image-hash cache, idempotency keys. Every trigger logged and counted in `/metrics`.
 - Ops: JSON logs with request id (no images, key, code or full URLs); `/healthz` (DB writable, no model call); `/metrics`; fail-fast config; `DATA_DIR` volume. Details and the Dockerfile review: `docs/DEPLOY.md`. Secrets scan: `docs/secrets_scan.txt`.
 - **Where production would differ:** a queue and worker pool in front of the model call (today the HTTP request blocks for 5-15 s); a shared store (Redis) for rate limits and concurrency across replicas; a provider-side budget/rate-limit per tenant; Postgres instead of SQLite; real authentication with per-user audit identity.
+
+### Routing v1.1: secondary "better photos" note
+
+- **What:** `RoutingDecision.notes` (schema 1.3.0, rules `routing_v1.1`). When rule 4 sends a claim to `adjuster_review` and half or more findings are low confidence, the decision also carries e.g. "Better photos of the right wheel and right fender would help: 2 of 2 findings are low confidence." The outcome and the reasons are unchanged from routing_v1 (tested); the UI shows the note under the reasons as "Also recommended".
+- **Why:** the candidate noticed a Mercedes claim with 2 of 2 low-confidence findings went to an adjuster with no prompt for better photos. Rule 4 (needs a human) runs before rule 5 (ask for photos), by design, so the photo request was lost. The note restores it without delaying the adjuster.
+- **Not on rule 3** (possible total loss), by the candidate's decision: better photos don't change a total-loss review. Rule 7 can't have half or more low-confidence findings (rule 5 would fire first); rules 1, 2 and 5 already need no note.
+- After an adjuster accepts corrections, items count as high confidence, so the note disappears.
+- **Rejected:** reordering rules so low confidence asks for photos first (would delay severe claims that need a person anyway); making the photo request a second outcome (one outcome per claim keeps routing auditable).

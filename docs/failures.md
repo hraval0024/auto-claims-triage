@@ -87,3 +87,9 @@ Stated honestly so they can be raised in the demo; update as each is verified li
 
 - Railway's edge adds `server: railway-hikari`, `x-railway-edge` and `x-railway-request-id` to every response. Not the app (which sends no Server header) and not secret; reveals only the hosting provider. Cannot be removed from the app.
 - Two "timed" live runs were cache hits (photos already sent to this deployment by the candidate's own uploads), so the script's first latency summary was wrong. Model-call runs only: p50 about 5.7 s, max 7.6 s, n=6. The script now excludes cache hits from latency.
+
+## Design decision (not a failure): rule order sends low-confidence severe claims to an adjuster
+
+- **Observed:** `case8_multiphoto_mercedes_a.jpg` (wheel severity 4 / low, fender severity 3 / low; 2 of 2 low confidence) routes to `adjuster_review`, not `request_more_photos`.
+- **Why, by design:** routing checks rule 4 (needs a human: any severity 4, or severity 3+ at low confidence, among others) before rule 5 (half or more low confidence -> ask for photos). Severe damage needs a person whatever the photos show; asking for photos first would only delay that person. Rule 5 decides only minor, uncertain claims, where a better photo could change the outcome, possibly to fast track.
+- **Gap and fix:** the photo request was lost on severe, low-confidence claims. routing_v1.1 keeps the outcome and adds a secondary note naming the areas better photos would help with (see HANDOFF, "Routing v1.1").

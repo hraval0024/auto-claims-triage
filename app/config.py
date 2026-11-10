@@ -10,7 +10,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Pinned in code, recorded on every response (auditability).
 PROMPT_VERSION = "extract_v2"  # v2: camera_view before side (F1 fix)
-SCHEMA_VERSION = "1.2.0"  # 1.1: PhotoAssessment.camera_view; 1.2: GateResult.codes, Usage.cached
+SCHEMA_VERSION = "1.3.0"  # 1.1: PhotoAssessment.camera_view; 1.2: GateResult.codes, Usage.cached; 1.3: RoutingDecision.notes
 COST_TABLE_VERSION = "cost_table_v1"
 LLM_BASELINE_PROMPT_VERSION = "llm_baseline_v1"
 

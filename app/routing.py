@@ -10,11 +10,16 @@ is listed as a reason:
   6. every fast-track condition holds      -> fast_track_candidate
   7. otherwise                             -> adjuster_review
 Uncertainty always moves a claim toward a human, never toward fast track.
+
+routing_v1.1 adds secondary NOTES without changing any outcome or reason: when rule 4 sends a
+claim to an adjuster and half or more findings are low confidence, the decision also says which
+areas better photos would help with. (Rule 5 can't fire then, because rule 4 returns first;
+rule 3, possible total loss, deliberately gets no note: better photos don't change that review.)
 """
 
 from app.schemas import Confidence, CostEstimate, MergedDamageItem, Panel, RoutingDecision
 
-RULES_VERSION = "routing_v1"
+RULES_VERSION = "routing_v1.1"
 
 # ASSUMPTIONS (no source), to be tuned with the carrier:
 FAST_TRACK_MAX_HIGH_USD = 2500  # fast track only if the HIGH end is at or below this
@@ -33,8 +38,8 @@ def route(
     conflicts: list[str],
     gate_reasons: list[str] | None = None,
 ) -> RoutingDecision:
-    def decide(outcome: str, reasons: list[str]) -> RoutingDecision:
-        return RoutingDecision(outcome=outcome, reasons=reasons, rules_version=RULES_VERSION)
+    def decide(outcome: str, reasons: list[str], notes: list[str] | None = None) -> RoutingDecision:
+        return RoutingDecision(outcome=outcome, reasons=reasons, notes=notes or [], rules_version=RULES_VERSION)
 
     # 1. Error: never fabricate, send to a person.
     if status == "error":
@@ -75,7 +80,7 @@ def route(
         if cost.low_usd and cost.high_usd / cost.low_usd > WIDE_RANGE_RATIO:
             human.append(f"The cost range is wide (high is {cost.high_usd / cost.low_usd:.1f}x the low), so the estimate is too uncertain to automate.")
     if human:
-        return decide("adjuster_review", human)
+        return decide("adjuster_review", human, notes=_better_photos_note(damage))
 
     # 5. Not enough confidence to decide.
     unsure = []
@@ -103,3 +108,20 @@ def route(
 
     # 7. Default to a human.
     return decide("adjuster_review", ["Does not meet fast-track criteria: " + "; ".join(blockers) + "."])
+
+
+def _area(d: MergedDamageItem) -> str:
+    panel = d.panel.value.replace("_", " ")
+    return f"{d.side.value} {panel}" if d.side.value in ("left", "right") else panel
+
+
+def _better_photos_note(damage: list[MergedDamageItem]) -> list[str]:
+    """routing_v1.1: secondary note for adjuster_review when half or more findings are low confidence."""
+    if not damage:
+        return []
+    low = [d for d in damage if d.confidence == Confidence.low]
+    if len(low) / len(damage) < LOW_CONFIDENCE_SHARE:
+        return []
+    areas = list(dict.fromkeys(_area(d) for d in low))  # unique, in order
+    joined = areas[0] if len(areas) == 1 else ", ".join(areas[:-1]) + " and " + areas[-1]
+    return [f"Better photos of the {joined} would help: {len(low)} of {len(damage)} findings are low confidence."]
