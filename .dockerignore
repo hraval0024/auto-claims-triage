@@ -1,0 +1,9 @@
+.env
+.env.*
+.git
+.venv
+__pycache__
+data
+eval/data
+*.db
+.DS_Store

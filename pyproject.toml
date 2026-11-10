@@ -1,0 +1,27 @@
+[project]
+name = "auto-claims-triage"
+version = "0.1.0"
+description = "Vehicle damage claims triage prototype"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "anthropic>=2.7.0",
+    "fastapi>=0.162.2",
+    "httpx>=0.28.1",
+    "pillow>=13.0.0",
+    "pydantic>=2.14.3",
+    "pydantic-settings>=2.16.2",
+    "python-multipart>=0.0.33",
+    "pyyaml>=6.0.3",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
