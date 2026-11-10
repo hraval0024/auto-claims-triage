@@ -67,11 +67,14 @@ def _validate(url: str) -> None:
         raise UrlFetchError("URLs with embedded credentials are not allowed.")
 
 
-def fetch_image(url: str) -> bytes:
+DEFAULT_USER_AGENT = "auto-claims-triage-prototype/0.1"
+
+
+def fetch_image(url: str, user_agent: str = DEFAULT_USER_AGENT) -> bytes:
     deadline = time.monotonic() + settings.url_fetch_timeout_s
     per_op = min(5.0, settings.url_fetch_timeout_s)
     timeouts = {"connect": per_op, "read": per_op, "write": per_op, "pool": per_op}
-    headers = [(b"User-Agent", b"auto-claims-triage-prototype/0.1"), (b"Accept", b"image/*")]
+    headers = [(b"User-Agent", user_agent.encode()), (b"Accept", b"image/*")]
     max_bytes = settings.max_upload_bytes
 
     with httpcore.ConnectionPool(network_backend=_GuardedBackend(), retries=0) as pool:

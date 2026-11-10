@@ -1,0 +1,194 @@
+{
+  "status": "ok",
+  "audit": {
+    "request_id": "424fcf35-3198-463a-ba14-2183966e7867",
+    "timestamp": "2026-11-10T02:50:16.139712Z",
+    "model_id": "claude-sonnet-5-5",
+    "model_effort": "medium",
+    "prompt_version": "extract_v2",
+    "schema_version": "1.1.0",
+    "cost_table_version": "none",
+    "input_hashes": [
+      "ccce1d6734b47119c5dc04239fe95efcfbf16f847d4344a8a10ffda7e8307db7"
+    ]
+  },
+  "gate": {
+    "passed": true,
+    "usable_photo_indices": [
+      0
+    ],
+    "reasons": [],
+    "retake_advice": []
+  },
+  "prechecks": [
+    {
+      "photo_index": 0,
+      "width": 1568,
+      "height": 882,
+      "brightness_mean": 124.4,
+      "sharpness": 1795.7,
+      "warnings": [],
+      "blocking": []
+    }
+  ],
+  "vehicle": {
+    "make": {
+      "value": "Chrysler",
+      "confidence": "high"
+    },
+    "model": {
+      "value": "Cirrus",
+      "confidence": "low"
+    },
+    "color": {
+      "value": "red",
+      "confidence": "high"
+    },
+    "year_range": {
+      "start": 1995,
+      "end": 2000,
+      "confidence": "low"
+    }
+  },
+  "damage": [
+    {
+      "panel": "front_bumper",
+      "side": "center",
+      "damage_type": "missing_part",
+      "severity": 3,
+      "confidence": "high",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "bumper cover absent, bare reinforcement bar and radiator support exposed, rust and paint wear on bar"
+      ],
+      "severity_conflict": false
+    },
+    {
+      "panel": "hood",
+      "side": "center",
+      "damage_type": "dent",
+      "severity": 3,
+      "confidence": "low",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "hood front edge wavy with creases and chipped paint near the leading edge, hood appears buckled; between levels so higher level chosen"
+      ],
+      "severity_conflict": false
+    },
+    {
+      "panel": "headlamp",
+      "side": "right",
+      "damage_type": "misalignment",
+      "severity": 2,
+      "confidence": "low",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "right headlamp appears intact but is hazed and the surrounding mounting area is exposed with no bumper cover support"
+      ],
+      "severity_conflict": false
+    }
+  ],
+  "damage_summary": "The front bumper cover is missing, exposing the reinforcement bar and radiator support, and the hood leading edge looks creased and buckled. The right headlamp looks intact, and the grille is present.",
+  "not_assessable": [
+    "underbody",
+    "frame rails",
+    "radiator and cooling system",
+    "airbags",
+    "suspension",
+    "engine bay components",
+    "left side of the front end"
+  ],
+  "conflicts": [],
+  "flags": [],
+  "error": null,
+  "usage": {
+    "model_id": "claude-sonnet-5-5",
+    "input_tokens": 1833,
+    "cache_write_tokens": 0,
+    "cache_read_tokens": 5321,
+    "output_tokens": 601,
+    "cost_usd": 0.01021,
+    "attempts": 1
+  },
+  "latency_ms": 4487,
+  "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
+  "raw_model_output": {
+    "photos": [
+      {
+        "photo_index": 0,
+        "camera_view": "front_right",
+        "issues": [],
+        "retake_advice": "",
+        "vehicle_make_seen": "Chrysler",
+        "vehicle_color_seen": "red",
+        "license_plate_visible": false,
+        "person_face_visible": false,
+        "embedded_text_seen": ""
+      }
+    ],
+    "vehicle": {
+      "make": {
+        "value": "Chrysler",
+        "confidence": "high"
+      },
+      "model": {
+        "value": "Cirrus",
+        "confidence": "low"
+      },
+      "color": {
+        "value": "red",
+        "confidence": "high"
+      },
+      "year_range": {
+        "start": 1995,
+        "end": 2000,
+        "confidence": "low"
+      }
+    },
+    "damage": [
+      {
+        "photo_index": 0,
+        "panel": "front_bumper",
+        "side": "center",
+        "damage_type": "missing_part",
+        "severity": 3,
+        "confidence": "high",
+        "cues": "bumper cover absent, bare reinforcement bar and radiator support exposed, rust and paint wear on bar"
+      },
+      {
+        "photo_index": 0,
+        "panel": "hood",
+        "side": "center",
+        "damage_type": "dent",
+        "severity": 3,
+        "confidence": "low",
+        "cues": "hood front edge wavy with creases and chipped paint near the leading edge, hood appears buckled; between levels so higher level chosen"
+      },
+      {
+        "photo_index": 0,
+        "panel": "headlamp",
+        "side": "right",
+        "damage_type": "misalignment",
+        "severity": 2,
+        "confidence": "low",
+        "cues": "right headlamp appears intact but is hazed and the surrounding mounting area is exposed with no bumper cover support"
+      }
+    ],
+    "damage_summary": "The front bumper cover is missing, exposing the reinforcement bar and radiator support, and the hood leading edge looks creased and buckled. The right headlamp looks intact, and the grille is present.",
+    "not_assessable": [
+      "underbody",
+      "frame rails",
+      "radiator and cooling system",
+      "airbags",
+      "suspension",
+      "engine bay components",
+      "left side of the front end"
+    ]
+  }
+}

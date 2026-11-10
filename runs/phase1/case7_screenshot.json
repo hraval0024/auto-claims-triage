@@ -1,0 +1,105 @@
+{
+  "status": "gate_failed",
+  "audit": {
+    "request_id": "83b8c287-94bc-4364-b105-535fcab80c6f",
+    "timestamp": "2026-11-10T02:50:44.515201Z",
+    "model_id": "claude-sonnet-5-5",
+    "model_effort": "medium",
+    "prompt_version": "extract_v2",
+    "schema_version": "1.1.0",
+    "cost_table_version": "none",
+    "input_hashes": [
+      "4674f6390233ee8e30d17a891113b01c244872d53511f58ba1d70ebbb5650446"
+    ]
+  },
+  "gate": {
+    "passed": false,
+    "usable_photo_indices": [],
+    "reasons": [
+      "Photo 0: looks like a screenshot or stock photo, not an original photo (Browser address bar, website header with navigation and phone number are visible around the image, indicating a screenshot of a web page.)"
+    ],
+    "retake_advice": [
+      "Photo 0: Send an original photo taken directly of the vehicle, in daylight, from the front, front-left and front-right at about 2-3 meters, not a screenshot of a web page."
+    ]
+  },
+  "prechecks": [
+    {
+      "photo_index": 0,
+      "width": 1568,
+      "height": 1220,
+      "brightness_mean": 135.3,
+      "sharpness": 1273.4,
+      "warnings": [],
+      "blocking": []
+    }
+  ],
+  "vehicle": null,
+  "damage": [],
+  "damage_summary": null,
+  "not_assessable": [],
+  "conflicts": [],
+  "flags": [
+    "license_plate_visible"
+  ],
+  "error": null,
+  "usage": {
+    "model_id": "claude-sonnet-5-5",
+    "input_tokens": 2505,
+    "cache_write_tokens": 0,
+    "cache_read_tokens": 5321,
+    "output_tokens": 492,
+    "cost_usd": 0.01046,
+    "attempts": 1
+  },
+  "latency_ms": 4740,
+  "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
+  "raw_model_output": {
+    "photos": [
+      {
+        "photo_index": 0,
+        "camera_view": "front",
+        "issues": [
+          {
+            "code": "likely_screenshot_or_stock",
+            "detail": "Browser address bar, website header with navigation and phone number are visible around the image, indicating a screenshot of a web page."
+          }
+        ],
+        "retake_advice": "Send an original photo taken directly of the vehicle, in daylight, from the front, front-left and front-right at about 2-3 meters, not a screenshot of a web page.",
+        "vehicle_make_seen": "BMW",
+        "vehicle_color_seen": "gray",
+        "license_plate_visible": true,
+        "person_face_visible": false,
+        "embedded_text_seen": "Browser URL bar (brightonpanelworks.com.au news page), banner 'Call Us - 24/7 +613 9555 3522', logo 'BPW Brighton Panel Works', menu items Home, About, Services, Courtesy Cars."
+      }
+    ],
+    "vehicle": {
+      "make": {
+        "value": "BMW",
+        "confidence": "high"
+      },
+      "model": {
+        "value": "unknown",
+        "confidence": "low"
+      },
+      "color": {
+        "value": "gray",
+        "confidence": "medium"
+      },
+      "year_range": {
+        "start": null,
+        "end": null,
+        "confidence": "low"
+      }
+    },
+    "damage": [],
+    "damage_summary": "The image is a screenshot of a web page, so it cannot be relied on as claim evidence; no damage observations were recorded, although a front-end collision appears to be shown.",
+    "not_assessable": [
+      "underbody",
+      "frame",
+      "airbags",
+      "suspension",
+      "interior",
+      "engine bay"
+    ]
+  }
+}

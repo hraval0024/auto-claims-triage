@@ -47,4 +47,25 @@ schema is the largest single part; trimming field descriptions is a possible lev
 
 ## Spend to date
 
-About $0.21 of the $30 ceiling (2026-11-10).
+About $1.76 of the $30 ceiling (2026-11-10): smoke/caching $0.21, Opus side checks $0.20, latency experiment $1.26, Phase 1 case run $0.09.
+
+## Latency levers, one at a time (2026-11-10, `data/runs/latency_exp.jsonl`, `scripts/latency_experiment.py`)
+
+claude-sonnet-5-5, extract_v2, caching on. 7 DEV images x 4 repeats = **28 calls per arm**, 112
+total, 0 failed, $1.26. Calls interleaved across arms. p95 is nearest-rank over 28 calls (the
+27th value), so it is a rough estimate. Quality = agreement with the baseline arm, compared with
+the baseline's agreement with itself (noise floor). No labels, so this is consistency, not accuracy.
+
+| Arm | n | p50 s | p95 s | max s | Output tokens | $/call | Cue words | Gate agrees | Item overlap | Panel overlap | Max severity agrees | F1 side correct |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| baseline (medium, 1568px) | 28 | 5.5 | 9.5 | 9.5 | 706 | 0.0120 | 16.6 | 100% | 0.75 (floor) | 0.86 (floor) | 100% | 0/4 |
+| effort low | 28 | 5.1 | 8.8 | 9.1 | 683 | 0.0113 | 15.5 | 100% | 0.71 | 0.84 | 100% | 0/4 |
+| cues at most 8 words | 28 | 5.2 | 8.8 | 11.5 | 738 | 0.0125 | 6.1 | 100% | 0.68 | 0.80 | 86% | 0/4 |
+| 1024px cap | 28 | 5.1 | 6.5 | 6.7 | 671 | 0.0092 | 14.5 | 86% | 0.52 | 0.71 | 86% | 0/4 |
+
+Findings:
+- **Effort low:** small gain (p95 -0.7 s, -6% cost); quality stays near the noise floor. Not adopted yet: the gain is within run-to-run variation. Recheck in the Phase 4 eval against labels.
+- **Short cues:** cue text fell from 17 to 6 words but total output tokens did not fall (thinking tokens dominate), and severity agreement dropped. Rejected.
+- **1024px cap:** fastest (p95 6.5 s) and 23% cheaper, but gate, item and severity agreement all dropped clearly below the noise floor. Rejected: resolution matters for damage detail.
+- **Latency varies over time:** this run had p95 9.5 s and nothing over 15 s, while 1 of 7 earlier single-photo Sonnet calls took 19.3 s. A per-request p95 for the demo needs an n of 50+ on the deployed service (Phase 5).
+- F1 side remains wrong on Sonnet in every arm (16/16).

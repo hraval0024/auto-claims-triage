@@ -1,0 +1,267 @@
+{
+  "status": "ok",
+  "audit": {
+    "request_id": "7bf6e300-dbd7-4402-8137-44ed76c8d5dc",
+    "timestamp": "2026-11-10T02:50:26.334956Z",
+    "model_id": "claude-sonnet-5-5",
+    "model_effort": "medium",
+    "prompt_version": "extract_v2",
+    "schema_version": "1.1.0",
+    "cost_table_version": "none",
+    "input_hashes": [
+      "9ea4b3b47b0ab275a01bd0c121854622e5e57d17a873e4ccab60d36255b099a5"
+    ]
+  },
+  "gate": {
+    "passed": true,
+    "usable_photo_indices": [
+      0
+    ],
+    "reasons": [],
+    "retake_advice": []
+  },
+  "prechecks": [
+    {
+      "photo_index": 0,
+      "width": 1568,
+      "height": 1045,
+      "brightness_mean": 102.6,
+      "sharpness": 4183.5,
+      "warnings": [],
+      "blocking": []
+    }
+  ],
+  "vehicle": {
+    "make": {
+      "value": "Hyundai",
+      "confidence": "high"
+    },
+    "model": {
+      "value": "H-1 / Grand Starex",
+      "confidence": "medium"
+    },
+    "color": {
+      "value": "yellow",
+      "confidence": "high"
+    },
+    "year_range": {
+      "start": 2007,
+      "end": 2017,
+      "confidence": "low"
+    }
+  },
+  "damage": [
+    {
+      "panel": "pillar",
+      "side": "left",
+      "damage_type": "deformation",
+      "severity": 4,
+      "confidence": "high",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "pillars and door opening visibly buckled, roof structure collapsed onto door openings"
+      ],
+      "severity_conflict": false
+    },
+    {
+      "panel": "quarter_panel",
+      "side": "left",
+      "damage_type": "deformation",
+      "severity": 4,
+      "confidence": "medium",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "rear upper body crushed and buckled together with roof and door, debris on top"
+      ],
+      "severity_conflict": false
+    },
+    {
+      "panel": "rear_door",
+      "side": "left",
+      "damage_type": "deformation",
+      "severity": 4,
+      "confidence": "medium",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "rear side door area crushed with upper body panel collapsed, adjacent to crushed roof and quarter panel"
+      ],
+      "severity_conflict": false
+    },
+    {
+      "panel": "roof",
+      "side": "center",
+      "damage_type": "deformation",
+      "severity": 4,
+      "confidence": "high",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "roof crushed inward and collapsed under fallen bricks and wall debris, roofline buckled"
+      ],
+      "severity_conflict": false
+    },
+    {
+      "panel": "side_glass",
+      "side": "left",
+      "damage_type": "missing_part",
+      "severity": 3,
+      "confidence": "medium",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "side glass absent over door openings, glass fragments on ground"
+      ],
+      "severity_conflict": false
+    },
+    {
+      "panel": "windshield",
+      "side": "center",
+      "damage_type": "shatter",
+      "severity": 3,
+      "confidence": "high",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "windshield heavily cracked and caved in at the top"
+      ],
+      "severity_conflict": false
+    }
+  ],
+  "damage_summary": "The van's roof, pillars and left side upper body are crushed under fallen brick wall debris, with a cracked windshield and missing side glass. Front bumper, hood and headlamp appear intact, but the structural damage requires human assessment.",
+  "not_assessable": [
+    "underbody",
+    "frame",
+    "airbags",
+    "suspension",
+    "interior",
+    "engine bay",
+    "right side",
+    "rear of vehicle"
+  ],
+  "conflicts": [],
+  "flags": [
+    "license_plate_visible"
+  ],
+  "error": null,
+  "usage": {
+    "model_id": "claude-sonnet-5-5",
+    "input_tokens": 2169,
+    "cache_write_tokens": 0,
+    "cache_read_tokens": 5321,
+    "output_tokens": 869,
+    "cost_usd": 0.01356,
+    "attempts": 1
+  },
+  "latency_ms": 6281,
+  "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
+  "raw_model_output": {
+    "photos": [
+      {
+        "photo_index": 0,
+        "camera_view": "front_left",
+        "issues": [],
+        "retake_advice": "",
+        "vehicle_make_seen": "Hyundai",
+        "vehicle_color_seen": "yellow",
+        "license_plate_visible": true,
+        "person_face_visible": false,
+        "embedded_text_seen": "Korean text on a red stop-style sign on the door (children's vehicle stop sign), a small warning sticker on the building wall, and a printed banner on the ground."
+      }
+    ],
+    "vehicle": {
+      "make": {
+        "value": "Hyundai",
+        "confidence": "high"
+      },
+      "model": {
+        "value": "H-1 / Grand Starex",
+        "confidence": "medium"
+      },
+      "color": {
+        "value": "yellow",
+        "confidence": "high"
+      },
+      "year_range": {
+        "start": 2007,
+        "end": 2017,
+        "confidence": "low"
+      }
+    },
+    "damage": [
+      {
+        "photo_index": 0,
+        "panel": "roof",
+        "side": "center",
+        "damage_type": "deformation",
+        "severity": 4,
+        "confidence": "high",
+        "cues": "roof crushed inward and collapsed under fallen bricks and wall debris, roofline buckled"
+      },
+      {
+        "photo_index": 0,
+        "panel": "pillar",
+        "side": "left",
+        "damage_type": "deformation",
+        "severity": 4,
+        "confidence": "high",
+        "cues": "pillars and door opening visibly buckled, roof structure collapsed onto door openings"
+      },
+      {
+        "photo_index": 0,
+        "panel": "windshield",
+        "side": "center",
+        "damage_type": "shatter",
+        "severity": 3,
+        "confidence": "high",
+        "cues": "windshield heavily cracked and caved in at the top"
+      },
+      {
+        "photo_index": 0,
+        "panel": "rear_door",
+        "side": "left",
+        "damage_type": "deformation",
+        "severity": 4,
+        "confidence": "medium",
+        "cues": "rear side door area crushed with upper body panel collapsed, adjacent to crushed roof and quarter panel"
+      },
+      {
+        "photo_index": 0,
+        "panel": "quarter_panel",
+        "side": "left",
+        "damage_type": "deformation",
+        "severity": 4,
+        "confidence": "medium",
+        "cues": "rear upper body crushed and buckled together with roof and door, debris on top"
+      },
+      {
+        "photo_index": 0,
+        "panel": "side_glass",
+        "side": "left",
+        "damage_type": "missing_part",
+        "severity": 3,
+        "confidence": "medium",
+        "cues": "side glass absent over door openings, glass fragments on ground"
+      }
+    ],
+    "damage_summary": "The van's roof, pillars and left side upper body are crushed under fallen brick wall debris, with a cracked windshield and missing side glass. Front bumper, hood and headlamp appear intact, but the structural damage requires human assessment.",
+    "not_assessable": [
+      "underbody",
+      "frame",
+      "airbags",
+      "suspension",
+      "interior",
+      "engine bay",
+      "right side",
+      "rear of vehicle"
+    ]
+  }
+}

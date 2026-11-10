@@ -1,0 +1,114 @@
+{
+  "status": "gate_failed",
+  "audit": {
+    "request_id": "3a49c43d-653f-455f-8722-9cdf825cb7bb",
+    "timestamp": "2026-11-10T02:50:32.620873Z",
+    "model_id": "claude-sonnet-5-5",
+    "model_effort": "medium",
+    "prompt_version": "extract_v2",
+    "schema_version": "1.1.0",
+    "cost_table_version": "none",
+    "input_hashes": [
+      "0b6ff8eba82fc81013e857b57c43c16b1e8c027ac36efcdeba476f0dae40765c"
+    ]
+  },
+  "gate": {
+    "passed": false,
+    "usable_photo_indices": [],
+    "reasons": [
+      "Photo 0: more than one vehicle could be the claimed vehicle (A crashed silver sedan, a damaged black sedan and a dark SUV are all in frame, and it is unclear which is the claimed vehicle.)",
+      "Photo 0: too blurry or dark to judge damage (Night scene with low light and noise; the vehicles are small and distant, so panel damage cannot be judged.)",
+      "Photo 0: the damaged area is not visible (The vehicles are too far away to assess individual panels.)"
+    ],
+    "retake_advice": [
+      "Photo 0: Send a daylight or well-lit photo of only the claimed vehicle from about 2-3 meters, showing each damaged area close up, with a wider shot of the whole vehicle from the front and rear corners."
+    ]
+  },
+  "prechecks": [
+    {
+      "photo_index": 0,
+      "width": 1568,
+      "height": 1176,
+      "brightness_mean": 75.3,
+      "sharpness": 1109.0,
+      "warnings": [],
+      "blocking": []
+    }
+  ],
+  "vehicle": null,
+  "damage": [],
+  "damage_summary": null,
+  "not_assessable": [],
+  "conflicts": [],
+  "flags": [],
+  "error": null,
+  "usage": {
+    "model_id": "claude-sonnet-5-5",
+    "input_tokens": 2393,
+    "cache_write_tokens": 0,
+    "cache_read_tokens": 5321,
+    "output_tokens": 565,
+    "cost_usd": 0.01097,
+    "attempts": 1
+  },
+  "latency_ms": 4573,
+  "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
+  "raw_model_output": {
+    "photos": [
+      {
+        "photo_index": 0,
+        "camera_view": "not_applicable",
+        "issues": [
+          {
+            "code": "multiple_vehicles",
+            "detail": "A crashed silver sedan, a damaged black sedan and a dark SUV are all in frame, and it is unclear which is the claimed vehicle."
+          },
+          {
+            "code": "too_blurry_or_dark",
+            "detail": "Night scene with low light and noise; the vehicles are small and distant, so panel damage cannot be judged."
+          },
+          {
+            "code": "damage_area_not_visible",
+            "detail": "The vehicles are too far away to assess individual panels."
+          }
+        ],
+        "retake_advice": "Send a daylight or well-lit photo of only the claimed vehicle from about 2-3 meters, showing each damaged area close up, with a wider shot of the whole vehicle from the front and rear corners.",
+        "vehicle_make_seen": "unknown",
+        "vehicle_color_seen": "silver",
+        "license_plate_visible": false,
+        "person_face_visible": false,
+        "embedded_text_seen": ""
+      }
+    ],
+    "vehicle": {
+      "make": {
+        "value": "unknown",
+        "confidence": "low"
+      },
+      "model": {
+        "value": "unknown",
+        "confidence": "low"
+      },
+      "color": {
+        "value": "unknown",
+        "confidence": "low"
+      },
+      "year_range": {
+        "start": null,
+        "end": null,
+        "confidence": "low"
+      }
+    },
+    "damage": [],
+    "damage_summary": "Cannot assess damage from this photo: it is a distant night scene with several vehicles, and the claimed vehicle is unclear. Heavy front-end damage is apparent on a silver sedan and a black sedan, but no panel-level assessment is possible.",
+    "not_assessable": [
+      "underbody",
+      "frame",
+      "airbags",
+      "suspension",
+      "interior",
+      "individual panel damage",
+      "claimed vehicle identity"
+    ]
+  }
+}

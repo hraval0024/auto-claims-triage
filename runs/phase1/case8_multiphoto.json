@@ -1,0 +1,238 @@
+{
+  "status": "ok",
+  "audit": {
+    "request_id": "10afed61-8208-47de-8af5-c4e044a38a97",
+    "timestamp": "2026-11-10T02:50:49.273514Z",
+    "model_id": "claude-sonnet-5-5",
+    "model_effort": "medium",
+    "prompt_version": "extract_v2",
+    "schema_version": "1.1.0",
+    "cost_table_version": "none",
+    "input_hashes": [
+      "9bdf8d518ebe10f364446d2c1e2bdcdcc3c34371976f3bd64edec79979b2ed34",
+      "568aed1f4790a165b2de5d8298a0ddff92fc7a4c3c2e91a3a3734ae7ca8b5ba4"
+    ]
+  },
+  "gate": {
+    "passed": true,
+    "usable_photo_indices": [
+      0,
+      1
+    ],
+    "reasons": [],
+    "retake_advice": []
+  },
+  "prechecks": [
+    {
+      "photo_index": 0,
+      "width": 1568,
+      "height": 1045,
+      "brightness_mean": 106.8,
+      "sharpness": 1844.5,
+      "warnings": [],
+      "blocking": []
+    },
+    {
+      "photo_index": 1,
+      "width": 1568,
+      "height": 1045,
+      "brightness_mean": 112.5,
+      "sharpness": 2406.1,
+      "warnings": [],
+      "blocking": []
+    }
+  ],
+  "vehicle": {
+    "make": {
+      "value": "Mercedes-Benz",
+      "confidence": "high"
+    },
+    "model": {
+      "value": "C-Class sedan",
+      "confidence": "medium"
+    },
+    "color": {
+      "value": "black",
+      "confidence": "high"
+    },
+    "year_range": {
+      "start": 2000,
+      "end": 2007,
+      "confidence": "medium"
+    }
+  },
+  "damage": [
+    {
+      "panel": "wheel",
+      "side": "right",
+      "damage_type": "misalignment",
+      "severity": 4,
+      "confidence": "low",
+      "photo_indices": [
+        0,
+        1
+      ],
+      "cues": [
+        "Front right wheel is turned or tilted and appears pushed back against the damaged fender area, which suggests possible suspension involvement.",
+        "Front right wheel looks turned and pushed back into the damaged arch, which suggests possible suspension damage."
+      ],
+      "severity_conflict": false
+    },
+    {
+      "panel": "fender",
+      "side": "right",
+      "damage_type": "deformation",
+      "severity": 3,
+      "confidence": "medium",
+      "photo_indices": [
+        0,
+        1
+      ],
+      "cues": [
+        "Front right fender crumpled at the far end of the car and pushed toward the wheel; seen at an oblique angle.",
+        "Front right fender crushed with creases and buckled metal near the headlamp and wheel arch; gap to the door looks uneven."
+      ],
+      "severity_conflict": false
+    },
+    {
+      "panel": "front_bumper",
+      "side": "right",
+      "damage_type": "tear_puncture",
+      "severity": 3,
+      "confidence": "medium",
+      "photo_indices": [
+        1
+      ],
+      "cues": [
+        "Right end of the bumper cover is torn, crushed and scraped, with parts hanging or missing."
+      ],
+      "severity_conflict": false
+    }
+  ],
+  "damage_summary": "Front right corner of the car is crushed, with a deformed fender, a torn and crushed bumper end, and a front wheel that looks displaced. The car is stopped against a lamp post on grass.",
+  "not_assessable": [
+    "underbody",
+    "frame",
+    "suspension",
+    "airbags",
+    "engine bay",
+    "interior",
+    "right headlamp internals"
+  ],
+  "conflicts": [],
+  "flags": [],
+  "error": null,
+  "usage": {
+    "model_id": "claude-sonnet-5-5",
+    "input_tokens": 4307,
+    "cache_write_tokens": 0,
+    "cache_read_tokens": 5321,
+    "output_tokens": 1757,
+    "cost_usd": 0.02672,
+    "attempts": 1
+  },
+  "latency_ms": 14576,
+  "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
+  "raw_model_output": {
+    "photos": [
+      {
+        "photo_index": 0,
+        "camera_view": "rear_right",
+        "issues": [],
+        "retake_advice": "",
+        "vehicle_make_seen": "Mercedes-Benz",
+        "vehicle_color_seen": "black",
+        "license_plate_visible": false,
+        "person_face_visible": false,
+        "embedded_text_seen": "Yellow tape reading 'SECURITY NO PARKING' across the car; background road signs (20 speed limit, humps) and a notice board. None addresses an AI."
+      },
+      {
+        "photo_index": 1,
+        "camera_view": "front_right",
+        "issues": [],
+        "retake_advice": "",
+        "vehicle_make_seen": "Mercedes-Benz",
+        "vehicle_color_seen": "black",
+        "license_plate_visible": false,
+        "person_face_visible": false,
+        "embedded_text_seen": "Yellow tape partly reading 'SECURITY', a lamp post marked 'FGBA023', and a small sign. None addresses an AI."
+      }
+    ],
+    "vehicle": {
+      "make": {
+        "value": "Mercedes-Benz",
+        "confidence": "high"
+      },
+      "model": {
+        "value": "C-Class sedan",
+        "confidence": "medium"
+      },
+      "color": {
+        "value": "black",
+        "confidence": "high"
+      },
+      "year_range": {
+        "start": 2000,
+        "end": 2007,
+        "confidence": "medium"
+      }
+    },
+    "damage": [
+      {
+        "photo_index": 0,
+        "panel": "fender",
+        "side": "right",
+        "damage_type": "deformation",
+        "severity": 3,
+        "confidence": "medium",
+        "cues": "Front right fender crumpled at the far end of the car and pushed toward the wheel; seen at an oblique angle."
+      },
+      {
+        "photo_index": 0,
+        "panel": "wheel",
+        "side": "right",
+        "damage_type": "misalignment",
+        "severity": 4,
+        "confidence": "low",
+        "cues": "Front right wheel is turned or tilted and appears pushed back against the damaged fender area, which suggests possible suspension involvement."
+      },
+      {
+        "photo_index": 1,
+        "panel": "fender",
+        "side": "right",
+        "damage_type": "deformation",
+        "severity": 3,
+        "confidence": "high",
+        "cues": "Front right fender crushed with creases and buckled metal near the headlamp and wheel arch; gap to the door looks uneven."
+      },
+      {
+        "photo_index": 1,
+        "panel": "front_bumper",
+        "side": "right",
+        "damage_type": "tear_puncture",
+        "severity": 3,
+        "confidence": "medium",
+        "cues": "Right end of the bumper cover is torn, crushed and scraped, with parts hanging or missing."
+      },
+      {
+        "photo_index": 1,
+        "panel": "wheel",
+        "side": "right",
+        "damage_type": "misalignment",
+        "severity": 4,
+        "confidence": "low",
+        "cues": "Front right wheel looks turned and pushed back into the damaged arch, which suggests possible suspension damage."
+      }
+    ],
+    "damage_summary": "Front right corner of the car is crushed, with a deformed fender, a torn and crushed bumper end, and a front wheel that looks displaced. The car is stopped against a lamp post on grass.",
+    "not_assessable": [
+      "underbody",
+      "frame",
+      "suspension",
+      "airbags",
+      "engine bay",
+      "interior",
+      "right headlamp internals"
+    ]
+  }
+}

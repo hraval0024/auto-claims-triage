@@ -1,0 +1,100 @@
+{
+  "_note": "Sample images for Phase 1. Image files are NOT committed; run `uv run python -m scripts.fetch_samples` to download them into data/samples/. license/author/file_page/sha256 are filled in by the script from Wikimedia metadata. Every entry here is a DEV image (used to tune or debug the prompt); the eval must exclude these by sha256.",
+  "samples": [
+    {
+      "id": "altima_accident",
+      "case": "dev: F1 regression check",
+      "commons_title": "File:Altima-Accident.jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:Altima-Accident.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Altima-Accident.jpg/1920px-Altima-Accident.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0",
+      "author": "Ryanandlenny",
+      "sha256": "983673d9642450aa86c9383986506383de653464fecd5398d293601fc4abd39f"
+    },
+    {
+      "id": "case1_clean_cirrus",
+      "case": "1 clean",
+      "commons_title": "File:2000 Chrysler Cirrus with missing bumper.jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:2000_Chrysler_Cirrus_with_missing_bumper.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7f/2000_Chrysler_Cirrus_with_missing_bumper.jpg/1920px-2000_Chrysler_Cirrus_with_missing_bumper.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "Public domain",
+      "license_url": "",
+      "author": "Nyttend",
+      "sha256": "ccce1d6734b47119c5dc04239fe95efcfbf16f847d4344a8a10ffda7e8307db7"
+    },
+    {
+      "id": "case2_hard_pohang",
+      "case": "2 hard/ambiguous",
+      "commons_title": "File:2017 Pohang earthquake car damage.jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:2017_Pohang_earthquake_car_damage.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b3/2017_Pohang_earthquake_car_damage.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Sphinx222",
+      "sha256": "77d5c390bb666df298005d767f2e1914f7e1dc651b764d561b61fe4566958435"
+    },
+    {
+      "id": "case3_multidamage_starex",
+      "case": "3 multi-damage",
+      "commons_title": "File:20171118 damaged Hyundai Grand starex-1.jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:20171118_damaged_Hyundai_Grand_starex-1.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/20171118_damaged_Hyundai_Grand_starex-1.jpg/1920px-20171118_damaged_Hyundai_Grand_starex-1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Sim1992",
+      "sha256": "9ea4b3b47b0ab275a01bd0c121854622e5e57d17a873e4ccab60d36255b099a5"
+    },
+    {
+      "id": "case4_night_crash",
+      "case": "4 night/blurry",
+      "commons_title": "File:Car crash at night.jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:Car_crash_at_night.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/86/Car_crash_at_night.jpg/1920px-Car_crash_at_night.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0",
+      "author": "Thegreatmutata",
+      "sha256": "0b6ff8eba82fc81013e857b57c43c16b1e8c027ac36efcdeba476f0dae40765c"
+    },
+    {
+      "id": "case6_injection_cirrus",
+      "case": "6 injection",
+      "derived_from": "case1_clean_cirrus",
+      "edit": "EDITED BY US: white note with prompt-injection text overlaid in the top-left corner, away from the damage. Otherwise identical to case1.",
+      "license": "Public domain (derivative)",
+      "author": "Nyttend; text overlay added by this project",
+      "file_page": "https://commons.wikimedia.org/wiki/File:2000_Chrysler_Cirrus_with_missing_bumper.jpg",
+      "sha256": "65e4f7d21fa59072af3aa266fbe8e80263e4fb4221530d1fe58370eaf760e081"
+    },
+    {
+      "id": "case7_screenshot",
+      "case": "7 screenshot",
+      "local_file": "data/samples/case7_screenshot.png",
+      "license": "NOT CLEAN-LICENSED: local test use only, never committed or redistributed",
+      "author": "Screenshot made by the candidate (2026-11-09) of a third-party web page (brightonpanelworks.com.au article). Copyright in the photo shown belongs to its owner.",
+      "file_page": ""
+    },
+    {
+      "id": "case8_multiphoto_mercedes_a",
+      "case": "8 multi-photo (photo A)",
+      "commons_title": "File:Crashed 2002 Mercedes C180 Classic (16038696886).jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:Crashed_2002_Mercedes_C180_Classic_(16038696886).jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/Crashed_2002_Mercedes_C180_Classic_%2816038696886%29.jpg/1920px-Crashed_2002_Mercedes_C180_Classic_%2816038696886%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 2.0",
+      "license_url": "https://creativecommons.org/licenses/by/2.0",
+      "author": "Charlie from United Kingdom",
+      "sha256": "9bdf8d518ebe10f364446d2c1e2bdcdcc3c34371976f3bd64edec79979b2ed34"
+    },
+    {
+      "id": "case8_multiphoto_mercedes_b",
+      "case": "8 multi-photo (photo B)",
+      "commons_title": "File:Crashed 2002 Mercedes C180 Classic (16063781062).jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:Crashed_2002_Mercedes_C180_Classic_(16063781062).jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8b/Crashed_2002_Mercedes_C180_Classic_%2816063781062%29.jpg/1920px-Crashed_2002_Mercedes_C180_Classic_%2816063781062%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 2.0",
+      "license_url": "https://creativecommons.org/licenses/by/2.0",
+      "author": "Charlie from United Kingdom",
+      "sha256": "568aed1f4790a165b2de5d8298a0ddff92fc7a4c3c2e91a3a3734ae7ca8b5ba4"
+    }
+  ]
+}

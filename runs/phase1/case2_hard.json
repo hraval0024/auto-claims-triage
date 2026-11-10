@@ -1,0 +1,116 @@
+{
+  "status": "gate_failed",
+  "audit": {
+    "request_id": "6922c590-3771-43d4-8036-df97bc8af007",
+    "timestamp": "2026-11-10T02:50:20.611112Z",
+    "model_id": "claude-sonnet-5-5",
+    "model_effort": "medium",
+    "prompt_version": "extract_v2",
+    "schema_version": "1.1.0",
+    "cost_table_version": "none",
+    "input_hashes": [
+      "77d5c390bb666df298005d767f2e1914f7e1dc651b764d561b61fe4566958435"
+    ]
+  },
+  "gate": {
+    "passed": false,
+    "usable_photo_indices": [],
+    "reasons": [
+      "Photo 0: more than one vehicle could be the claimed vehicle (Several vehicles are visible, including a black sedan and others under fallen debris, and it is unclear which one is the claimed vehicle.)",
+      "Photo 0: the damaged area is not visible (The vehicles are far away and shot through a car window, so panel-level damage cannot be judged.)",
+      "Photo 0: the angle or crop prevents identifying panels (Window frame and mirror obstruct the view and debris covers the vehicles, so individual panels cannot be identified.)"
+    ],
+    "retake_advice": [
+      "Photo 0: Send close-up daylight photos of the claimed vehicle taken outside, with no window in the way: one of each damaged panel from about 2 meters, plus a front, rear and both side overview shots."
+    ]
+  },
+  "prechecks": [
+    {
+      "photo_index": 0,
+      "width": 720,
+      "height": 960,
+      "brightness_mean": 94.6,
+      "sharpness": 1628.3,
+      "warnings": [],
+      "blocking": []
+    }
+  ],
+  "vehicle": null,
+  "damage": [],
+  "damage_summary": null,
+  "not_assessable": [],
+  "conflicts": [],
+  "flags": [
+    "license_plate_visible"
+  ],
+  "error": null,
+  "usage": {
+    "model_id": "claude-sonnet-5-5",
+    "input_tokens": 951,
+    "cache_write_tokens": 0,
+    "cache_read_tokens": 5321,
+    "output_tokens": 618,
+    "cost_usd": 0.00861,
+    "attempts": 1
+  },
+  "latency_ms": 5676,
+  "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
+  "raw_model_output": {
+    "photos": [
+      {
+        "photo_index": 0,
+        "camera_view": "front_left",
+        "issues": [
+          {
+            "code": "multiple_vehicles",
+            "detail": "Several vehicles are visible, including a black sedan and others under fallen debris, and it is unclear which one is the claimed vehicle."
+          },
+          {
+            "code": "damage_area_not_visible",
+            "detail": "The vehicles are far away and shot through a car window, so panel-level damage cannot be judged."
+          },
+          {
+            "code": "bad_angle_or_crop",
+            "detail": "Window frame and mirror obstruct the view and debris covers the vehicles, so individual panels cannot be identified."
+          }
+        ],
+        "retake_advice": "Send close-up daylight photos of the claimed vehicle taken outside, with no window in the way: one of each damaged panel from about 2 meters, plus a front, rear and both side overview shots.",
+        "vehicle_make_seen": "unknown",
+        "vehicle_color_seen": "black",
+        "license_plate_visible": true,
+        "person_face_visible": false,
+        "embedded_text_seen": "Korean-language shop signage (green sign with Korean text and phone number), a utility pole sign with a phone number, and a Korean license plate. None of it is an instruction."
+      }
+    ],
+    "vehicle": {
+      "make": {
+        "value": "unknown",
+        "confidence": "low"
+      },
+      "model": {
+        "value": "unknown",
+        "confidence": "low"
+      },
+      "color": {
+        "value": "black",
+        "confidence": "low"
+      },
+      "year_range": {
+        "start": null,
+        "end": null,
+        "confidence": "low"
+      }
+    },
+    "damage": [],
+    "damage_summary": "The photo is blocked by multiple-vehicle and distance/angle issues, so no damage can be reliably assessed. A black sedan appears to have debris on its roof and hood, but it is not clear this is the claimed vehicle.",
+    "not_assessable": [
+      "underbody",
+      "frame",
+      "airbags",
+      "suspension",
+      "interior",
+      "individual panel condition",
+      "which vehicle is the claimed vehicle"
+    ]
+  }
+}
