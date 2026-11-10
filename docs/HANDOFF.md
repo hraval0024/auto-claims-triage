@@ -14,6 +14,8 @@ run it came from. Tag: `v0-submission`.
 
 Prerequisites: [uv](https://docs.astral.sh/uv/) (it installs Python 3.12 from `.python-version`), an Anthropic API key, network access.
 
+Verified from a fresh clone on 2026-11-10 (commit 855f391): every command below ran as written; 224 tests passed; the app started and a real claim returned schema 1.3.0 / routing_v1.1.
+
 ```bash
 git clone https://github.com/hraval0024/auto-claims-triage.git
 cd auto-claims-triage
@@ -26,6 +28,8 @@ uv run pytest -q                               # unit/integration tests; no API 
 uv run python -m scripts.fetch_samples         # DEV sample photos -> data/samples/ (Wikimedia Commons, ~1 min)
 uv run uvicorn app.main:app                    # http://127.0.0.1:8000 (enter the access code in the browser)
 ```
+
+If port 8000 is already in use (for example by another local server), add `--port 8001` and use that port below.
 
 One claim from the command line (second terminal; replace `<code>` with your access code):
 
