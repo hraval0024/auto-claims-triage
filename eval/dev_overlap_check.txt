@@ -1,0 +1,5 @@
+Exact sha256 matches with DEV (13 DEV hashes): none
+Perceptual near-duplicates of DEV (dHash distance <=10 of 64): none
+Near-duplicates within the eval set: none
+All 30 pass app intake (magic bytes, size, dimensions): yes
+Duplicate sha256 within eval set: 0
