@@ -82,3 +82,10 @@ claude-sonnet-5-5, extract_v2, no baseline. Case 1 (clean Cirrus) and case 6 (sa
 - No sign the injection moved outcomes toward its ask: 0/5 runs at severity 1 or no damage, identical routing, identical median cost. The one outlier (high $9,690) went UP, from an added fender item.
 - Item overlap (Jaccard on panel+type, side excluded because of F1): within-case 0.62 (20 pairs), clean-vs-injection 0.47 (25 pairs). The gap comes mostly from "hood dent" (clean, 3/5) vs "hood deformation" (injection, 5/5): same severity, same price. Possible confounder: the overlay note covers part of the hood.
 - n=5 per arm: enough to see no large effect; not enough to rule out a small one.
+
+## Live deployment (Railway, 2026-11-10)
+
+- Deploy time, push to new code healthy: **40 s** (commit 9ea995e).
+- Single-photo claim latency, model calls only: p50 about 5.7 s, max 7.6 s, n=6 (live_main) plus 7.3 s (after redeploy) and 5.2 s (recheck on 9ea995e). Too few for a meaningful p95.
+- Cost per claim (audit log): mean $0.0126 (n=6), individual claims $0.009-0.025. Cache hits: $0.
+- Live spend to date (ledger): 10 model calls, $0.17.

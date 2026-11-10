@@ -63,7 +63,8 @@ Stated honestly so they can be raised in the demo; update as each is verified li
 - **Rate limits and the concurrency cap are in memory, per instance:** they reset on restart and would not hold with more than 1 replica (railway.json pins 1). The daily call and spend caps are in SQLite and do survive restarts.
 - **Login brute-force protection is only a per-IP rate limit (10/min)**; no lockout, no CAPTCHA. A 24-character random code makes guessing impractical; a short code would not.
 - **URL input from Railway:** the rehearsal fetched a Wikimedia image fine from a home IP with the generic User-Agent; from a datacenter IP Wikimedia may block it (it blocked a burst earlier, F-note in Phase 1). Set `URL_FETCH_USER_AGENT` if so.
-- **Cold-start time:** not captured (the service was already up when polling started). Needs polling started before pressing Redeploy.
+- **Cold-start / deploy time: 40 s** from `git push` (19:26:01Z) to the first moment the NEW code served `/healthz` 200 and `/health` reported schema 1.3.0 (19:26:41Z), 2026-11-10, commit 9ea995e. Includes Railway's build (cached layers) and container start; polled every ~5 s. Railway keeps the old container serving until the new one is healthy, so users saw no downtime.
+- **Daily call and spend caps: unit tests only, untested live.** The candidate skipped the live spend-cap demo (2026-11-10). Covered by `tests/test_limits.py` (call cap, spend cap, fail-closed ledger error, persistence across restart) and the local rehearsal; the live ledger is seen counting correctly in `/metrics` (`usage_today`), but no live refusal has been shown.
 
 ## F3: First Railway deploys failed at startup (config + volume permissions)
 
@@ -81,6 +82,7 @@ Stated honestly so they can be raised in the demo; update as each is verified li
 - **What this shows:** Railway puts a per-request-varying value in the last `X-Forwarded-For` position (or replaces the header), so "rightmost entry = client" is wrong behind Railway's edge. Every request lands in its own bucket.
 - **Side effect fixed along the way:** with `TRUST_PROXY_HOPS=0`, HSTS was also missing; with 1 it is present (Railway does send `X-Forwarded-Proto: https`).
 - **Still protecting the key:** access code gate, concurrency cap, daily call and USD caps (SQLite, fail closed).
+- **Re-test after `TRUST_PROXY_HOPS` was fixed (2026-11-10 19:27Z, commit 9ea995e):** 1 real claim then 8 claims reusing the same, now-cached photo (each passes the rate limiter, then is served from the image-hash cache: $0, no model call; ledger unchanged at 10 calls / $0.1716). All 9 got 200 within ~22 s against a limit of 6/min; no trigger. Still open; the setting was not changed on a guess.
 - **Next step (approved later):** temporary log fields (count of XFF entries, salted hash per position, salted hash of `X-Real-IP`), one marked burst, read which position is stable; then `TRUST_PROXY_HOPS=2`, use `X-Real-IP`, or fall back to per-session limiting. Do not guess a hop count: trusting a forgeable entry would let clients bypass the limit.
 
 ## Live check notes (2026-11-10)
