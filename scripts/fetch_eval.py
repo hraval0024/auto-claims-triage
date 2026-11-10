@@ -51,10 +51,11 @@ def main() -> None:
             failed.append(r["image_id"])
             print(f"FAIL {r['image_id']}: {err}")
         entries.append(e)
+    removed = json.loads(MANIFEST.read_text()).get("removed", []) if MANIFEST.exists() else []
     MANIFEST.write_text(json.dumps({
         "_note": "Phase 4 eval images. Files live in data/eval/ (gitignored) and are never committed. "
-                 "Labels come from the candidate (not an adjuster). DEV images (samples/manifest.json) are excluded.",
-        "images": entries}, indent=2, ensure_ascii=False) + "\n")
+                 "DEV images (samples/manifest.json) are excluded. Label provenance is recorded per row in eval/labels/.",
+        "images": entries, "removed": removed}, indent=2, ensure_ascii=False) + "\n")
     print(f"done: {len(entries) - len(failed)} ok, {len(failed)} failed {failed}")
 
 

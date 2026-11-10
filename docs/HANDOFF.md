@@ -62,6 +62,12 @@ Started in Phase 1 and filled in as facts are verified. The full handoff is comp
 
 ### Eval set and labeling (Phase 4 prep)
 
-- 30 real Wikimedia Commons images (`eval/manifest.json`: id, title, link, license, author, sha256). Files live in `data/eval/` (gitignored), fetched by `scripts/fetch_eval.py`. None match a DEV image by sha256 or perceptual hash (`eval/dev_overlap_check.txt`).
-- Labels come from the candidate (not an adjuster). No model pre-fill; titles (which often name the make and model) are hidden from the labeling page.
-- `labeler/` is a local page (127.0.0.1 only) that shows the image next to dropdowns for the allowed values in `eval/labels/VOCAB.md` and saves to the two CSVs. It takes `--images-csv/--damage-csv`, so each independent labeler and the adjudicated set can use separate files. Planned use: adjudicating disagreements between independent labels.
+- 34 real Wikimedia Commons images (`eval/manifest.json`: id, title, link, license, author, sha256). Files live in `data/eval/` (gitignored), fetched by `scripts/fetch_eval.py`. eval_007 was dropped (off-topic burned-out shell; id not reused) and eval_031-035 were added (clean single-vehicle minor damage). None match a DEV image by sha256 or perceptual hash (`scripts/check_eval_overlap.py` -> `eval/dev_overlap_check.txt`).
+- **Label provenance (candidate decision, 2026-11-10): ChatGPT only, one CSV set, no second labeler, no human adjudication.** Every imported row carries `label_source` stating it is model-generated and not human-verified. Consequences to state in the eval write-up:
+  - Metrics are agreement with ChatGPT's labels, not accuracy against ground truth.
+  - Shared failure modes are invisible: where both models make the same mistake (side mirroring, F1, is the obvious candidate), the eval scores Claude as correct.
+  - Make/model has a partial independent check available: Commons titles and descriptions were written by the photographers and are hidden from ChatGPT (not built; see open questions).
+- Prompt: `eval/labels/chatgpt_prompt.md` (image only, exact vocabulary, approved rubric definitions, output the two CSVs only; no titles, sources or model output).
+- Import: `scripts/import_labels.py` validates every value against the schema (`scripts/label_schema.py`, documented in `eval/labels/VOCAB.md`), reports bad rows instead of fixing them, trims whitespace only (announced), and rejects a whole image if any of its rows is invalid. It writes `eval/labels/images_labels.csv`, `damage_labels.csv` and `import_report.txt`.
+- Schema change: `gate_expected` was replaced by `should_pass_gate` (yes/no) + `gate_reason` (a blocking gate code when no; empty or `embedded_instruction_text` when yes). `has_visible_damage` is now yes/no.
+- `labeler/` (local page) is kept only schema-compatible; not used for the ChatGPT labels.

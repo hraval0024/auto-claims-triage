@@ -1,5 +1,5 @@
 {
-  "_note": "Phase 4 eval images. Files live in data/eval/ (gitignored) and are never committed. Labels come from the candidate (not an adjuster). DEV images (samples/manifest.json) are excluded.",
+  "_note": "Phase 4 eval images. Files live in data/eval/ (gitignored) and are never committed. DEV images (samples/manifest.json) are excluded. Label provenance is recorded per row in eval/labels/.",
   "images": [
     {
       "image_id": "eval_001",
@@ -66,17 +66,6 @@
       "license_url": "https://creativecommons.org/licenses/by/2.0",
       "author": "Riley from Christchurch, New Zealand",
       "sha256": "ae78b149091ec117b30e62dd13871258515826bdf1314526291c8088655d6bf8"
-    },
-    {
-      "image_id": "eval_007",
-      "bucket": "minor",
-      "commons_title": "File:Taillight Broken (9082455213).jpg",
-      "file_page": "https://commons.wikimedia.org/wiki/File:Taillight_Broken_(9082455213).jpg",
-      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a1/Taillight_Broken_%289082455213%29.jpg/1920px-Taillight_Broken_%289082455213%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-      "license": "CC BY-SA 2.0",
-      "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
-      "author": "Falcon® Photography from France",
-      "sha256": "6007cf998c7a52e565e574f779f02b203fe1fdff6d843c2d0c771cf1fd16b982"
     },
     {
       "image_id": "eval_008",
@@ -330,6 +319,68 @@
       "license_url": "https://creativecommons.org/licenses/by/2.0",
       "author": "Charlie from United Kingdom",
       "sha256": "e3da1658c81c154ba77eaf9654d6bc6f1ec2fd334952b589365b7fc2a42633bd"
+    },
+    {
+      "image_id": "eval_031",
+      "bucket": "minor",
+      "commons_title": "File:1997 Honda Accord ES 2.2i Coupe Automatic Front.jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:1997_Honda_Accord_ES_2.2i_Coupe_Automatic_Front.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/1997_Honda_Accord_ES_2.2i_Coupe_Automatic_Front.jpg/1920px-1997_Honda_Accord_ES_2.2i_Coupe_Automatic_Front.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Makizox",
+      "sha256": "61c4eb7d21b51ae6f75f454f54a973b96a0417d65148d640940be5b9994e339f"
+    },
+    {
+      "image_id": "eval_032",
+      "bucket": "minor",
+      "commons_title": "File:2001 Subaru Impreza 2.5 RS 4-dr, front right.jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:2001_Subaru_Impreza_2.5_RS_4-dr,_front_right.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c4/2001_Subaru_Impreza_2.5_RS_4-dr%2C_front_right.jpg/1920px-2001_Subaru_Impreza_2.5_RS_4-dr%2C_front_right.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Mr.choppers",
+      "sha256": "501081997a9470112fbc839c45158604994fba69fca81e313bf440d112b353f1"
+    },
+    {
+      "image_id": "eval_033",
+      "bucket": "minor",
+      "commons_title": "File:1990 Nissan Bluebird LX (9900403664).jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:1990_Nissan_Bluebird_LX_(9900403664).jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/1990_Nissan_Bluebird_LX_%289900403664%29.jpg/1920px-1990_Nissan_Bluebird_LX_%289900403664%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 2.0",
+      "license_url": "https://creativecommons.org/licenses/by/2.0",
+      "author": "Charlie from United Kingdom",
+      "sha256": "28089d95ba278e134bde69d911e481e4ddf28e0a33f6c000a58428f8f403095a"
+    },
+    {
+      "image_id": "eval_034",
+      "bucket": "minor",
+      "commons_title": "File:1996 Ford Mondeo 1.8 LX (14751850019).jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:1996_Ford_Mondeo_1.8_LX_(14751850019).jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6e/1996_Ford_Mondeo_1.8_LX_%2814751850019%29.jpg/1920px-1996_Ford_Mondeo_1.8_LX_%2814751850019%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY 2.0",
+      "license_url": "https://creativecommons.org/licenses/by/2.0",
+      "author": "Kieran White from Manchester, England",
+      "sha256": "7610de56858500a914faaa2fa954b6675930b18e53928db8256f356ff442440f"
+    },
+    {
+      "image_id": "eval_035",
+      "bucket": "minor",
+      "commons_title": "File:Scratched Paint (3606242828).jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:Scratched_Paint_(3606242828).jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Scratched_Paint_%283606242828%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+      "license": "CC BY-SA 2.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+      "author": "daryl_mitchell from Saskatoon, Saskatchewan, Canada",
+      "sha256": "08715852d5f3fb1b375318118a36d587f94e111c827b7525483a1c639e260744"
+    }
+  ],
+  "removed": [
+    {
+      "image_id": "eval_007",
+      "commons_title": "File:Taillight Broken (9082455213).jpg",
+      "reason": "Dropped by the candidate (2026-11-10): image is a burned-out, rusted shell, off-topic for a minor-damage claim. Never labeled or run through a model. Id not reused."
     }
   ]
 }

@@ -36,8 +36,10 @@
   <form id="form">
     <label for="label_source">Label source</label>
     <input type="text" id="label_source" required>
-    <label for="gate_expected">Expected photo check</label>
-    <select id="gate_expected"></select>
+    <label for="should_pass_gate">Should pass the photo check?</label>
+    <select id="should_pass_gate"><option value=""></option><option value="yes">yes</option><option value="no">no</option></select>
+    <label for="gate_reason">Gate reason (required if no)</label>
+    <select id="gate_reason"></select>
     <label for="make">Make</label><input type="text" id="make" placeholder="or unknown">
     <label for="model">Model</label><input type="text" id="model" placeholder="or unknown">
     <label for="color">Color</label><input type="text" id="color" placeholder="or unknown">
@@ -47,7 +49,7 @@
     <label for="camera_view">Camera view (vehicle's point of view)</label>
     <select id="camera_view"></select>
     <label for="has_visible_damage">Visible damage?</label>
-    <select id="has_visible_damage"><option value=""></option><option value="y">y</option><option value="n">n</option></select>
+    <select id="has_visible_damage"><option value=""></option><option value="yes">yes</option><option value="no">no</option></select>
     <label>Damage items (one per damaged part; side = vehicle's own)</label>
     <table id="dmg"><thead><tr><th>Panel</th><th>Side</th><th>Type</th><th>Sev</th><th>Notes</th><th></th></tr></thead><tbody></tbody></table>
     <button type="button" id="add">+ Add item</button>
@@ -92,7 +94,8 @@ async function load(i) {
   $("img").src = `/api/image/${id}`; $("img").onclick = () => window.open(`/api/image/${id}`, "_blank");
   const L = await (await fetch(`/api/labels/${id}`)).json();
   $("label_source").value = L.label_source;
-  opt($("gate_expected"), V.gate_expected, L.gate_expected);
+  $("should_pass_gate").value = L.should_pass_gate || "";
+  opt($("gate_reason"), V.gate_reason, L.gate_reason);
   opt($("camera_view"), V.camera_view, L.camera_view);
   for (const k of ["make", "model", "color", "year_start", "year_end", "label_notes"]) $(k).value = L[k] ?? "";
   $("has_visible_damage").value = L.has_visible_damage || "";
@@ -102,7 +105,7 @@ async function load(i) {
 async function save(ev) {
   if (ev) ev.preventDefault();
   const id = IDS[cur].image_id, num = (k) => ($(k).value === "" ? null : Number($(k).value));
-  const body = { label_source: $("label_source").value, gate_expected: $("gate_expected").value, make: $("make").value.trim(),
+  const body = { label_source: $("label_source").value, should_pass_gate: $("should_pass_gate").value, gate_reason: $("gate_reason").value, make: $("make").value.trim(),
     model: $("model").value.trim(), color: $("color").value.trim(), year_start: num("year_start"), year_end: num("year_end"),
     camera_view: $("camera_view").value, has_visible_damage: $("has_visible_damage").value, label_notes: $("label_notes").value,
     damage: [...$("dmg").tBodies[0].rows].map((tr) => Object.fromEntries([...tr.querySelectorAll("[data-k]")].map((e) =>

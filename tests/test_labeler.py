@@ -21,8 +21,8 @@ def client(tmp_path, monkeypatch):
     return TestClient(server.app)
 
 
-GOOD = {"label_source": "candidate (not an adjuster)", "gate_expected": "pass", "make": "Acura", "model": "TSX",
-        "color": "white", "year_start": 2009, "year_end": 2014, "camera_view": "front_right", "has_visible_damage": "y",
+GOOD = {"label_source": "candidate (not an adjuster)", "should_pass_gate": "yes", "gate_reason": "", "make": "Acura", "model": "TSX",
+        "color": "white", "year_start": 2009, "year_end": 2014, "camera_view": "front_right", "has_visible_damage": "yes",
         "label_notes": "", "damage": [{"panel": "headlamp", "side": "right", "damage_type": "shatter", "severity": 3},
                                       {"panel": "front_bumper", "side": "right", "damage_type": "crack", "severity": 3}]}
 
@@ -34,7 +34,7 @@ def test_save_and_reload_round_trip(client):
     rows = list(csv.DictReader(open(server.CFG["images_csv"])))
     r = next(x for x in rows if x["image_id"] == "eval_008")
     assert r["commons_title"] == "File:Oh deer!.jpg" and r["license"] == "Public domain"  # provenance kept in the file
-    assert len(rows) == 30
+    assert len(rows) == 34
 
 
 def test_resave_replaces_damage_rows_not_appends(client):
@@ -53,7 +53,7 @@ def test_titles_and_sources_never_reach_the_page(client):
 @pytest.mark.parametrize("bad", [
     {"damage": [{"panel": "spoiler", "side": "left", "damage_type": "dent", "severity": 2}]},
     {"damage": [{"panel": "hood", "side": "left", "damage_type": "dent", "severity": 5}]},
-    {"gate_expected": "looks_fine"},
+    {"gate_reason": "looks_fine"},
     {"camera_view": "top"},
     {"has_visible_damage": "maybe"},
     {"year_start": 2015, "year_end": 2010},
@@ -81,5 +81,5 @@ def test_fresh_labeler_file_starts_from_manifest(tmp_path, monkeypatch):
 
 def test_real_label_files_untouched_by_tests():
     rows = list(csv.DictReader(open(ROOT / "eval/labels/images_labels.csv")))
-    assert all(r["make"] == "" and r["gate_expected"] == "" for r in rows)
+    assert all(r["make"] == "" and r["should_pass_gate"] == "" for r in rows)
     assert not list(csv.DictReader(open(ROOT / "eval/labels/damage_labels.csv")))

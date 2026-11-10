@@ -22,16 +22,13 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.schemas import CameraView, DamageType, GateCode, Panel, Side
+from app.schemas import CameraView, DamageType, Panel, Side
+from scripts.label_schema import DMG_COLS, GATE_BLOCKING, GATE_NONBLOCKING, IMG_COLS
 
 ROOT = Path(__file__).resolve().parent.parent
 IMAGE_DIR = ROOT / "data" / "eval"
 MANIFEST = ROOT / "eval" / "manifest.json"
-IMG_COLS = ["image_id", "commons_title", "license", "author", "label_source", "gate_expected", "make", "model",
-            "color", "year_start", "year_end", "camera_view", "has_visible_damage", "label_notes"]
-LABEL_FIELDS = IMG_COLS[4:]  # the only image columns the page reads or writes
-DMG_COLS = ["image_id", "panel", "side", "damage_type", "severity", "label_notes"]
-GATE_VALUES = ["pass"] + [g.value for g in GateCode]
+LABEL_FIELDS = IMG_COLS[4:]  # the only image columns the page reads or writes (schema: scripts/label_schema.py)
 
 app = FastAPI(title="Eval labeler")
 CFG = {"images_csv": ROOT / "eval/labels/images_labels.csv", "damage_csv": ROOT / "eval/labels/damage_labels.csv"}
@@ -76,22 +73,23 @@ class DamageLabel(BaseModel):
 class ImageLabel(BaseModel):
     model_config = ConfigDict(extra="forbid")
     label_source: str = Field(min_length=1)
-    gate_expected: str = ""
+    should_pass_gate: Literal["", "yes", "no"] = ""
+    gate_reason: str = ""
     make: str = ""
     model: str = ""
     color: str = ""
     year_start: int | None = None
     year_end: int | None = None
     camera_view: str = ""
-    has_visible_damage: Literal["", "y", "n"] = ""
+    has_visible_damage: Literal["", "yes", "no"] = ""
     label_notes: str = ""
     damage: list[DamageLabel] = []
 
-    @field_validator("gate_expected")
+    @field_validator("gate_reason")
     @classmethod
     def _gate(cls, v):
-        if v not in [""] + GATE_VALUES:
-            raise ValueError(f"gate_expected must be one of {GATE_VALUES}")
+        if v not in [""] + GATE_BLOCKING + GATE_NONBLOCKING:
+            raise ValueError("invalid gate_reason")
         return v
 
     @field_validator("camera_view")
@@ -109,7 +107,7 @@ def index():
 
 @app.get("/api/vocab")
 def vocab():
-    return {"gate_expected": GATE_VALUES, "camera_view": [c.value for c in CameraView], "panel": [p.value for p in Panel],
+    return {"gate_reason": GATE_BLOCKING + GATE_NONBLOCKING, "camera_view": [c.value for c in CameraView], "panel": [p.value for p in Panel],
             "side": [s.value for s in Side], "damage_type": [d.value for d in DamageType], "severity": [1, 2, 3, 4]}
 
 
