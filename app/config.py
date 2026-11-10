@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     # URL fetch (SSRF guard)
     url_fetch_timeout_s: float = 10.0
     url_max_redirects: int = 3
+    # Some image hosts (e.g. Wikimedia) require a User-Agent with contact details for automated
+    # clients. Empty = a generic client name. Set it in the deployment; never commit personal data.
+    url_fetch_user_agent: str = ""
 
     # LLM free-guess cost baseline: a SEPARATE call, for eval comparison only. Off by default;
     # its number never feeds the cost table or routing.

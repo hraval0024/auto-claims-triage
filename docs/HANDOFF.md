@@ -71,3 +71,10 @@ Started in Phase 1 and filled in as facts are verified. The full handoff is comp
 - Import: `scripts/import_labels.py` validates every value against the schema (`scripts/label_schema.py`, documented in `eval/labels/VOCAB.md`), reports bad rows instead of fixing them, trims whitespace only (announced), and rejects a whole image if any of its rows is invalid. It writes `eval/labels/images_labels.csv`, `damage_labels.csv` and `import_report.txt`.
 - Schema change: `gate_expected` was replaced by `should_pass_gate` (yes/no) + `gate_reason` (a blocking gate code when no; empty or `embedded_instruction_text` when yes). `has_visible_damage` is now yes/no.
 - `labeler/` (local page) is kept only schema-compatible; not used for the ChatGPT labels.
+
+### Hardening and deploy (Phase 5)
+
+- Access: shared `APP_ACCESS_CODE` on every route except `/healthz`/`/login` (header for scripts, HMAC session cookie for the UI; constant-time compare; rotating the code ends all sessions). No auth/identity beyond that, by scope.
+- Cost protection: per-IP rate limits, concurrency cap, daily model-call and USD caps in a SQLite ledger (fail closed), image-hash cache, idempotency keys. Every trigger logged and counted in `/metrics`.
+- Ops: JSON logs with request id (no images, key, code or full URLs); `/healthz` (DB writable, no model call); `/metrics`; fail-fast config; `DATA_DIR` volume. Details and the Dockerfile review: `docs/DEPLOY.md`. Secrets scan: `docs/secrets_scan.txt`.
+- **Where production would differ:** a queue and worker pool in front of the model call (today the HTTP request blocks for 5-15 s); a shared store (Redis) for rate limits and concurrency across replicas; a provider-side budget/rate-limit per tenant; Postgres instead of SQLite; real authentication with per-user audit identity.

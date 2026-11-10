@@ -52,3 +52,15 @@ Detecting a stock or press photo from pixels alone is unreliable: a well-lit ori
 - The Phase 1 DEV images skew toward severe damage (crushed front ends, a roof collapse, a pole impact). After the Phase 2 re-run **no case is routed to `fast_track_candidate`**, so the fast-track path has only been exercised by unit tests, never by a real photo.
 - The low-confidence route (`request_more_photos` because most findings are low confidence) has also not fired on a real photo that passed the photo check.
 - **Implication for Phase 4:** the eval set needs minor-damage images (scuffs, small dents, a single cracked lamp) and some ambiguous-but-passing photos. Otherwise the fast-track and low-confidence rules stay untested on real data.
+
+## Phase 5: untested or unverified (2026-11-10)
+
+Stated honestly so they can be raised in the demo; update as each is verified live.
+
+- **Docker image never built.** Docker is not installed on the dev machine (not installed without asking). Replayed instead: a context with only what `.dockerignore` allows, the same frozen no-dev `uv sync`, and the exact CMD with env vars only. Not covered: the base image, the ghcr.io uv copy, the non-root user, Railway's builder.
+- **Volume permissions for a non-root container on Railway:** unknown. If `/data` is root-owned, startup fails with "DATA_DIR '/data' is not writable" (fail fast, by design).
+- **Railway proxy hop count:** `TRUST_PROXY_HOPS=1` assumes Railway's edge appends the real client IP as the last X-Forwarded-For entry. If that's wrong, per-IP limits either lump all users into one bucket (too strict) or trust a forgeable entry (too loose). Not verifiable from my side without the deployment.
+- **Rate limits and the concurrency cap are in memory, per instance:** they reset on restart and would not hold with more than 1 replica (railway.json pins 1). The daily call and spend caps are in SQLite and do survive restarts.
+- **Login brute-force protection is only a per-IP rate limit (10/min)**; no lockout, no CAPTCHA. A 24-character random code makes guessing impractical; a short code would not.
+- **URL input from Railway:** the rehearsal fetched a Wikimedia image fine from a home IP with the generic User-Agent; from a datacenter IP Wikimedia may block it (it blocked a burst earlier, F-note in Phase 1). Set `URL_FETCH_USER_AGENT` if so.
+- **Cold-start time and live p50/p95:** pending the live check (step 12).
