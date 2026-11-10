@@ -40,3 +40,4 @@ button:disabled { opacity: .5; cursor: wait; }
 .removed td { text-decoration: line-through; color: var(--muted); }
 .review-actions { background: var(--panel); padding: 8px 12px; border-radius: 6px; margin-top: 20px; }
 pre { white-space: pre-wrap; font-size: .8rem; background: var(--panel); padding: 8px; }
+.logout { display: inline; float: right; }

@@ -6,6 +6,13 @@ let VOCAB = null;
 let CURRENT = null; // last ClaimResult
 
 const $ = (id) => document.getElementById(id);
+// All API calls go through here: session cookie is sent automatically (same origin); a 401 means
+// the session ended, so go back to the access-code page. The code itself never touches JS or a URL.
+async function api(url, opts = {}) {
+  const r = await fetch(url, { credentials: "same-origin", ...opts });
+  if (r.status === 401) { window.location.assign("/login"); throw new Error("Session ended. Please enter the access code again."); }
+  return r;
+}
 function el(tag, attrs = {}, ...children) {
   const n = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -55,20 +62,23 @@ $("claim-form").addEventListener("submit", async (ev) => {
   }
   $("submit-btn").disabled = true;
   $("form-status").textContent = "Assessing... (a single photo usually takes 5-15 s; several photos take longer)";
+  const slow = setTimeout(() => { $("form-status").textContent = "Still working: the model is slow right now. If it takes over a minute, the claim is routed to a human adjuster instead."; }, 20000);
   try {
-    const r = await fetch("/api/claims", { method: "POST", body: fd });
+    const r = await api("/api/claims", { method: "POST", body: fd });
     const body = await r.json();
     if (!r.ok) {
-      const msg = body.error || (body.detail && JSON.stringify(body.detail)) || `HTTP ${r.status}`;
-      $("form-status").textContent = `Rejected: ${msg}`;
+      const msg = body.error || `HTTP ${r.status}`;
+      const label = r.status === 429 || r.status === 503 ? "Not run" : "Rejected";
+      $("form-status").textContent = `${label}: ${msg}`;
       $("result").hidden = true;
       return;
     }
     $("form-status").textContent = "";
     render(body);
   } catch (e) {
-    $("form-status").textContent = `Request failed: ${e}`;
+    $("form-status").textContent = `Request failed: ${e.message || e}`;
   } finally {
+    clearTimeout(slow);
     $("submit-btn").disabled = false;
   }
 });
@@ -85,7 +95,7 @@ function render(res) {
   bar.append(
     el("span", {}, "Status: ", el("strong", {}, res.status)),
     el("span", {}, "Latency: ", el("strong", {}, (res.latency_ms / 1000).toFixed(1) + " s")),
-    el("span", {}, "Model cost for this request: ", el("strong", {}, "$" + spend.toFixed(4))),
+    el("span", {}, "Model cost for this request: ", el("strong", {}, "$" + spend.toFixed(4)), res.usage && res.usage.cached ? " (identical photos seen before: no model call)" : ""),
     el("span", { class: "muted" }, "Request ", res.audit.request_id),
   );
 
@@ -236,11 +246,11 @@ function collectReview(decision) {
 async function sendReview(decision) {
   $("accept-btn").disabled = $("reject-btn").disabled = true;
   try {
-    const r = await fetch(`/api/claims/${CURRENT.audit.request_id}/review`, {
+    const r = await api(`/api/claims/${CURRENT.audit.request_id}/review`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(collectReview(decision)),
     });
     const body = await r.json();
-    if (!r.ok) throw new Error(body.detail ? JSON.stringify(body.detail) : `HTTP ${r.status}`);
+    if (!r.ok) throw new Error(body.error || `HTTP ${r.status}`);
     $("review-status").textContent = `${decision === "accept" ? "Accepted" : "Rejected"}: ${body.corrections.length} correction(s) logged at ${body.logged_at}. ${body.note}`;
     renderRouting(body.routing);
     renderCost(body.cost);
@@ -258,7 +268,7 @@ async function loadLog() {
   const t = clear("log-table");
   t.append(el("tr", {}, ["Time (UTC)", "Request", "Field", "Original", "Corrected", "Decision"].map((h) => el("th", {}, h))));
   try {
-    const { corrections } = await (await fetch("/api/corrections?limit=50")).json();
+    const { corrections } = await (await api("/api/corrections?limit=50")).json();
     if (!corrections.length) t.append(el("tr", {}, el("td", { colspan: 6, class: "muted" }, "No corrections yet.")));
     for (const c of corrections) {
       t.append(el("tr", {}, el("td", {}, c.created_at.replace("T", " ").slice(0, 19)), el("td", { class: "muted" }, c.request_id.slice(0, 8)),
@@ -271,6 +281,6 @@ async function loadLog() {
 $("refresh-log").addEventListener("click", loadLog);
 
 (async function init() {
-  VOCAB = await (await fetch("/api/vocab")).json();
+  VOCAB = await (await api("/api/vocab")).json();
   loadLog();
 })();

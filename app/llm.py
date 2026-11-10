@@ -13,6 +13,7 @@
 
 import base64
 import json
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -126,7 +127,10 @@ def call_model(
     model_id: str | None = None,
     effort: str | None = None,
     client: anthropic.Anthropic | None = None,
+    deadline: float | None = None,
 ) -> tuple[ModelOutput, UsageTally]:
+    """deadline: time.monotonic() value; no new attempt starts after it, and each attempt's
+    timeout is capped by the time left."""
     model_id = model_id or settings.model_id
     effort = effort or settings.model_effort
     client = client or get_client()
@@ -134,9 +138,16 @@ def call_model(
     retry_note: str | None = None
 
     for _ in range(1 + settings.validation_max_retries):
+        api = client
+        if deadline is not None:
+            left = deadline - time.monotonic()
+            if left < 3:
+                raise LLMError("The model took too long to respond.", tally)
+            if hasattr(client, "with_options"):
+                api = client.with_options(timeout=min(settings.model_timeout_s, left))
         tally.attempts += 1
         try:
-            resp = client.messages.create(
+            resp = api.messages.create(
                 model=model_id,
                 max_tokens=16000,
                 system=system_blocks(),
@@ -145,8 +156,10 @@ def call_model(
             )
         except anthropic.APIStatusError as e:
             raise LLMError(f"Model API error (HTTP {e.status_code}).", tally) from e
-        except (anthropic.APIConnectionError, anthropic.APITimeoutError) as e:
-            raise LLMError("Model API unreachable or timed out.", tally) from e
+        except anthropic.APITimeoutError as e:
+            raise LLMError("The model took too long to respond.", tally) from e
+        except anthropic.APIConnectionError as e:
+            raise LLMError("Model API unreachable.", tally) from e
 
         tally.add(resp.usage)
         if resp.stop_reason == "refusal":

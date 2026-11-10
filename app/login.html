@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Claims Triage: access</title>
+  <style>
+    body { font: 18px/1.5 system-ui, sans-serif; margin: 0; display: grid; place-items: center; min-height: 100vh; background: #f5f6f8; }
+    form { background: #fff; border: 1px solid #d0d0d0; border-radius: 8px; padding: 24px 28px; width: min(420px, 90vw); }
+    h1 { font-size: 1.2rem; margin: 0 0 12px; }
+    input, button { font: inherit; width: 100%; box-sizing: border-box; padding: 8px; margin-top: 8px; }
+    button { background: #1f4f8f; color: #fff; border: 0; border-radius: 6px; cursor: pointer; }
+    p { color: #555; font-size: .9rem; }
+    .err { color: #a3221a; }
+    :focus-visible { outline: 3px solid #f0a500; }
+  </style>
+</head>
+<body>
+  <form method="post" action="/login">
+    <h1>Vehicle damage claims triage (prototype)</h1>
+    <label for="code">Access code</label>
+    <input id="code" name="code" type="password" autocomplete="current-password" required autofocus>
+    <button type="submit">Enter</button>
+    <!--ERROR-->
+    <p>The code is kept for this browser session only.</p>
+  </form>
+</body>
+</html>

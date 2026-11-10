@@ -6,9 +6,9 @@ from app import pipeline
 from app.llm import LLMError, UsageTally
 from app.main import app
 from app.schemas import LLMCostGuess, ModelOutput
-from tests.helpers import model_output_dict, textured_jpeg
+from tests.helpers import AUTH, model_output_dict, textured_jpeg
 
-client = TestClient(app)
+client = TestClient(app, headers=AUTH)
 
 
 def _stub(monkeypatch, payload=None, baseline=None):

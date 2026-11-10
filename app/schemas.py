@@ -195,6 +195,7 @@ class MergedDamageItem(BaseModel):
 class GateResult(BaseModel):
     passed: bool
     usable_photo_indices: list[int]
+    codes: list[str] = []  # machine-readable gate codes (for metrics), e.g. not_a_vehicle
     reasons: list[str]  # plain English
     retake_advice: list[str]
 
@@ -205,8 +206,9 @@ class Usage(BaseModel):
     cache_write_tokens: int
     cache_read_tokens: int
     output_tokens: int  # includes thinking tokens
-    cost_usd: float
+    cost_usd: float  # what THIS request cost; 0 when served from the image-hash cache
     attempts: int  # model calls made, including validation retries
+    cached: bool = False  # True: identical images were assessed before; no model call made
 
 
 class Audit(BaseModel):

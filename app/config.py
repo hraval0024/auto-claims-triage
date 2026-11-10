@@ -4,11 +4,13 @@ Versions that define *behavior* (prompt, schema, cost table) are pinned in code 
 response can be traced to an exact commit. Operational knobs come from env vars / .env.
 """
 
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Pinned in code, recorded on every response (auditability).
 PROMPT_VERSION = "extract_v2"  # v2: camera_view before side (F1 fix)
-SCHEMA_VERSION = "1.1.0"  # 1.1: PhotoAssessment.camera_view
+SCHEMA_VERSION = "1.2.0"  # 1.1: PhotoAssessment.camera_view; 1.2: GateResult.codes, Usage.cached
 COST_TABLE_VERSION = "cost_table_v1"
 LLM_BASELINE_PROMPT_VERSION = "llm_baseline_v1"
 
@@ -53,10 +55,25 @@ class Settings(BaseSettings):
     # its number never feeds the cost table or routing.
     llm_baseline_enabled: bool = False
 
-    daily_spend_cap_usd: float = 5.00
+    # ---- Access and cost protection (Phase 5). Every knob is an env var. ----
+    # Shared access code for every route except /healthz. Required; at least 12 characters.
+    app_access_code: str = ""
+    # Daily caps (UTC day). Both fail closed: when reached, no model call is made.
+    daily_call_cap: int = 200  # model calls per day, across all users
+    daily_spend_cap_usd: float = 5.00  # model spend per day, USD
+    max_concurrent_claims: int = 3  # claims being assessed at the same time
+    rate_limit_claims_per_min: int = 6  # per client IP, POST /api/claims
+    rate_limit_login_per_min: int = 10  # per client IP, POST /login (brute-force guard)
+    rate_limit_requests_per_min: int = 120  # per client IP, all other routes
+    # Number of trusted reverse proxies in front of the app. 0 locally; 1 on Railway, where
+    # the edge proxy appends the real client IP as the LAST X-Forwarded-For entry.
+    trust_proxy_hops: int = 0
+    # Wall-clock limit for the model part of one claim, including retries.
+    claim_deadline_s: float = 60.0
 
-    # SQLite file for the request audit log and corrections log (no images stored).
-    db_path: str = "data/app.db"
+    # Where SQLite (request audit log, corrections, usage ledger, cache) lives.
+    # ./data locally; /data on Railway (a mounted volume).
+    data_dir: str = "data"
 
     # Body-shop labor rate, USD/hour. Source: 2026 "Who Pays for What?" survey, median
     # non-DRP body labor rate (~$68/h). Rates vary a lot by state; regional tiers that
@@ -65,4 +82,30 @@ class Settings(BaseSettings):
     labor_rate_usd_per_hour: float = 68.0
 
 
+    @property
+    def db_path(self) -> Path:
+        return Path(self.data_dir) / "app.db"
+
+
 settings = Settings()
+
+
+def check_config() -> None:
+    """Fail fast at startup with a clear message. Never prints secret values."""
+    problems = []
+    if not settings.anthropic_api_key:
+        problems.append("ANTHROPIC_API_KEY is not set.")
+    if not settings.app_access_code:
+        problems.append("APP_ACCESS_CODE is not set.")
+    elif len(settings.app_access_code) < 12:
+        problems.append("APP_ACCESS_CODE must be at least 12 characters.")
+    d = Path(settings.data_dir)
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+        probe = d / ".write_probe"
+        probe.write_text("ok")
+        probe.unlink()
+    except OSError:
+        problems.append(f"DATA_DIR '{settings.data_dir}' is not writable.")
+    if problems:
+        raise RuntimeError("Configuration error: " + " ".join(problems))

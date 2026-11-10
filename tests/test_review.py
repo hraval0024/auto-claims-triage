@@ -9,9 +9,9 @@ from app import pipeline
 from app.llm import UsageTally
 from app.main import app
 from app.schemas import ModelOutput
-from tests.helpers import model_output_dict, textured_jpeg
+from tests.helpers import AUTH, model_output_dict, textured_jpeg
 
-client = TestClient(app)
+client = TestClient(app, headers=AUTH)
 
 
 @pytest.fixture(autouse=True)
@@ -98,7 +98,7 @@ def test_originals_come_from_the_store_not_the_client():
 def test_dropping_an_item_silently_is_rejected():
     c = new_claim()
     r = client.post(f"/api/claims/{c['audit']['request_id']}/review", json={"decision": "accept", "vehicle": vehicle_as_sent(c), "damage": items_as_sent(c)[:1]})
-    assert r.status_code == 422 and "removed=true" in r.json()["detail"]
+    assert r.status_code == 422 and "removed=true" in r.json()["error"]
 
 
 def test_reject_logs_decision_without_repricing():

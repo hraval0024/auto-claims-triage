@@ -1,5 +1,9 @@
 import io
 
+ACCESS_CODE = "test-access-code-0123456789"
+API_KEY = "sk-ant-test-0000000000000000"  # fake; never a real key
+AUTH = {"X-Access-Code": ACCESS_CODE}
+
 from PIL import Image, ImageDraw
 
 
