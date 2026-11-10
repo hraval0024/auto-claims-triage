@@ -1,0 +1,11 @@
+image_id,should_pass_gate,gate_reason,make,model,color,year_start,year_end,camera_view,has_visible_damage,label_notes
+eval_035,yes,,unknown,unknown,blue,,,close_up_unclear,yes,Close-up shows abrasion on a bumper corner with limited context for orientation
+eval_034,yes,,ford,mondeo,red,1993,1996,front_right,yes,
+eval_033,yes,,nissan,sunny,blue,,,front_left,yes,
+eval_032,yes,,subaru,impreza,red,,,front_right,yes,
+eval_031,yes,,honda,accord,white,1994,1997,front_right,yes,
+contact_sheet,no,multiple_vehicles,unknown,unknown,unknown,,,not_applicable,no,Composite shows many vehicles and damage examples with no single assessment subject
+eval_030,yes,,honda,civic,blue,,,front_left,yes,
+eval_029,yes,,ford,escort,white,1986,1990,rear_right,yes,
+eval_028,yes,,amc,javelin,silver,1971,1974,front_right,no,
+eval_027,yes,,fiat,stilo,blue and white,,,right_side,no,

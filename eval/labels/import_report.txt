@@ -1,0 +1,9 @@
+Label import report 2026-11-10T19:40:14+00:00
+label_source: ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified
+Inputs (sha256): eval/labels/batch1_images.csv b1745cd0e39d, eval/labels/batch2_images.csv 9781e706c5d5, eval/labels/bacth3_images.csv c1803955fa32, eval/labels/batch1_damage.csv f7f04812658d, eval/labels/batch2_damage.csv cc8ef5e3440f, eval/labels/batch3_damage.csv 47cf8e8fd233
+Only change made to values: leading/trailing whitespace trimmed. Nothing else is altered or fixed.
+Accepted images: 34 (damage rows: 103)
+Rejected images: 0
+Manifest images with no label row: 0 
+File / row problems:
+  - eval/labels/batch1_images.csv:7: unknown image_id 'contact_sheet'; row ignored

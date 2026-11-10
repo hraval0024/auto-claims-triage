@@ -1,0 +1,16 @@
+image_id,should_pass_gate,gate_reason,make,model,color,year_start,year_end,camera_view,has_visible_damage,label_notes
+eval_001,no,bad_angle_or_crop,unknown,unknown,unknown,,,close_up_unclear,yes,Tight crop shows broken glass without enough context to identify the part.
+eval_002,yes,,unknown,unknown,gray,,,right_side,yes,
+eval_003,yes,,zamyad,unknown,blue,,,front_left,yes,Blue pickup is the subject.
+eval_004,yes,,nissan,gt-r,white,,,right_side,yes,White coupe is the subject.
+eval_005,yes,,mercedes-benz,c-class,green,,,front_left,yes,Green sedan is the subject.
+eval_006,yes,,unknown,unknown,white,,,front_right,yes,Foreground white sedan is the subject.
+eval_008,yes,,acura,unknown,white,,,front_right,yes,
+eval_009,yes,,unknown,unknown,silver,,,right_side,yes,
+eval_010,yes,,unknown,unknown,silver,,,rear_right,yes,
+eval_011,yes,,audi,unknown,silver,,,front,yes,
+eval_012,no,multiple_vehicles,unknown,unknown,unknown,,,rear,no,Silver Lexus and dark pickup are both plausible subjects. Their contact area is obscured.
+eval_013,no,multiple_vehicles,unknown,unknown,unknown,,,rear,no,Silver Lexus and dark pickup are both plausible subjects. Their contact area is obscured.
+eval_014,yes,,ford,taurus,red,,,rear_left,yes,
+eval_015,yes,,citroen,c5,silver,,,front_right,yes,Tree partly obscures the damaged corner.
+eval_016,yes,,jeep,wrangler,black,,,front,yes,The buckled hood identifies the foreground Jeep as the subject. The trailer obscures part of its front.

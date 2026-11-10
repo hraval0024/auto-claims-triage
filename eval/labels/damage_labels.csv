@@ -1,1 +1,104 @@
 image_id,panel,side,damage_type,severity,label_notes
+eval_001,other_unknown,unknown,shatter,3,Radial fractures surround a hole in the glass.
+eval_002,front_door,right,scratch_scuff,2,Long scratches across the painted surface.
+eval_002,rear_door,right,scratch_scuff,2,Long gouge with paint loss.
+eval_002,quarter_panel,right,scratch_scuff,2,Scratch continues behind the rear door.
+eval_002,side_mirror,right,scratch_scuff,2,Scuffed outer edge with paint loss.
+eval_003,front_door,left,deformation,3,Lower door skin is sharply creased.
+eval_003,front_door,left,scratch_scuff,2,Long scrapes along the lower door.
+eval_003,quarter_panel,left,deformation,3,Pickup bed side is buckled just behind the cab.
+eval_003,quarter_panel,left,scratch_scuff,2,Paint is scraped away on the bed side.
+eval_004,fender,right,dent,2,Localized indentation above the front wheel arch.
+eval_005,front_bumper,left,scratch_scuff,1,Small scuffed patch below the headlamp.
+eval_006,front_bumper,center,crack,3,Multiple splits in the cover including below the plate.
+eval_006,front_bumper,center,scratch_scuff,2,Broad scuffs and paint loss across the cover.
+eval_008,front_bumper,right,dent,3,Deep sharply creased indentation below the lamp.
+eval_008,front_bumper,right,tear_puncture,3,Open puncture and split in the cover.
+eval_008,front_bumper,right,misalignment,3,Cover pulled away at the wheel arch and held with tape.
+eval_008,headlamp,right,shatter,3,Lens is fractured with sections missing.
+eval_009,front_door,right,deformation,4,Door skin and upper window frame are sharply distorted at the door opening.
+eval_009,front_door,right,scratch_scuff,2,Several gouges on the door skin.
+eval_009,side_glass,right,missing_part,3,Front side window opening is covered with taped plastic.
+eval_009,side_mirror,right,missing_part,3,Mirror housing is absent from its visible mount.
+eval_010,rear_glass,center,shatter,3,Most of the glass has collapsed into the cabin.
+eval_010,trunk_tailgate,center,dent,2,Small rounded dents on the trunk lid.
+eval_010,pillar,right,dent,2,Small rounded indentation beside the rear glass.
+eval_011,hood,center,dent,3,Shallow dents are distributed across much of the hood.
+eval_011,roof,center,dent,2,Shallow depressions on the visible roof section.
+eval_011,fender,right,dent,2,Small rounded ding above the headlamp.
+eval_011,front_bumper,left,scratch_scuff,2,Heavy abrasion around the washer cover.
+eval_011,front_bumper,left,misalignment,3,Washer cover is displaced.
+eval_014,quarter_panel,left,deformation,3,Deep folds at the rear corner.
+eval_014,quarter_panel,left,scratch_scuff,2,Deep scrape marks across the folded panel.
+eval_014,taillamp,left,shatter,3,Broken lens pieces in the rear corner opening.
+eval_014,trunk_tailgate,center,deformation,3,Sharp crease along the left edge of the lid.
+eval_014,trunk_tailgate,center,misalignment,3,Wide uneven gap along the left and lower edges.
+eval_014,rear_bumper,left,deformation,3,Bumper cover is distorted at the corner.
+eval_014,rear_bumper,left,scratch_scuff,3,Extensive abrasion across the visible corner.
+eval_015,fender,right,deformation,3,Front wheel arch and fender are sharply folded.
+eval_015,hood,center,deformation,3,Hood is kinked and lifted along the impact side.
+eval_015,front_bumper,right,misalignment,3,Cover is pulled away and hangs near the wheel.
+eval_015,front_bumper,right,crack,3,Cover is split below the headlamp.
+eval_015,headlamp,right,shatter,3,Lamp lens is broken at the impact corner.
+eval_016,hood,center,deformation,3,Hood is sharply buckled above the grille.
+eval_017,windshield,center,shatter,3,Glass fragmented beneath truck body
+eval_017,hood,center,deformation,3,Hood edge distorted at contact with truck
+eval_017,other_unknown,center,missing_part,3,Front plate hangs down from its mount
+eval_018,hood,center,deformation,3,Hood sharply folded upward
+eval_018,front_bumper,right,missing_part,3,Cover absent at visible front corner
+eval_019,hood,center,deformation,4,Hood folded sharply into crushed front assembly
+eval_019,front_bumper,center,missing_part,3,Cover torn away from front assembly
+eval_019,grille,center,deformation,3,Grille crushed and displaced
+eval_019,headlamp,right,shatter,3,Lamp assembly broken apart
+eval_019,headlamp,left,shatter,3,Lamp assembly broken apart
+eval_019,fender,right,deformation,3,Leading edge distorted above wheel
+eval_019,rear_door,right,deformation,3,Leading edge bent outward at door seam
+eval_019,rocker_panel,right,deformation,3,Front end visibly buckled
+eval_020,fender,left,deformation,3,Pink Toyota fender creased above front wheel
+eval_021,hood,center,deformation,4,Hood buckled steeply above crushed front assembly
+eval_021,front_bumper,center,missing_part,3,Cover hanging below nose
+eval_021,grille,center,missing_part,3,Grille absent with radiator exposed
+eval_021,fender,left,deformation,4,Metal crushed back to the door opening
+eval_021,headlamp,left,shatter,3,Lamp broken within crushed corner
+eval_021,headlamp,right,missing_part,3,Lamp assembly hangs away from its mount
+eval_021,windshield,center,crack,3,Multiple fracture lines visible
+eval_021,wheel,left,misalignment,4,Front wheel visibly tilted and pushed back
+eval_022,trunk_tailgate,center,deformation,4,Trunk lid folded upward over crushed rear assembly
+eval_022,rear_bumper,right,misalignment,3,Rear corner pulled away with lower material hanging
+eval_022,quarter_panel,right,deformation,3,Metal creased ahead of rear lamp
+eval_022,taillamp,right,shatter,3,Rear lamp broken at impact corner
+eval_022,front_bumper,right,crack,3,Lower lip visibly split
+eval_023,trunk_tailgate,center,deformation,4,Hatch crushed into rear body opening
+eval_023,rear_glass,center,shatter,3,Glass fragments remain around opening
+eval_023,rear_bumper,center,missing_part,3,Cover absent with reinforcement exposed
+eval_023,quarter_panel,left,deformation,4,Panel crushed from lamp pocket to rear door opening
+eval_023,rear_door,left,deformation,3,Door skin creased near rear edge
+eval_023,taillamp,left,shatter,3,Lens broken
+eval_023,taillamp,right,missing_part,3,Lamp assembly hanging outward
+eval_024,front_bumper,right,scratch_scuff,1,Scuff across lower bumper corner
+eval_025,rear_bumper,left,dent,2,Deep rounded depression below taillamp
+eval_025,rear_bumper,left,scratch_scuff,1,Light abrasion at wheel arch edge
+eval_025,rear_bumper,center,scratch_scuff,1,Surface marks above tow hitch
+eval_026,rear_bumper,right,scratch_scuff,1,Small dark scuffs on painted corner
+eval_026,rear_bumper,center,scratch_scuff,1,Small marks on painted lower face
+eval_029,rear_door,right,dent,2,Shallow depression low on the door ahead of the rear wheel arch
+eval_030,hood,center,scratch_scuff,2,Multiple patches of paint loss across the hood and leading edge
+eval_030,roof,center,scratch_scuff,2,Paint loss along the left roof edge
+eval_030,fender,left,dent,3,Multiple indentations with a crease above the wheel arch
+eval_030,fender,left,scratch_scuff,2,Paint loss around the front wheel arch and trailing edge
+eval_030,front_door,left,dent,3,Large creased depression across the door skin
+eval_030,front_door,left,scratch_scuff,2,Paint loss around the handle and lower front edge
+eval_030,quarter_panel,left,scratch_scuff,2,Paint loss below the rear side glass and near the wheel arch
+eval_030,front_bumper,left,deformation,3,Chrome bumper corner is visibly buckled
+eval_030,other_unknown,left,misalignment,3,Small front lamp housing is displaced onto the bumper
+eval_031,front_bumper,right,scratch_scuff,2,Two scraped areas expose the dark substrate
+eval_032,fender,right,dent,3,Sharp creases ahead of the front wheel arch
+eval_032,fender,right,scratch_scuff,2,Several scrapes expose a lighter layer across the dent
+eval_032,front_bumper,right,crack,3,Split in the lower bumper lip
+eval_032,other_unknown,right,shatter,3,Small bumper-mounted lamp has a broken lens
+eval_033,headlamp,left,shatter,3,Outer lens is broken away and exposes the reflector and bulb
+eval_033,fender,left,dent,2,Indentation near the front of the wheel arch
+eval_033,fender,left,scratch_scuff,2,Paint loss along the wheel arch lip
+eval_033,front_bumper,left,misalignment,3,Uneven gap below the headlamp at the bumper corner
+eval_034,front_bumper,right,scratch_scuff,1,Dark rub marks below the right headlamp
+eval_035,other_unknown,unknown,scratch_scuff,2,Multiple abrasions and a deep gouge near the lower edge of the bumper cover

@@ -1,35 +1,35 @@
 image_id,commons_title,license,author,label_source,should_pass_gate,gate_reason,make,model,color,year_start,year_end,camera_view,has_visible_damage,label_notes
-eval_001,File:Smash Web.JPG,CC BY-SA 4.0,Liz Sullivan,,,,,,,,,,,
-eval_002,File:KeyedPaintOnCar.JPG,CC BY-SA 4.0,Athol Mullen,,,,,,,,,,,
-eval_003,File:Car accident (21150193932).jpg,CC BY 2.0,"s1ingshot from Berlin, Germany",,,,,,,,,,,
-eval_004,File:Dented - Flickr - CarSpotter.jpg,CC BY-SA 2.0,CarSpotter from New York,,,,,,,,,,,
-eval_005,File:1994 Mercedes C 200 Auto (19480808160).jpg,CC BY 2.0,"Kieran White from Manchester, England",,,,,,,,,,,
-eval_006,File:1996 Nissan Cima (38758379754).jpg,CC BY 2.0,"Riley from Christchurch, New Zealand",,,,,,,,,,,
-eval_008,File:Oh deer!.jpg,Public domain,Nyttend,,,,,,,,,,,
-eval_009,File:Damaged car door.jpg,Public domain,Garitzko,,,,,,,,,,,
-eval_010,File:Hail damage car.jpg,CC0,Simiprof,,,,,,,,,,,
-eval_011,File:Some cars are not designed to survive a summer in Queensland due to hail.jpg,CC BY-SA 4.0,Chris Olszewski,,,,,,,,,,,
-eval_012,File:EM FENDER BENDER (2844238087).jpg,CC BY-SA 2.0,"Eddie Maloney from North Las Vegas, USA",,,,,,,,,,,
-eval_013,File:EM FENDER BENDER (2845071828).jpg,CC BY-SA 2.0,"Eddie Maloney from North Las Vegas, USA",,,,,,,,,,,
-eval_014,File:Elon Fender Bender (3310089823).jpg,CC BY-SA 2.0,"MPD01605 from Sterling, Virginia, United States, United States",,,,,,,,,,,
-eval_015,"File:Broken car at Storegade, Esbjerg.jpg",CC BY 4.0,Kent Madsen,,,,,,,,,,,
-eval_016,File:Car accident on Airways Blvd Memphis TN 2013-05-02.jpg,CC BY 3.0,Thomas R Machnitzki (thomasmachnitzki.com),,,,,,,,,,,
-eval_017,File:Lymington High Street collision April 2011 (5643606448).jpg,CC BY 2.0,Chris Sampson,,,,,,,,,,,
-eval_018,File:Toyota car accident Japan.jpg,CC BY-SA 3.0,Snake Head 1995,,,,,,,,,,,
-eval_019,File:Crashed Subaru Legacy (28178565471).jpg,CC BY 2.0,"Riley from Christchurch, New Zealand",,,,,,,,,,,
-eval_020,File:Japanese car accident.jpg,CC BY-SA 2.0,Shuets Udono,,,,,,,,,,,
-eval_021,"File:Car crash in Thessaloniki, Greece.jpg",CC BY-SA 3.0 gr,Konstantinos Stampoulis (el:User:Geraki),,,,,,,,,,,
-eval_022,"File:Moscow, Smolenskaya Square, rear-end collision, June 2026 06.jpg",CC0,Retired electrician,,,,,,,,,,,
-eval_023,File:Chery A1 after rear crash test.jpg,CC BY-SA 2.0,"Jun Wang from Gainesville, U.S.A. (Photo taken at China Automotive Technology and Research Center (CATARC))",,,,,,,,,,,
-eval_024,"File:1996 Oldsmobile Ciera SL, front right, 12-20-2020.jpg",CC0,Cutlass,,,,,,,,,,,
-eval_025,"File:2009 Kia Sedona LX, Rear Left, 09-17-2020.jpg",CC BY-SA 4.0,SsmIntrigue,,,,,,,,,,,
-eval_026,"File:1991 Audi 100 in Pearl White Metallic, rear right.jpg",CC BY-SA 3.0,Mr.choppers,,,,,,,,,,,
-eval_027,File:Side view of parked Polizia di Stato car in Esino Lario.jpg,CC BY-SA 3.0,Daniel Case,,,,,,,,,,,
-eval_028,File:1974 AMC Javelin in Diamond Blue at 2024 AMO meet 02of14.jpg,CC BY-SA 4.0,"CZmarlin — Christopher Ziemnowicz, a photo credit would be appreciated if this image is used anywhere other than Wikipedia.",,,,,,,,,,,
-eval_029,File:Late 1991 Ford Escort mk4 1.4 L (9672436255).jpg,CC BY 2.0,Charlie from United Kingdom,,,,,,,,,,,
-eval_030,File:Mk1 Honda Civic (11422983583).jpg,CC BY 2.0,Charlie from United Kingdom,,,,,,,,,,,
-eval_031,File:1997 Honda Accord ES 2.2i Coupe Automatic Front.jpg,CC BY-SA 4.0,Makizox,,,,,,,,,,,
-eval_032,"File:2001 Subaru Impreza 2.5 RS 4-dr, front right.jpg",CC BY-SA 3.0,Mr.choppers,,,,,,,,,,,
-eval_033,File:1990 Nissan Bluebird LX (9900403664).jpg,CC BY 2.0,Charlie from United Kingdom,,,,,,,,,,,
-eval_034,File:1996 Ford Mondeo 1.8 LX (14751850019).jpg,CC BY 2.0,"Kieran White from Manchester, England",,,,,,,,,,,
-eval_035,File:Scratched Paint (3606242828).jpg,CC BY-SA 2.0,"daryl_mitchell from Saskatoon, Saskatchewan, Canada",,,,,,,,,,,
+eval_001,File:Smash Web.JPG,CC BY-SA 4.0,Liz Sullivan,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",no,bad_angle_or_crop,unknown,unknown,unknown,,,close_up_unclear,yes,Tight crop shows broken glass without enough context to identify the part.
+eval_002,File:KeyedPaintOnCar.JPG,CC BY-SA 4.0,Athol Mullen,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,unknown,unknown,gray,,,right_side,yes,
+eval_003,File:Car accident (21150193932).jpg,CC BY 2.0,"s1ingshot from Berlin, Germany","ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,zamyad,unknown,blue,,,front_left,yes,Blue pickup is the subject.
+eval_004,File:Dented - Flickr - CarSpotter.jpg,CC BY-SA 2.0,CarSpotter from New York,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,nissan,gt-r,white,,,right_side,yes,White coupe is the subject.
+eval_005,File:1994 Mercedes C 200 Auto (19480808160).jpg,CC BY 2.0,"Kieran White from Manchester, England","ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,mercedes-benz,c-class,green,,,front_left,yes,Green sedan is the subject.
+eval_006,File:1996 Nissan Cima (38758379754).jpg,CC BY 2.0,"Riley from Christchurch, New Zealand","ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,unknown,unknown,white,,,front_right,yes,Foreground white sedan is the subject.
+eval_008,File:Oh deer!.jpg,Public domain,Nyttend,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,acura,unknown,white,,,front_right,yes,
+eval_009,File:Damaged car door.jpg,Public domain,Garitzko,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,unknown,unknown,silver,,,right_side,yes,
+eval_010,File:Hail damage car.jpg,CC0,Simiprof,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,unknown,unknown,silver,,,rear_right,yes,
+eval_011,File:Some cars are not designed to survive a summer in Queensland due to hail.jpg,CC BY-SA 4.0,Chris Olszewski,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,audi,unknown,silver,,,front,yes,
+eval_012,File:EM FENDER BENDER (2844238087).jpg,CC BY-SA 2.0,"Eddie Maloney from North Las Vegas, USA","ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",no,multiple_vehicles,unknown,unknown,unknown,,,rear,no,Silver Lexus and dark pickup are both plausible subjects. Their contact area is obscured.
+eval_013,File:EM FENDER BENDER (2845071828).jpg,CC BY-SA 2.0,"Eddie Maloney from North Las Vegas, USA","ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",no,multiple_vehicles,unknown,unknown,unknown,,,rear,no,Silver Lexus and dark pickup are both plausible subjects. Their contact area is obscured.
+eval_014,File:Elon Fender Bender (3310089823).jpg,CC BY-SA 2.0,"MPD01605 from Sterling, Virginia, United States, United States","ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,ford,taurus,red,,,rear_left,yes,
+eval_015,"File:Broken car at Storegade, Esbjerg.jpg",CC BY 4.0,Kent Madsen,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,citroen,c5,silver,,,front_right,yes,Tree partly obscures the damaged corner.
+eval_016,File:Car accident on Airways Blvd Memphis TN 2013-05-02.jpg,CC BY 3.0,Thomas R Machnitzki (thomasmachnitzki.com),"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,jeep,wrangler,black,,,front,yes,The buckled hood identifies the foreground Jeep as the subject. The trailer obscures part of its front.
+eval_017,File:Lymington High Street collision April 2011 (5643606448).jpg,CC BY 2.0,Chris Sampson,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,seat,unknown,red,,,front_right,yes,Red car beneath the truck body
+eval_018,File:Toyota car accident Japan.jpg,CC BY-SA 3.0,Snake Head 1995,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,unknown,unknown,white,,,right_side,yes,Vegetation partly obscures the nose
+eval_019,File:Crashed Subaru Legacy (28178565471).jpg,CC BY 2.0,"Riley from Christchurch, New Zealand","ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,subaru,legacy,black,,,front_right,yes,
+eval_020,File:Japanese car accident.jpg,CC BY-SA 2.0,Shuets Udono,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",no,multiple_vehicles,toyota,platz,pink,,,rear_left,yes,Vehicle fields describe the pink Toyota with visible fender damage. The silver Honda is also at the contact point.
+eval_021,"File:Car crash in Thessaloniki, Greece.jpg",CC BY-SA 3.0 gr,Konstantinos Stampoulis (el:User:Geraki),"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,peugeot,206,silver,,,front_left,yes,
+eval_022,"File:Moscow, Smolenskaya Square, rear-end collision, June 2026 06.jpg",CC0,Retired electrician,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,unknown,unknown,white,,,right_side,yes,White sedan in foreground
+eval_023,File:Chery A1 after rear crash test.jpg,CC BY-SA 2.0,"Jun Wang from Gainesville, U.S.A. (Photo taken at China Automotive Technology and Research Center (CATARC))","ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,chery,riich m1,gray,,,rear_left,yes,
+eval_024,"File:1996 Oldsmobile Ciera SL, front right, 12-20-2020.jpg",CC0,Cutlass,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,oldsmobile,cutlass ciera,blue,,,front_right,yes,
+eval_025,"File:2009 Kia Sedona LX, Rear Left, 09-17-2020.jpg",CC BY-SA 4.0,SsmIntrigue,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,kia,sedona,black,,,rear_left,yes,
+eval_026,"File:1991 Audi 100 in Pearl White Metallic, rear right.jpg",CC BY-SA 3.0,Mr.choppers,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,audi,100,silver,,,rear_right,yes,
+eval_027,File:Side view of parked Polizia di Stato car in Esino Lario.jpg,CC BY-SA 3.0,Daniel Case,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,fiat,stilo,blue and white,,,right_side,no,
+eval_028,File:1974 AMC Javelin in Diamond Blue at 2024 AMO meet 02of14.jpg,CC BY-SA 4.0,"CZmarlin — Christopher Ziemnowicz, a photo credit would be appreciated if this image is used anywhere other than Wikipedia.","ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,amc,javelin,silver,1971,1974,front_right,no,
+eval_029,File:Late 1991 Ford Escort mk4 1.4 L (9672436255).jpg,CC BY 2.0,Charlie from United Kingdom,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,ford,escort,white,1986,1990,rear_right,yes,
+eval_030,File:Mk1 Honda Civic (11422983583).jpg,CC BY 2.0,Charlie from United Kingdom,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,honda,civic,blue,,,front_left,yes,
+eval_031,File:1997 Honda Accord ES 2.2i Coupe Automatic Front.jpg,CC BY-SA 4.0,Makizox,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,honda,accord,white,1994,1997,front_right,yes,
+eval_032,"File:2001 Subaru Impreza 2.5 RS 4-dr, front right.jpg",CC BY-SA 3.0,Mr.choppers,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,subaru,impreza,red,,,front_right,yes,
+eval_033,File:1990 Nissan Bluebird LX (9900403664).jpg,CC BY 2.0,Charlie from United Kingdom,"ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,nissan,sunny,blue,,,front_left,yes,
+eval_034,File:1996 Ford Mondeo 1.8 LX (14751850019).jpg,CC BY 2.0,"Kieran White from Manchester, England","ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,ford,mondeo,red,1993,1996,front_right,yes,
+eval_035,File:Scratched Paint (3606242828).jpg,CC BY-SA 2.0,"daryl_mitchell from Saskatoon, Saskatchewan, Canada","ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified",yes,,unknown,unknown,blue,,,close_up_unclear,yes,Close-up shows abrasion on a bumper corner with limited context for orientation

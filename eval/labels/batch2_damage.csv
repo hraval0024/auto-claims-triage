@@ -1,0 +1,41 @@
+image_id,panel,side,damage_type,severity,label_notes
+eval_017,windshield,center,shatter,3,Glass fragmented beneath truck body
+eval_017,hood,center,deformation,3,Hood edge distorted at contact with truck
+eval_017,other_unknown,center,missing_part,3,Front plate hangs down from its mount
+eval_018,hood,center,deformation,3,Hood sharply folded upward
+eval_018,front_bumper,right,missing_part,3,Cover absent at visible front corner
+eval_019,hood,center,deformation,4,Hood folded sharply into crushed front assembly
+eval_019,front_bumper,center,missing_part,3,Cover torn away from front assembly
+eval_019,grille,center,deformation,3,Grille crushed and displaced
+eval_019,headlamp,right,shatter,3,Lamp assembly broken apart
+eval_019,headlamp,left,shatter,3,Lamp assembly broken apart
+eval_019,fender,right,deformation,3,Leading edge distorted above wheel
+eval_019,rear_door,right,deformation,3,Leading edge bent outward at door seam
+eval_019,rocker_panel,right,deformation,3,Front end visibly buckled
+eval_020,fender,left,deformation,3,Pink Toyota fender creased above front wheel
+eval_021,hood,center,deformation,4,Hood buckled steeply above crushed front assembly
+eval_021,front_bumper,center,missing_part,3,Cover hanging below nose
+eval_021,grille,center,missing_part,3,Grille absent with radiator exposed
+eval_021,fender,left,deformation,4,Metal crushed back to the door opening
+eval_021,headlamp,left,shatter,3,Lamp broken within crushed corner
+eval_021,headlamp,right,missing_part,3,Lamp assembly hangs away from its mount
+eval_021,windshield,center,crack,3,Multiple fracture lines visible
+eval_021,wheel,left,misalignment,4,Front wheel visibly tilted and pushed back
+eval_022,trunk_tailgate,center,deformation,4,Trunk lid folded upward over crushed rear assembly
+eval_022,rear_bumper,right,misalignment,3,Rear corner pulled away with lower material hanging
+eval_022,quarter_panel,right,deformation,3,Metal creased ahead of rear lamp
+eval_022,taillamp,right,shatter,3,Rear lamp broken at impact corner
+eval_022,front_bumper,right,crack,3,Lower lip visibly split
+eval_023,trunk_tailgate,center,deformation,4,Hatch crushed into rear body opening
+eval_023,rear_glass,center,shatter,3,Glass fragments remain around opening
+eval_023,rear_bumper,center,missing_part,3,Cover absent with reinforcement exposed
+eval_023,quarter_panel,left,deformation,4,Panel crushed from lamp pocket to rear door opening
+eval_023,rear_door,left,deformation,3,Door skin creased near rear edge
+eval_023,taillamp,left,shatter,3,Lens broken
+eval_023,taillamp,right,missing_part,3,Lamp assembly hanging outward
+eval_024,front_bumper,right,scratch_scuff,1,Scuff across lower bumper corner
+eval_025,rear_bumper,left,dent,2,Deep rounded depression below taillamp
+eval_025,rear_bumper,left,scratch_scuff,1,Light abrasion at wheel arch edge
+eval_025,rear_bumper,center,scratch_scuff,1,Surface marks above tow hitch
+eval_026,rear_bumper,right,scratch_scuff,1,Small dark scuffs on painted corner
+eval_026,rear_bumper,center,scratch_scuff,1,Small marks on painted lower face

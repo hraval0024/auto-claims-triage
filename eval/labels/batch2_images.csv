@@ -1,0 +1,11 @@
+image_id,should_pass_gate,gate_reason,make,model,color,year_start,year_end,camera_view,has_visible_damage,label_notes
+eval_017,yes,,seat,unknown,red,,,front_right,yes,Red car beneath the truck body
+eval_018,yes,,unknown,unknown,white,,,right_side,yes,Vegetation partly obscures the nose
+eval_019,yes,,subaru,legacy,black,,,front_right,yes,
+eval_020,no,multiple_vehicles,toyota,platz,pink,,,rear_left,yes,Vehicle fields describe the pink Toyota with visible fender damage. The silver Honda is also at the contact point.
+eval_021,yes,,peugeot,206,silver,,,front_left,yes,
+eval_022,yes,,unknown,unknown,white,,,right_side,yes,White sedan in foreground
+eval_023,yes,,chery,riich m1,gray,,,rear_left,yes,
+eval_024,yes,,oldsmobile,cutlass ciera,blue,,,front_right,yes,
+eval_025,yes,,kia,sedona,black,,,rear_left,yes,
+eval_026,yes,,audi,100,silver,,,rear_right,yes,

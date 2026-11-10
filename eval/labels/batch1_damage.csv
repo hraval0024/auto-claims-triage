@@ -1,0 +1,22 @@
+image_id,panel,side,damage_type,severity,label_notes
+eval_035,other_unknown,unknown,scratch_scuff,2,Multiple abrasions and a deep gouge near the lower edge of the bumper cover
+eval_034,front_bumper,right,scratch_scuff,1,Dark rub marks below the right headlamp
+eval_033,headlamp,left,shatter,3,Outer lens is broken away and exposes the reflector and bulb
+eval_033,fender,left,dent,2,Indentation near the front of the wheel arch
+eval_033,fender,left,scratch_scuff,2,Paint loss along the wheel arch lip
+eval_033,front_bumper,left,misalignment,3,Uneven gap below the headlamp at the bumper corner
+eval_032,fender,right,dent,3,Sharp creases ahead of the front wheel arch
+eval_032,fender,right,scratch_scuff,2,Several scrapes expose a lighter layer across the dent
+eval_032,front_bumper,right,crack,3,Split in the lower bumper lip
+eval_032,other_unknown,right,shatter,3,Small bumper-mounted lamp has a broken lens
+eval_031,front_bumper,right,scratch_scuff,2,Two scraped areas expose the dark substrate
+eval_030,hood,center,scratch_scuff,2,Multiple patches of paint loss across the hood and leading edge
+eval_030,roof,center,scratch_scuff,2,Paint loss along the left roof edge
+eval_030,fender,left,dent,3,Multiple indentations with a crease above the wheel arch
+eval_030,fender,left,scratch_scuff,2,Paint loss around the front wheel arch and trailing edge
+eval_030,front_door,left,dent,3,Large creased depression across the door skin
+eval_030,front_door,left,scratch_scuff,2,Paint loss around the handle and lower front edge
+eval_030,quarter_panel,left,scratch_scuff,2,Paint loss below the rear side glass and near the wheel arch
+eval_030,front_bumper,left,deformation,3,Chrome bumper corner is visibly buckled
+eval_030,other_unknown,left,misalignment,3,Small front lamp housing is displaced onto the bumper
+eval_029,rear_door,right,dent,2,Shallow depression low on the door ahead of the rear wheel arch
