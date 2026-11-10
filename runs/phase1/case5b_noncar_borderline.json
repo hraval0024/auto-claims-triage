@@ -1,0 +1,103 @@
+{
+  "status": "gate_failed",
+  "audit": {
+    "request_id": "c7c21466-1b71-4da7-8f2b-b0b4319047b3",
+    "timestamp": "2026-11-10T03:02:04.857136Z",
+    "model_id": "claude-sonnet-5-5",
+    "model_effort": "medium",
+    "prompt_version": "extract_v2",
+    "schema_version": "1.1.0",
+    "cost_table_version": "none",
+    "input_hashes": [
+      "b3855f3e5c707ab3440f18e90116d3ce18b3ef20dbb39bc0acc08fc84460410e"
+    ]
+  },
+  "gate": {
+    "passed": false,
+    "usable_photo_indices": [],
+    "reasons": [
+      "Photo 0: no vehicle is the subject of the photo (The subject is a small scale model car on a indoor table next to packaging foam, not a real road vehicle.)"
+    ],
+    "retake_advice": [
+      "Photo 0: Send photos of the actual damaged vehicle, taken outdoors in daylight: the full vehicle from each corner plus close-ups of each damaged area from about 2 meters."
+    ]
+  },
+  "prechecks": [
+    {
+      "photo_index": 0,
+      "width": 1568,
+      "height": 1176,
+      "brightness_mean": 110.5,
+      "sharpness": 503.2,
+      "warnings": [],
+      "blocking": []
+    }
+  ],
+  "vehicle": null,
+  "damage": [],
+  "damage_summary": null,
+  "not_assessable": [],
+  "conflicts": [],
+  "flags": [],
+  "error": null,
+  "usage": {
+    "model_id": "claude-sonnet-5-5",
+    "input_tokens": 2393,
+    "cache_write_tokens": 0,
+    "cache_read_tokens": 5321,
+    "output_tokens": 389,
+    "cost_usd": 0.00921,
+    "attempts": 1
+  },
+  "latency_ms": 4312,
+  "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
+  "raw_model_output": {
+    "photos": [
+      {
+        "photo_index": 0,
+        "camera_view": "front_right",
+        "issues": [
+          {
+            "code": "not_a_vehicle",
+            "detail": "The subject is a small scale model car on a indoor table next to packaging foam, not a real road vehicle."
+          }
+        ],
+        "retake_advice": "Send photos of the actual damaged vehicle, taken outdoors in daylight: the full vehicle from each corner plus close-ups of each damaged area from about 2 meters.",
+        "vehicle_make_seen": "Tesla",
+        "vehicle_color_seen": "red",
+        "license_plate_visible": false,
+        "person_face_visible": false,
+        "embedded_text_seen": ""
+      }
+    ],
+    "vehicle": {
+      "make": {
+        "value": "unknown",
+        "confidence": "low"
+      },
+      "model": {
+        "value": "unknown",
+        "confidence": "low"
+      },
+      "color": {
+        "value": "unknown",
+        "confidence": "low"
+      },
+      "year_range": {
+        "start": null,
+        "end": null,
+        "confidence": "low"
+      }
+    },
+    "damage": [],
+    "damage_summary": "No assessable vehicle: the photo shows a scale model car on a table, and no damage is visible.",
+    "not_assessable": [
+      "actual claimed vehicle",
+      "underbody",
+      "frame",
+      "airbags",
+      "suspension",
+      "interior"
+    ]
+  }
+}

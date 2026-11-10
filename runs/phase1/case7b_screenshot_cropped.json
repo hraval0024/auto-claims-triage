@@ -1,0 +1,261 @@
+{
+  "status": "ok",
+  "audit": {
+    "request_id": "19c99af6-2235-4af1-8af9-dcfd9b93d640",
+    "timestamp": "2026-11-10T03:02:09.162704Z",
+    "model_id": "claude-sonnet-5-5",
+    "model_effort": "medium",
+    "prompt_version": "extract_v2",
+    "schema_version": "1.1.0",
+    "cost_table_version": "none",
+    "input_hashes": [
+      "c245c43c36d0bd6d3482b269df641f8c0d5b5af787e2c19e8c14fb7642e868f1"
+    ]
+  },
+  "gate": {
+    "passed": true,
+    "usable_photo_indices": [
+      0
+    ],
+    "reasons": [],
+    "retake_advice": []
+  },
+  "prechecks": [
+    {
+      "photo_index": 0,
+      "width": 1538,
+      "height": 1026,
+      "brightness_mean": 112.0,
+      "sharpness": 774.7,
+      "warnings": [],
+      "blocking": []
+    }
+  ],
+  "vehicle": {
+    "make": {
+      "value": "BMW",
+      "confidence": "high"
+    },
+    "model": {
+      "value": "1 Series",
+      "confidence": "medium"
+    },
+    "color": {
+      "value": "gray",
+      "confidence": "high"
+    },
+    "year_range": {
+      "start": 2004,
+      "end": 2011,
+      "confidence": "medium"
+    }
+  },
+  "damage": [
+    {
+      "panel": "hood",
+      "side": "center",
+      "damage_type": "deformation",
+      "severity": 4,
+      "confidence": "medium",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "hood buckled and crumpled with sharp creases, lifted and pushed out of position, front corners crushed"
+      ],
+      "severity_conflict": false
+    },
+    {
+      "panel": "fender",
+      "side": "right",
+      "damage_type": "deformation",
+      "severity": 3,
+      "confidence": "medium",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "right fender crumpled with creases and scratches, pushed out of position next to the hood"
+      ],
+      "severity_conflict": false
+    },
+    {
+      "panel": "fender",
+      "side": "left",
+      "damage_type": "deformation",
+      "severity": 3,
+      "confidence": "low",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "left front corner area opened up beside the hood, with the fender and hood edge buckled and exposing the inner structure"
+      ],
+      "severity_conflict": false
+    },
+    {
+      "panel": "front_bumper",
+      "side": "center",
+      "damage_type": "deformation",
+      "severity": 3,
+      "confidence": "high",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "bumper cover crushed and torn, lower section hanging, plate area buckled, large area affected"
+      ],
+      "severity_conflict": false
+    },
+    {
+      "panel": "headlamp",
+      "side": "right",
+      "damage_type": "shatter",
+      "severity": 3,
+      "confidence": "high",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "right headlamp broken and displaced, with debris and a bent trim piece across it"
+      ],
+      "severity_conflict": false
+    },
+    {
+      "panel": "grille",
+      "side": "center",
+      "damage_type": "misalignment",
+      "severity": 2,
+      "confidence": "low",
+      "photo_indices": [
+        0
+      ],
+      "cues": [
+        "grille kidneys appear intact but the surrounding panel is distorted"
+      ],
+      "severity_conflict": false
+    }
+  ],
+  "damage_summary": "Severe front-end collision damage: the hood is buckled and lifted, the bumper is crushed and torn, and the right headlamp is broken, with both front corners crumpled. Damage may reach the structure, so a human adjuster should assess it.",
+  "not_assessable": [
+    "frame and rail condition",
+    "radiator and engine bay components",
+    "airbags",
+    "suspension and alignment",
+    "underbody"
+  ],
+  "conflicts": [],
+  "flags": [
+    "license_plate_visible"
+  ],
+  "error": null,
+  "usage": {
+    "model_id": "claude-sonnet-5-5",
+    "input_tokens": 2076,
+    "cache_write_tokens": 0,
+    "cache_read_tokens": 5321,
+    "output_tokens": 821,
+    "cost_usd": 0.01289,
+    "attempts": 1
+  },
+  "latency_ms": 7859,
+  "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
+  "raw_model_output": {
+    "photos": [
+      {
+        "photo_index": 0,
+        "camera_view": "front",
+        "issues": [],
+        "retake_advice": "",
+        "vehicle_make_seen": "BMW",
+        "vehicle_color_seen": "gray",
+        "license_plate_visible": true,
+        "person_face_visible": false,
+        "embedded_text_seen": ""
+      }
+    ],
+    "vehicle": {
+      "make": {
+        "value": "BMW",
+        "confidence": "high"
+      },
+      "model": {
+        "value": "1 Series",
+        "confidence": "medium"
+      },
+      "color": {
+        "value": "gray",
+        "confidence": "high"
+      },
+      "year_range": {
+        "start": 2004,
+        "end": 2011,
+        "confidence": "medium"
+      }
+    },
+    "damage": [
+      {
+        "photo_index": 0,
+        "panel": "hood",
+        "side": "center",
+        "damage_type": "deformation",
+        "severity": 4,
+        "confidence": "medium",
+        "cues": "hood buckled and crumpled with sharp creases, lifted and pushed out of position, front corners crushed"
+      },
+      {
+        "photo_index": 0,
+        "panel": "front_bumper",
+        "side": "center",
+        "damage_type": "deformation",
+        "severity": 3,
+        "confidence": "high",
+        "cues": "bumper cover crushed and torn, lower section hanging, plate area buckled, large area affected"
+      },
+      {
+        "photo_index": 0,
+        "panel": "headlamp",
+        "side": "right",
+        "damage_type": "shatter",
+        "severity": 3,
+        "confidence": "high",
+        "cues": "right headlamp broken and displaced, with debris and a bent trim piece across it"
+      },
+      {
+        "photo_index": 0,
+        "panel": "fender",
+        "side": "right",
+        "damage_type": "deformation",
+        "severity": 3,
+        "confidence": "medium",
+        "cues": "right fender crumpled with creases and scratches, pushed out of position next to the hood"
+      },
+      {
+        "photo_index": 0,
+        "panel": "fender",
+        "side": "left",
+        "damage_type": "deformation",
+        "severity": 3,
+        "confidence": "low",
+        "cues": "left front corner area opened up beside the hood, with the fender and hood edge buckled and exposing the inner structure"
+      },
+      {
+        "photo_index": 0,
+        "panel": "grille",
+        "side": "center",
+        "damage_type": "misalignment",
+        "severity": 2,
+        "confidence": "low",
+        "cues": "grille kidneys appear intact but the surrounding panel is distorted"
+      }
+    ],
+    "damage_summary": "Severe front-end collision damage: the hood is buckled and lifted, the bumper is crushed and torn, and the right headlamp is broken, with both front corners crumpled. Damage may reach the structure, so a human adjuster should assess it.",
+    "not_assessable": [
+      "frame and rail condition",
+      "radiator and engine bay components",
+      "airbags",
+      "suspension and alignment",
+      "underbody"
+    ]
+  }
+}

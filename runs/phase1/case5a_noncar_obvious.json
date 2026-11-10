@@ -1,0 +1,103 @@
+{
+  "status": "gate_failed",
+  "audit": {
+    "request_id": "90be939b-62b3-48bb-94f6-fc557a98e599",
+    "timestamp": "2026-11-10T03:02:01.191296Z",
+    "model_id": "claude-sonnet-5-5",
+    "model_effort": "medium",
+    "prompt_version": "extract_v2",
+    "schema_version": "1.1.0",
+    "cost_table_version": "none",
+    "input_hashes": [
+      "f5c0509c078fcb47e6813db53111ae4697bccdae06983534b4cc9af03bdfb312"
+    ]
+  },
+  "gate": {
+    "passed": false,
+    "usable_photo_indices": [],
+    "reasons": [
+      "Photo 0: no vehicle is the subject of the photo (The photo shows a golden-colored dog lying on grass; no vehicle is visible.)"
+    ],
+    "retake_advice": [
+      "Photo 0: Send photos of the damaged vehicle: a wide daylight shot of the whole car from a corner, plus close-ups of each damaged panel from about 2 meters."
+    ]
+  },
+  "prechecks": [
+    {
+      "photo_index": 0,
+      "width": 1176,
+      "height": 1568,
+      "brightness_mean": 108.9,
+      "sharpness": 4422.9,
+      "warnings": [],
+      "blocking": []
+    }
+  ],
+  "vehicle": null,
+  "damage": [],
+  "damage_summary": null,
+  "not_assessable": [],
+  "conflicts": [],
+  "flags": [],
+  "error": null,
+  "usage": {
+    "model_id": "claude-sonnet-5-5",
+    "input_tokens": 2393,
+    "cache_write_tokens": 5321,
+    "cache_read_tokens": 0,
+    "output_tokens": 374,
+    "cost_usd": 0.02183,
+    "attempts": 1
+  },
+  "latency_ms": 3669,
+  "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
+  "raw_model_output": {
+    "photos": [
+      {
+        "photo_index": 0,
+        "camera_view": "not_applicable",
+        "issues": [
+          {
+            "code": "not_a_vehicle",
+            "detail": "The photo shows a golden-colored dog lying on grass; no vehicle is visible."
+          }
+        ],
+        "retake_advice": "Send photos of the damaged vehicle: a wide daylight shot of the whole car from a corner, plus close-ups of each damaged panel from about 2 meters.",
+        "vehicle_make_seen": "unknown",
+        "vehicle_color_seen": "unknown",
+        "license_plate_visible": false,
+        "person_face_visible": false,
+        "embedded_text_seen": ""
+      }
+    ],
+    "vehicle": {
+      "make": {
+        "value": "unknown",
+        "confidence": "high"
+      },
+      "model": {
+        "value": "unknown",
+        "confidence": "high"
+      },
+      "color": {
+        "value": "unknown",
+        "confidence": "high"
+      },
+      "year_range": {
+        "start": null,
+        "end": null,
+        "confidence": "low"
+      }
+    },
+    "damage": [],
+    "damage_summary": "No vehicle is visible in the photo, so no damage can be assessed.",
+    "not_assessable": [
+      "entire vehicle",
+      "exterior panels",
+      "underbody",
+      "frame",
+      "airbags",
+      "interior"
+    ]
+  }
+}

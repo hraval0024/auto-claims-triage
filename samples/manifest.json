@@ -57,6 +57,28 @@
       "sha256": "0b6ff8eba82fc81013e857b57c43c16b1e8c027ac36efcdeba476f0dae40765c"
     },
     {
+      "id": "case5a_noncar_obvious",
+      "case": "5 non-car (obvious)",
+      "commons_title": "File:Dog-laying-down.jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:Dog-laying-down.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/be/Dog-laying-down.jpg/1920px-Dog-laying-down.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "DaniaAlrehaili",
+      "sha256": "f5c0509c078fcb47e6813db53111ae4697bccdae06983534b4cc9af03bdfb312"
+    },
+    {
+      "id": "case5b_noncar_borderline",
+      "case": "5 non-car (borderline: scale model car)",
+      "commons_title": "File:Tesla model s toy car.jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:Tesla_model_s_toy_car.jpg",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Tesla_model_s_toy_car.jpg/1920px-Tesla_model_s_toy_car.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Vaibhavratnaparkhi",
+      "sha256": "b3855f3e5c707ab3440f18e90116d3ce18b3ef20dbb39bc0acc08fc84460410e"
+    },
+    {
       "id": "case6_injection_cirrus",
       "case": "6 injection",
       "derived_from": "case1_clean_cirrus",
@@ -72,7 +94,17 @@
       "local_file": "data/samples/case7_screenshot.png",
       "license": "NOT CLEAN-LICENSED: local test use only, never committed or redistributed",
       "author": "Screenshot made by the candidate (2026-11-09) of a third-party web page (brightonpanelworks.com.au article). Copyright in the photo shown belongs to its owner.",
-      "file_page": ""
+      "file_page": "",
+      "sha256": "4674f6390233ee8e30d17a891113b01c244872d53511f58ba1d70ebbb5650446"
+    },
+    {
+      "id": "case7b_screenshot",
+      "case": "7b screenshot (tight crop, no browser UI)",
+      "local_file": "data/samples/case7b_screenshot.png",
+      "license": "NOT CLEAN-LICENSED: local test use only, never committed or redistributed",
+      "author": "Screenshot made by the candidate (2026-11-09), cropped to the same third-party photo as case7 (no browser UI). Copyright in the photo belongs to its owner.",
+      "file_page": "",
+      "sha256": "c245c43c36d0bd6d3482b269df641f8c0d5b5af787e2c19e8c14fb7642e868f1"
     },
     {
       "id": "case8_multiphoto_mercedes_a",

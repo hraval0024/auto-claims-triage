@@ -47,7 +47,7 @@ schema is the largest single part; trimming field descriptions is a possible lev
 
 ## Spend to date
 
-About $1.76 of the $30 ceiling (2026-11-10): smoke/caching $0.21, Opus side checks $0.20, latency experiment $1.26, Phase 1 case run $0.09.
+About $1.80 of the $30 ceiling (2026-11-10): smoke/caching $0.21, Opus side checks $0.20, latency experiment $1.26, Phase 1 case runs $0.13.
 
 ## Latency levers, one at a time (2026-11-10, `data/runs/latency_exp.jsonl`, `scripts/latency_experiment.py`)
 
