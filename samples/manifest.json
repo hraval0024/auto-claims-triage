@@ -107,6 +107,14 @@
       "sha256": "c245c43c36d0bd6d3482b269df641f8c0d5b5af787e2c19e8c14fb7642e868f1"
     },
     {
+      "id": "case7c_screenshot_cc",
+      "case": "7c screenshot (browser UI visible; clean-licensed)",
+      "local_file": "data/samples/case7c_screenshot_cc.png",
+      "license": "Public domain (photo shown); screenshot made by the candidate",
+      "author": "Photo: Nyttend (Wikimedia Commons, 'File:2000 Chrysler Cirrus with missing bumper.jpg'). Screenshot of the Commons file page by the candidate, 2026-11-09.",
+      "file_page": "https://commons.wikimedia.org/wiki/File:2000_Chrysler_Cirrus_with_missing_bumper.jpg"
+    },
+    {
       "id": "case8_multiphoto_mercedes_a",
       "case": "8 multi-photo (photo A)",
       "commons_title": "File:Crashed 2002 Mercedes C180 Classic (16038696886).jpg",

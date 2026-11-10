@@ -1,0 +1,112 @@
+{
+  "status": "gate_failed",
+  "audit": {
+    "request_id": "0f5eb074-3741-4dc7-bcad-a14e83369b4e",
+    "timestamp": "2026-11-10T04:16:15.434119Z",
+    "model_id": "claude-sonnet-5-5",
+    "model_effort": "medium",
+    "prompt_version": "extract_v2",
+    "schema_version": "1.1.0",
+    "cost_table_version": "cost_table_v1",
+    "input_hashes": [
+      "87b9cb74a12c5fd8e8203a548decff73e1528f29c75399829c3ef6b71f904de8"
+    ]
+  },
+  "gate": {
+    "passed": false,
+    "usable_photo_indices": [],
+    "reasons": [
+      "Photo 0: looks like a screenshot or stock photo, not an original photo (Browser address bar showing a commons.wikimedia.org URL is visible at the top, so this is a screenshot of a web image.)"
+    ],
+    "retake_advice": [
+      "Photo 0: Send an original daylight photo taken directly with a phone camera of the front of the vehicle, from about 2-3 meters at a front corner angle, showing the bumper area."
+    ]
+  },
+  "prechecks": [
+    {
+      "photo_index": 0,
+      "width": 1568,
+      "height": 849,
+      "brightness_mean": 142.1,
+      "sharpness": 1761.1,
+      "warnings": [],
+      "blocking": []
+    }
+  ],
+  "vehicle": null,
+  "damage": [],
+  "damage_summary": null,
+  "not_assessable": [],
+  "conflicts": [],
+  "flags": [],
+  "error": null,
+  "cost": null,
+  "routing": {
+    "outcome": "request_more_photos",
+    "reasons": [
+      "The photos could not be assessed: Photo 0: looks like a screenshot or stock photo, not an original photo (Browser address bar showing a commons.wikimedia.org URL is visible at the top, so this is a screenshot of a web image.)"
+    ],
+    "rules_version": "routing_v1"
+  },
+  "llm_baseline": null,
+  "usage": {
+    "model_id": "claude-sonnet-5-5",
+    "input_tokens": 1777,
+    "cache_write_tokens": 0,
+    "cache_read_tokens": 5321,
+    "output_tokens": 498,
+    "cost_usd": 0.00907,
+    "attempts": 1
+  },
+  "latency_ms": 4258,
+  "boundary_notice": "Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.",
+  "raw_model_output": {
+    "photos": [
+      {
+        "photo_index": 0,
+        "camera_view": "front_right",
+        "issues": [
+          {
+            "code": "likely_screenshot_or_stock",
+            "detail": "Browser address bar showing a commons.wikimedia.org URL is visible at the top, so this is a screenshot of a web image."
+          }
+        ],
+        "retake_advice": "Send an original daylight photo taken directly with a phone camera of the front of the vehicle, from about 2-3 meters at a front corner angle, showing the bumper area.",
+        "vehicle_make_seen": "Chrysler",
+        "vehicle_color_seen": "red",
+        "license_plate_visible": false,
+        "person_face_visible": false,
+        "embedded_text_seen": "Browser address bar with URL 'commons.wikimedia.org/wiki/File:2000_Chrysler_Cirrus_with_missing_bumper.jpg' and a partial page link text 'ons' at left."
+      }
+    ],
+    "vehicle": {
+      "make": {
+        "value": "Chrysler",
+        "confidence": "high"
+      },
+      "model": {
+        "value": "unknown",
+        "confidence": "low"
+      },
+      "color": {
+        "value": "red",
+        "confidence": "high"
+      },
+      "year_range": {
+        "start": null,
+        "end": null,
+        "confidence": "low"
+      }
+    },
+    "damage": [],
+    "damage_summary": "Photo is a screenshot of a web page, so damage was not assessed; the image appears to show a front-end with the bumper cover missing, but it cannot be accepted as claim evidence.",
+    "not_assessable": [
+      "underbody",
+      "frame",
+      "airbags",
+      "suspension",
+      "radiator and engine bay components",
+      "interior"
+    ]
+  }
+}

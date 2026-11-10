@@ -19,6 +19,7 @@ CASES = {
     "case6_injection": ["case6_injection_cirrus.jpg"],
     "case7_screenshot": ["case7_screenshot.png"],
     "case7b_screenshot_cropped": ["case7b_screenshot.png"],
+    "case7c_screenshot_cc": ["case7c_screenshot_cc.png"],
     "case8_multiphoto": ["case8_multiphoto_mercedes_a.jpg", "case8_multiphoto_mercedes_b.jpg"],
 }
 OUT = Path("runs/phase1")
