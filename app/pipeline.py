@@ -179,5 +179,6 @@ def vehicle_conflicts(out: ModelOutput, usable: set[int]) -> list[str]:
 
 
 def _usage(t: UsageTally) -> Usage:
-    return Usage(model_id=t.model_id, input_tokens=t.input_tokens, output_tokens=t.output_tokens,
+    return Usage(model_id=t.model_id, input_tokens=t.input_tokens, cache_write_tokens=t.cache_write_tokens,
+                 cache_read_tokens=t.cache_read_tokens, output_tokens=t.output_tokens,
                  cost_usd=round(t.cost_usd, 5), attempts=t.attempts)

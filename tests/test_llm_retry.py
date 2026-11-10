@@ -37,6 +37,7 @@ def test_malformed_json_is_retried_then_succeeds():
     out, tally = call_model([b"img"], model_id="claude-sonnet-5-5", effort="medium", client=client)
     assert tally.attempts == 2
     assert tally.input_tokens == 3000 and tally.output_tokens == 800  # both attempts are billed
+    assert abs(tally.cost_usd - (3000 * 2.0 + 800 * 10.0) / 1e6) < 1e-9
     assert out.vehicle.make.value == "Toyota"
     retry_text = client.requests[1]["messages"][0]["content"][-1]["text"]
     assert "failed validation" in retry_text
@@ -71,3 +72,21 @@ def test_request_uses_native_structured_output_not_forced_tools():
     req = client.requests[0]
     assert req["output_config"]["format"]["type"] == "json_schema"
     assert "tool_choice" not in req and "tools" not in req and "temperature" not in req
+
+
+def test_cache_tokens_priced_separately():
+    from app.llm import UsageTally
+
+    t = UsageTally(model_id="claude-sonnet-5-5")
+    t.add(SimpleNamespace(input_tokens=1000, output_tokens=0, cache_creation_input_tokens=2000, cache_read_input_tokens=0))
+    t.add(SimpleNamespace(input_tokens=1000, output_tokens=0, cache_creation_input_tokens=0, cache_read_input_tokens=2000))
+    # 2000 uncached @ $2 + 2000 write @ $2.50 + 2000 read @ $0.10, per MTok
+    assert abs(t.cost_usd - (2000 * 2.0 + 2000 * 2.5 + 2000 * 0.1) / 1e6) < 1e-12
+
+
+def test_system_prompt_marked_for_caching_and_is_v2():
+    client = StubClient([_resp(VALID)])
+    call_model([b"img"], model_id="claude-sonnet-5-5", effort="medium", client=client)
+    block = client.requests[0]["system"][0]
+    assert block["cache_control"] == {"type": "ephemeral"}
+    assert "camera_view" in block["text"] and "{rubric}" not in block["text"]

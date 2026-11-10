@@ -70,6 +70,20 @@ class Confidence(StrEnum):
     low = "low"
 
 
+class CameraView(StrEnum):
+    # Named from the VEHICLE's point of view. Filled before any side is assigned (F1 fix).
+    front = "front"
+    rear = "rear"
+    left_side = "left_side"
+    right_side = "right_side"
+    front_left = "front_left"
+    front_right = "front_right"
+    rear_left = "rear_left"
+    rear_right = "rear_right"
+    close_up_unclear = "close_up_unclear"
+    not_applicable = "not_applicable"  # no vehicle in the photo
+
+
 class GateCode(StrEnum):
     not_a_vehicle = "not_a_vehicle"
     multiple_vehicles = "multiple_vehicles"
@@ -94,6 +108,10 @@ class GateIssue(Strict):
 
 class PhotoAssessment(Strict):
     photo_index: int = Field(description="0-based index of the photo, as labeled in the request.")
+    camera_view: CameraView = Field(
+        description="Which part of the vehicle faces the camera, named from the VEHICLE's point of view "
+        "(front_left = the vehicle's front and its own left side are visible). Decide this before assigning any side."
+    )
     issues: list[GateIssue] = Field(description="Every gate issue present. Empty list if none.")
     retake_advice: str = Field(description="What photo to send instead. Empty string if the photo is fine.")
     vehicle_make_seen: str = Field(description="Make visible in THIS photo, or 'unknown'.")
@@ -176,8 +194,10 @@ class GateResult(BaseModel):
 
 class Usage(BaseModel):
     model_id: str
-    input_tokens: int
-    output_tokens: int
+    input_tokens: int  # uncached input
+    cache_write_tokens: int
+    cache_read_tokens: int
+    output_tokens: int  # includes thinking tokens
     cost_usd: float
     attempts: int  # model calls made, including validation retries
 

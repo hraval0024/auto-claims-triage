@@ -11,7 +11,11 @@ builder's visual read of the photo unless it says otherwise; it is not an adjust
 - **Expected:** the damage (fender, bumper cover, headlamp, wheel, door edge) is on the vehicle's **left** (US driver side). Evidence: the photo is taken from the front, the damaged side is on the viewer's right, and the steering wheel is visible through the windshield on that side.
 - **Actual:** all 6 damage items reported as `side: right`; `not_assessable` lists "left side and rear of vehicle", so the model treated the visible side as the right.
 - **Why it matters:** wrong side means wrong parts ordered and a supplement later. The rubric already defines side from the vehicle's point of view, and the model still mirrored it.
-- **Status:** open. Candidate fixes to test: add a worked example to the rubric ("photo of the front: the vehicle's left is on the viewer's right"); ask the model to state which end of the car faces the camera before assigning sides; score side separately in the eval (planned).
+- **Fix attempted (prompt extract_v2, schema 1.1.0):** a per-photo `camera_view` field filled before any side, plus a worked example from a REAR view (the F1 image was deliberately not used, so F1 stays a clean regression check).
+- **Regression result, 2026-11-10 (`data/runs/cache_experiment.txt`):**
+  - claude-sonnet-5-5, effort medium, extract_v2: **6/6 runs still wrong**. All gave `camera_view: front_right` with sides `right` (one run also had a `left` item). The model misreads which side is visible; it isn't a mapping slip after a correct view.
+  - claude-opus-5-5, effort medium, extract_v2: **1/1 correct** (`camera_view: front_left`, all sides `left`). n=1.
+- **Status:** open on Sonnet. The fix did not work for the provisional default model. Side accuracy is now a model-choice factor for the Phase 4 eval (side is scored separately). Demo use: run the same photo on Sonnet and Opus.
 
 ## Known limitation (not yet observed): stock-photo detection
 

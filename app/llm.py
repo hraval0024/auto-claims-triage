@@ -20,11 +20,11 @@ import anthropic
 from anthropic.lib._parse._transform import transform_schema  # same transform messages.parse uses
 from pydantic import ValidationError
 
-from app.config import MODEL_PRICES_USD_PER_MTOK, settings
+from app.config import MODEL_PRICES_USD_PER_MTOK, PROMPT_VERSION, settings
 from app.schemas import ModelOutput
 
 _PROMPT_DIR = Path(__file__).parent / "prompts"
-SYSTEM_PROMPT = (_PROMPT_DIR / "extract_v1.md").read_text().replace(
+SYSTEM_PROMPT = (_PROMPT_DIR / f"{PROMPT_VERSION}.md").read_text().replace(
     "{rubric}", (_PROMPT_DIR / "rubric_v1.md").read_text()
 )
 OUTPUT_SCHEMA = transform_schema(ModelOutput.model_json_schema())
@@ -41,23 +41,28 @@ class LLMError(Exception):
 @dataclass
 class UsageTally:
     model_id: str
-    input_tokens: int = 0
+    input_tokens: int = 0  # uncached
+    cache_write_tokens: int = 0
+    cache_read_tokens: int = 0
     output_tokens: int = 0
     attempts: int = 0
     validation_errors: list[str] = field(default_factory=list)
 
     def add(self, usage) -> None:
-        self.input_tokens += (
-            usage.input_tokens
-            + (getattr(usage, "cache_creation_input_tokens", 0) or 0)
-            + (getattr(usage, "cache_read_input_tokens", 0) or 0)
-        )
+        self.input_tokens += usage.input_tokens
+        self.cache_write_tokens += getattr(usage, "cache_creation_input_tokens", 0) or 0
+        self.cache_read_tokens += getattr(usage, "cache_read_input_tokens", 0) or 0
         self.output_tokens += usage.output_tokens
 
     @property
     def cost_usd(self) -> float:
-        price_in, price_out = MODEL_PRICES_USD_PER_MTOK[self.model_id]
-        return (self.input_tokens * price_in + self.output_tokens * price_out) / 1_000_000
+        p_in, p_out, p_write, p_read = MODEL_PRICES_USD_PER_MTOK[self.model_id]
+        return (
+            self.input_tokens * p_in
+            + self.cache_write_tokens * p_write
+            + self.cache_read_tokens * p_read
+            + self.output_tokens * p_out
+        ) / 1_000_000
 
 
 _client: anthropic.Anthropic | None = None
@@ -89,6 +94,15 @@ def build_user_content(images_jpeg: list[bytes], retry_note: str | None) -> list
         text += f"\n\nA previous attempt returned output that failed validation: {retry_note}. Return corrected output."
     content.append({"type": "text", "text": text})
     return content
+
+
+def system_blocks() -> list[dict]:
+    """Static prefix: instructions + rubric (the schema rides in output_config). Marked for
+    caching so repeat requests read it at a fraction of the input price."""
+    block = {"type": "text", "text": SYSTEM_PROMPT}
+    if settings.prompt_cache:
+        block["cache_control"] = {"type": "ephemeral"}
+    return [block]
 
 
 def semantic_check(out: ModelOutput, n_photos: int) -> None:
@@ -123,7 +137,7 @@ def call_model(
             resp = client.messages.create(
                 model=model_id,
                 max_tokens=16000,
-                system=SYSTEM_PROMPT,
+                system=system_blocks(),
                 messages=[{"role": "user", "content": build_user_content(images_jpeg, retry_note)}],
                 output_config={"effort": effort, "format": {"type": "json_schema", "schema": OUTPUT_SCHEMA}},
             )

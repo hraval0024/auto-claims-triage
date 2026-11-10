@@ -7,17 +7,18 @@ response can be traced to an exact commit. Operational knobs come from env vars 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Pinned in code, recorded on every response (auditability).
-PROMPT_VERSION = "extract_v1"
-SCHEMA_VERSION = "1.0.0"
+PROMPT_VERSION = "extract_v2"  # v2: camera_view before side (F1 fix)
+SCHEMA_VERSION = "1.1.0"  # 1.1: PhotoAssessment.camera_view
 COST_TABLE_VERSION = "none"  # set when the Phase 2 table lands
 
-# USD per million tokens: (input, output). Source: Anthropic list prices as cached in the
-# claude-api reference on 2026-11-03. Verify against https://www.anthropic.com/pricing before
-# quoting externally. Thinking tokens are billed as output tokens.
-MODEL_PRICES_USD_PER_MTOK: dict[str, tuple[float, float]] = {
-    "claude-opus-5-5": (4.00, 20.00),
-    "claude-sonnet-5-5": (2.00, 10.00),
-    "claude-haiku-5-5": (0.10, 0.50),  # prompts <= 100K tokens; ours are far smaller
+# USD per million tokens: (input, output, cache_write_5min, cache_read). Source: Anthropic list
+# prices as cached in the claude-api reference on 2026-11-03 (cache write = 1.25x input; cache
+# read = 0.05x on Opus/Sonnet 5.5, 0.1x on Haiku 5.5). Verify against
+# https://www.anthropic.com/pricing before quoting externally. Thinking is billed as output.
+MODEL_PRICES_USD_PER_MTOK: dict[str, tuple[float, float, float, float]] = {
+    "claude-opus-5-5": (4.00, 20.00, 5.00, 0.20),
+    "claude-sonnet-5-5": (2.00, 10.00, 2.50, 0.10),
+    "claude-haiku-5-5": (0.10, 0.50, 0.125, 0.01),  # prompts <= 100K tokens; ours are far smaller
 }
 
 
@@ -30,6 +31,8 @@ class Settings(BaseSettings):
     model_id: str = "claude-sonnet-5-5"
     # Effort level sent to the model. Recorded on every response. Tuned from measurements.
     model_effort: str = "medium"
+    # Cache the static prefix (instructions + rubric + schema) across requests.
+    prompt_cache: bool = True
     model_timeout_s: float = 40.0
     model_max_retries: int = 2  # SDK retries 408/409/429/5xx/connection errors with backoff
     validation_max_retries: int = 2  # re-ask when output fails our validation

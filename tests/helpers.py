@@ -12,6 +12,7 @@ def model_output_dict(n_photos=1, issues=None, damage=None, makes=None, colors=N
         "photos": [
             {
                 "photo_index": i,
+                "camera_view": "rear_left",
                 "issues": issues.get(i, []),
                 "retake_advice": "Send a daylight photo of the damaged side." if issues.get(i) else "",
                 "vehicle_make_seen": makes[i],
