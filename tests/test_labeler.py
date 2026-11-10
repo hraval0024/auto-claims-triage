@@ -79,7 +79,11 @@ def test_fresh_labeler_file_starts_from_manifest(tmp_path, monkeypatch):
     assert rows[0]["image_id"] == "eval_008" and rows[0]["label_source"] == "labeler B"
 
 
-def test_real_label_files_untouched_by_tests():
-    rows = list(csv.DictReader(open(ROOT / "eval/labels/images_labels.csv")))
-    assert all(r["make"] == "" and r["should_pass_gate"] == "" for r in rows)
-    assert not list(csv.DictReader(open(ROOT / "eval/labels/damage_labels.csv")))
+def test_real_label_files_untouched_by_tests(client):
+    """The labeler fixture works on copies: saving through it never changes the real label files."""
+    import hashlib
+
+    real = [ROOT / "eval/labels/images_labels.csv", ROOT / "eval/labels/damage_labels.csv"]
+    before = [hashlib.sha256(f.read_bytes()).hexdigest() for f in real]
+    assert client.post("/api/labels/eval_008", json=GOOD).status_code == 200
+    assert [hashlib.sha256(f.read_bytes()).hexdigest() for f in real] == before

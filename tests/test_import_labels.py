@@ -124,8 +124,13 @@ def test_dry_run_writes_nothing_and_existing_labels_need_replace(tmp_path):
 def test_blank_template_does_not_block_first_import(tmp_path):
     out = tmp_path / "out"
     out.mkdir()
-    (out / "images_labels.csv").write_text((ROOT / "eval/labels/images_labels.csv").read_text())
-    (out / "damage_labels.csv").write_text((ROOT / "eval/labels/damage_labels.csv").read_text())
+    import json as _json
+
+    from scripts.label_schema import IMG_COLS
+    blank = [",".join(IMG_COLS)] + [e["image_id"] + "," * (len(IMG_COLS) - 1)
+                                    for e in _json.load(open(ROOT / "eval/manifest.json"))["images"]]
+    (out / "images_labels.csv").write_text("\n".join(blank) + "\n")  # a blank template: ids only, no labels
+    (out / "damage_labels.csv").write_text(",".join(DMG_COLS) + "\n")
     code, _ = run(tmp_path, [img()], [["eval_008", "headlamp", "right", "shatter", "3", ""]])
     assert code == 0
 
