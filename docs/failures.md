@@ -102,20 +102,23 @@ Stated honestly so they can be raised in the demo; update as each is verified li
 - **Cost accuracy and range coverage:** N/A, no public ground truth repair costs.
 - **p95 latency:** not reported (n = 34 per model; p95 needs n of 100 or more).
 - **Statistical significance / confidence intervals:** not computed; n is too small to separate models on most metrics.
-- **ChatGPT labeling model/version:** not recorded by the candidate.
+- **ChatGPT labeling model:** GPT-6.1 Sol-Light (recorded after the run; labels re-imported with only `label_source` changed).
+- **Labeler was not blind:** the contact sheet with bucket names was uploaded in the first ChatGPT batch.
 - **Effort sweep, multi-photo claims, HEIC input:** not in the eval set.
 
-## F5: eval.py make normalization drops accented letters (OPEN, pending approval)
+## F5: eval.py make normalization dropped accented letters (FIXED: scoring bug found after viewing results)
 
-- **Found:** after the run, while reading misses. `eval.py` `norm()` strips non-ASCII, so "Citroën" becomes "citron" and fails to match the label "citroen" (eval_015), costing every model one make point.
-- **Not fixed:** the candidate's rule forbids changing the harness after seeing results without approval. Proposed fix: accent folding (Unicode NFKD) as `eval.py` v2, re-scoring the SAVED runs (no new model calls, no cherry-picking), reported next to the as-run numbers.
+- **Found:** after the run, while reading misses. `eval.py` `norm()` stripped non-ASCII, so "Citroën" became "citron" and failed to match the label "citroen" (eval_015), costing every model one make point.
+- **This was a scoring bug found AFTER viewing results.** Fixed with the candidate's approval as harness `eval_v2` (commit da68f67): symmetric Unicode normalization (NFKD, strip accents, casefold) for make, model and color, applied identically to labels and predictions. The SAVED runs were re-scored; no model was re-run; no prompt, schema, rubric or routing rule changed.
+- **Before -> after (make accuracy):** Opus 95.0% -> 100% (20/20); Sonnet 81.2% -> 87.5% (14/16); Haiku 81.0% -> 85.7% (18/21). Model and color unchanged. As-run scores kept in `eval/results/5015ec7_20261110T194347Z/summary_v1_asrun.json` and `report_v1_asrun.md`.
 
-## F6: Haiku fast-tracks a claim the labels call replacement-level (eval_030)
+## F6: Haiku fast-tracks a claim the labels call replacement-level (eval_030): DISPUTED LABEL
 
 - **Input:** eval_030 (1976-era Honda Civic, labeled fender and door dents severity 3 and a deformed bumper).
 - **Expected:** not `fast_track_candidate` (severity 3 blocks fast track).
 - **Actual (Haiku 5.5):** findings at severity 1-2 with medium confidence, estimate $840-$2,110, routed `fast_track_candidate`. Opus and Sonnet did not fast-track it.
 - **Why it matters:** the one case in the eval where a model under-rating severity moves a claim toward automation. Fast track is still a candidate only (a human approves payment), but it is the failure mode the routing rules exist to prevent.
+- **Status: disputed label (candidate decision).** eval_030 is in the "undamaged" bucket, the car looked worn and rusty in the contact-sheet review, and whether the labeled "dents" are claim damage or wear is unclear. Neither the label nor Haiku's reading can be confirmed without a human. Listed in the label audit (`docs/eval_results.md`); excluded in the sensitivity view.
 
 ## F1 at scale: Sonnet side mirroring in the eval
 
