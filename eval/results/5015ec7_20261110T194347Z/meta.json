@@ -1,0 +1,34 @@
+{
+  "commit": "5015ec79edd856a529844bb79485b60afb2b78ff",
+  "started": "2026-11-10T19:43:47+00:00",
+  "models": [
+    "claude-opus-5-5",
+    "claude-sonnet-5-5",
+    "claude-haiku-5-5"
+  ],
+  "effort": "medium",
+  "prompt_version": "extract_v2",
+  "schema_version": "1.3.0",
+  "rules_version": "routing_v1.1",
+  "cost_table_version": "cost_table_v1",
+  "prompt_cache": true,
+  "image_hash_cache": "off",
+  "n_images": 34,
+  "repeat_ids": [
+    "eval_002",
+    "eval_005",
+    "eval_008",
+    "eval_011",
+    "eval_014",
+    "eval_017",
+    "eval_021",
+    "eval_024",
+    "eval_028",
+    "eval_032"
+  ],
+  "repeats": 3,
+  "label_source": [
+    "ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified"
+  ],
+  "max_spend_usd": 15.0
+}

@@ -1,0 +1,1212 @@
+{
+  "meta": {
+    "commit": "5015ec79edd856a529844bb79485b60afb2b78ff",
+    "started": "2026-11-10T19:43:47+00:00",
+    "models": [
+      "claude-opus-5-5",
+      "claude-sonnet-5-5",
+      "claude-haiku-5-5"
+    ],
+    "effort": "medium",
+    "prompt_version": "extract_v2",
+    "schema_version": "1.3.0",
+    "rules_version": "routing_v1.1",
+    "cost_table_version": "cost_table_v1",
+    "prompt_cache": true,
+    "image_hash_cache": "off",
+    "n_images": 34,
+    "repeat_ids": [
+      "eval_002",
+      "eval_005",
+      "eval_008",
+      "eval_011",
+      "eval_014",
+      "eval_017",
+      "eval_021",
+      "eval_024",
+      "eval_028",
+      "eval_032"
+    ],
+    "repeats": 3,
+    "label_source": [
+      "ChatGPT (model not recorded, labeled 2026-11-10); model-generated, not human-verified"
+    ],
+    "max_spend_usd": 15.0
+  },
+  "models": {
+    "claude-opus-5-5": {
+      "n_images_run": 34,
+      "exceptions": [],
+      "gate": {
+        "denominator": 34,
+        "agree": 30,
+        "label_pass_model_pass": 27,
+        "label_pass_model_fail": 3,
+        "label_fail_model_pass": 1,
+        "label_fail_model_fail": 3,
+        "disagreements": [
+          {
+            "id": "eval_001",
+            "label": "fail (bad_angle_or_crop)",
+            "model": "ok",
+            "model_codes": []
+          },
+          {
+            "id": "eval_004",
+            "label": "pass",
+            "model": "gate_failed",
+            "model_codes": [
+              "multiple_vehicles"
+            ]
+          },
+          {
+            "id": "eval_016",
+            "label": "pass",
+            "model": "gate_failed",
+            "model_codes": [
+              "damage_area_not_visible",
+              "multiple_vehicles"
+            ]
+          },
+          {
+            "id": "eval_017",
+            "label": "pass",
+            "model": "gate_failed",
+            "model_codes": [
+              "damage_area_not_visible",
+              "multiple_vehicles"
+            ]
+          }
+        ]
+      },
+      "n_both_pass": 27,
+      "make": {
+        "denominator": 20,
+        "correct": 19,
+        "acc_pct": 95.0,
+        "model_said_unknown": 0,
+        "misses": [
+          {
+            "id": "eval_015",
+            "label": "citroen",
+            "model": "Citro\u00ebn"
+          }
+        ]
+      },
+      "model": {
+        "denominator": 17,
+        "correct": 14,
+        "acc_pct": 82.4,
+        "model_said_unknown": 1,
+        "misses": [
+          {
+            "id": "eval_015",
+            "label": "c5",
+            "model": "Xsara Break (estate)"
+          },
+          {
+            "id": "eval_023",
+            "label": "riich m1",
+            "model": "unknown"
+          },
+          {
+            "id": "eval_033",
+            "label": "sunny",
+            "model": "Bluebird hatchback"
+          }
+        ]
+      },
+      "color": {
+        "denominator": 27,
+        "correct": 26,
+        "acc_pct": 96.3,
+        "model_said_unknown": 0,
+        "misses": [
+          {
+            "id": "eval_026",
+            "label": "silver",
+            "model": "off-white"
+          }
+        ]
+      },
+      "panel": {
+        "denominator": "27 both-pass images; 75 labeled panels, 61 predicted panels",
+        "precision_pct": 90.2,
+        "recall_pct": 73.3,
+        "misses": [
+          {
+            "id": "eval_002",
+            "missed": [
+              "quarter_panel"
+            ]
+          },
+          {
+            "id": "eval_010",
+            "missed": [
+              "pillar"
+            ]
+          },
+          {
+            "id": "eval_011",
+            "missed": [
+              "fender"
+            ]
+          },
+          {
+            "id": "eval_019",
+            "missed": [
+              "rear_door",
+              "rocker_panel"
+            ]
+          },
+          {
+            "id": "eval_022",
+            "missed": [
+              "front_bumper",
+              "taillamp"
+            ]
+          },
+          {
+            "id": "eval_023",
+            "missed": [
+              "rear_door"
+            ]
+          },
+          {
+            "id": "eval_024",
+            "missed": [
+              "front_bumper"
+            ]
+          },
+          {
+            "id": "eval_029",
+            "missed": [
+              "rear_door"
+            ]
+          },
+          {
+            "id": "eval_030",
+            "missed": [
+              "front_bumper",
+              "other_unknown",
+              "quarter_panel"
+            ]
+          },
+          {
+            "id": "eval_032",
+            "missed": [
+              "front_bumper",
+              "other_unknown"
+            ]
+          },
+          {
+            "id": "eval_033",
+            "missed": [
+              "fender",
+              "front_bumper",
+              "headlamp"
+            ]
+          },
+          {
+            "id": "eval_034",
+            "missed": [
+              "front_bumper"
+            ]
+          },
+          {
+            "id": "eval_035",
+            "missed": [
+              "other_unknown"
+            ]
+          }
+        ],
+        "extras": [
+          {
+            "id": "eval_009",
+            "extra": [
+              "fender"
+            ]
+          },
+          {
+            "id": "eval_010",
+            "extra": [
+              "other_unknown",
+              "quarter_panel"
+            ]
+          },
+          {
+            "id": "eval_019",
+            "extra": [
+              "front_door"
+            ]
+          },
+          {
+            "id": "eval_025",
+            "extra": [
+              "quarter_panel"
+            ]
+          },
+          {
+            "id": "eval_035",
+            "extra": [
+              "rear_bumper"
+            ]
+          }
+        ]
+      },
+      "damage_type": {
+        "denominator": "per-image type sets over 27 both-pass images (63 labeled, 43 predicted)",
+        "precision_pct": 81.4,
+        "recall_pct": 55.6
+      },
+      "side": {
+        "denominator": "34 matched panels whose label side is left/right",
+        "agree_pct": 91.2,
+        "mirrored": [
+          {
+            "id": "eval_003",
+            "panel": "front_door",
+            "label": "left",
+            "model": "right"
+          },
+          {
+            "id": "eval_003",
+            "panel": "quarter_panel",
+            "label": "left",
+            "model": "right"
+          },
+          {
+            "id": "eval_031",
+            "panel": "front_bumper",
+            "label": "right",
+            "model": "left"
+          }
+        ]
+      },
+      "severity": {
+        "denominator": "55 matched panels (max severity per panel)",
+        "exact_pct": 81.8,
+        "within1_pct": 100.0,
+        "weighted_kappa": 0.826,
+        "model_higher": 6,
+        "model_lower": 4
+      },
+      "severe_recall": {
+        "sev3": {
+          "labeled_panels": 47,
+          "panel_found_pct": 76.6,
+          "found_at_sev3plus_pct": 72.3
+        },
+        "sev4": {
+          "labeled_panels": 8,
+          "panel_found_pct": 100.0,
+          "found_at_sev4_pct": 87.5
+        }
+      },
+      "false_damage_on_undamaged": {
+        "denominator": 2,
+        "ids": []
+      },
+      "cost": {
+        "accuracy": "N/A: no public ground truth",
+        "status_counts": {
+          "estimated": 15,
+          "not_estimable": 7,
+          "no_damage": 6
+        },
+        "range_ratio_median": 4.11,
+        "range_width_usd_median": 3970,
+        "baseline_point_outside_engine_range": {
+          "denominator": "15 claims where the engine gave a full range",
+          "count": 3,
+          "pct": 20.0
+        },
+        "engine_not_estimable_but_baseline_guessed": {
+          "count": 7,
+          "baseline_point_median_usd": 6000
+        }
+      },
+      "routing": {
+        "denominator": 34,
+        "distribution": {
+          "adjuster_review": 17,
+          "request_more_photos": 14,
+          "possible_total_loss": 2,
+          "fast_track_candidate": 1
+        },
+        "abstain_or_human_pct": 97.1,
+        "request_more_photos_pct": 41.2,
+        "with_better_photos_note": 8
+      },
+      "latency_s": {
+        "cache": "image-hash cache OFF: all calls uncached",
+        "main_n": 34,
+        "main_p50": 13.79,
+        "main_max": 20.48,
+        "all_runs_n": 54,
+        "all_runs_p50": 13.65,
+        "p95": "not reported: n < 100",
+        "baseline_call_p50": 3.045
+      },
+      "cost_per_claim_usd": {
+        "extraction_mean": 0.03376,
+        "n": 34,
+        "baseline_call_mean": 0.01288,
+        "spend_this_model_total": 2.1713,
+        "at_volume_assumption": "ASSUMPTION 10,000 claims/month x extraction mean = $338/month (excludes baseline, retries, infra)"
+      },
+      "repeatability": {
+        "denominator": "10 subset images with all 3 runs",
+        "gate_same_pct": 100.0,
+        "routing_same_pct": 70.0,
+        "make_same_pct": 100.0,
+        "max_severity_same_pct": 90.0,
+        "cost_range_same_pct": 70.0,
+        "panel_set_jaccard_mean": 0.952
+      }
+    },
+    "claude-sonnet-5-5": {
+      "n_images_run": 34,
+      "exceptions": [],
+      "gate": {
+        "denominator": 34,
+        "agree": 25,
+        "label_pass_model_pass": 21,
+        "label_pass_model_fail": 9,
+        "label_fail_model_pass": 0,
+        "label_fail_model_fail": 4,
+        "disagreements": [
+          {
+            "id": "eval_003",
+            "label": "pass",
+            "model": "gate_failed",
+            "model_codes": [
+              "multiple_vehicles"
+            ]
+          },
+          {
+            "id": "eval_004",
+            "label": "pass",
+            "model": "gate_failed",
+            "model_codes": [
+              "damage_area_not_visible",
+              "multiple_vehicles"
+            ]
+          },
+          {
+            "id": "eval_006",
+            "label": "pass",
+            "model": "gate_failed",
+            "model_codes": [
+              "multiple_vehicles"
+            ]
+          },
+          {
+            "id": "eval_016",
+            "label": "pass",
+            "model": "gate_failed",
+            "model_codes": [
+              "damage_area_not_visible",
+              "multiple_vehicles",
+              "too_blurry_or_dark"
+            ]
+          },
+          {
+            "id": "eval_017",
+            "label": "pass",
+            "model": "gate_failed",
+            "model_codes": [
+              "damage_area_not_visible",
+              "multiple_vehicles"
+            ]
+          },
+          {
+            "id": "eval_026",
+            "label": "pass",
+            "model": "gate_failed",
+            "model_codes": [
+              "multiple_vehicles"
+            ]
+          },
+          {
+            "id": "eval_027",
+            "label": "pass",
+            "model": "gate_failed",
+            "model_codes": [
+              "damage_area_not_visible",
+              "multiple_vehicles"
+            ]
+          },
+          {
+            "id": "eval_028",
+            "label": "pass",
+            "model": "gate_failed",
+            "model_codes": [
+              "multiple_vehicles"
+            ]
+          },
+          {
+            "id": "eval_035",
+            "label": "pass",
+            "model": "gate_failed",
+            "model_codes": [
+              "bad_angle_or_crop"
+            ]
+          }
+        ]
+      },
+      "n_both_pass": 21,
+      "make": {
+        "denominator": 16,
+        "correct": 13,
+        "acc_pct": 81.2,
+        "model_said_unknown": 2,
+        "misses": [
+          {
+            "id": "eval_015",
+            "label": "citroen",
+            "model": "Citro\u00ebn"
+          },
+          {
+            "id": "eval_019",
+            "label": "subaru",
+            "model": "unknown"
+          },
+          {
+            "id": "eval_023",
+            "label": "chery",
+            "model": "unknown"
+          }
+        ]
+      },
+      "model": {
+        "denominator": 14,
+        "correct": 9,
+        "acc_pct": 64.3,
+        "model_said_unknown": 3,
+        "misses": [
+          {
+            "id": "eval_015",
+            "label": "c5",
+            "model": "Xsara Picasso"
+          },
+          {
+            "id": "eval_019",
+            "label": "legacy",
+            "model": "unknown"
+          },
+          {
+            "id": "eval_021",
+            "label": "206",
+            "model": "unknown"
+          },
+          {
+            "id": "eval_023",
+            "label": "riich m1",
+            "model": "unknown"
+          },
+          {
+            "id": "eval_033",
+            "label": "sunny",
+            "model": "Bluebird"
+          }
+        ]
+      },
+      "color": {
+        "denominator": 21,
+        "correct": 21,
+        "acc_pct": 100.0,
+        "model_said_unknown": 0,
+        "misses": []
+      },
+      "panel": {
+        "denominator": "21 both-pass images; 70 labeled panels, 58 predicted panels",
+        "precision_pct": 81.0,
+        "recall_pct": 67.1,
+        "misses": [
+          {
+            "id": "eval_002",
+            "missed": [
+              "quarter_panel",
+              "side_mirror"
+            ]
+          },
+          {
+            "id": "eval_009",
+            "missed": [
+              "side_mirror"
+            ]
+          },
+          {
+            "id": "eval_010",
+            "missed": [
+              "pillar"
+            ]
+          },
+          {
+            "id": "eval_014",
+            "missed": [
+              "taillamp"
+            ]
+          },
+          {
+            "id": "eval_019",
+            "missed": [
+              "rear_door",
+              "rocker_panel"
+            ]
+          },
+          {
+            "id": "eval_021",
+            "missed": [
+              "grille"
+            ]
+          },
+          {
+            "id": "eval_022",
+            "missed": [
+              "front_bumper"
+            ]
+          },
+          {
+            "id": "eval_024",
+            "missed": [
+              "front_bumper"
+            ]
+          },
+          {
+            "id": "eval_029",
+            "missed": [
+              "rear_door"
+            ]
+          },
+          {
+            "id": "eval_030",
+            "missed": [
+              "fender",
+              "front_bumper",
+              "hood",
+              "other_unknown",
+              "quarter_panel",
+              "roof"
+            ]
+          },
+          {
+            "id": "eval_032",
+            "missed": [
+              "front_bumper",
+              "other_unknown"
+            ]
+          },
+          {
+            "id": "eval_033",
+            "missed": [
+              "fender",
+              "front_bumper",
+              "headlamp"
+            ]
+          },
+          {
+            "id": "eval_034",
+            "missed": [
+              "front_bumper"
+            ]
+          }
+        ],
+        "extras": [
+          {
+            "id": "eval_008",
+            "extra": [
+              "fender"
+            ]
+          },
+          {
+            "id": "eval_009",
+            "extra": [
+              "fender",
+              "rocker_panel"
+            ]
+          },
+          {
+            "id": "eval_010",
+            "extra": [
+              "quarter_panel",
+              "roof"
+            ]
+          },
+          {
+            "id": "eval_014",
+            "extra": [
+              "pillar"
+            ]
+          },
+          {
+            "id": "eval_015",
+            "extra": [
+              "wheel"
+            ]
+          },
+          {
+            "id": "eval_018",
+            "extra": [
+              "fender",
+              "headlamp"
+            ]
+          },
+          {
+            "id": "eval_019",
+            "extra": [
+              "front_door"
+            ]
+          },
+          {
+            "id": "eval_025",
+            "extra": [
+              "quarter_panel"
+            ]
+          }
+        ]
+      },
+      "damage_type": {
+        "denominator": "per-image type sets over 21 both-pass images (57 labeled, 39 predicted)",
+        "precision_pct": 79.5,
+        "recall_pct": 54.4
+      },
+      "side": {
+        "denominator": "30 matched panels whose label side is left/right",
+        "agree_pct": 70.0,
+        "mirrored": [
+          {
+            "id": "eval_002",
+            "panel": "front_door",
+            "label": "right",
+            "model": "left"
+          },
+          {
+            "id": "eval_002",
+            "panel": "rear_door",
+            "label": "right",
+            "model": "left"
+          },
+          {
+            "id": "eval_005",
+            "panel": "front_bumper",
+            "label": "left",
+            "model": "right"
+          },
+          {
+            "id": "eval_008",
+            "panel": "headlamp",
+            "label": "right",
+            "model": "left"
+          },
+          {
+            "id": "eval_008",
+            "panel": "front_bumper",
+            "label": "right",
+            "model": "left"
+          },
+          {
+            "id": "eval_021",
+            "panel": "headlamp",
+            "label": "left",
+            "model": "right"
+          },
+          {
+            "id": "eval_021",
+            "panel": "fender",
+            "label": "left",
+            "model": "right"
+          },
+          {
+            "id": "eval_021",
+            "panel": "wheel",
+            "label": "left",
+            "model": "right"
+          },
+          {
+            "id": "eval_031",
+            "panel": "front_bumper",
+            "label": "right",
+            "model": "left"
+          }
+        ]
+      },
+      "severity": {
+        "denominator": "47 matched panels (max severity per panel)",
+        "exact_pct": 68.1,
+        "within1_pct": 97.9,
+        "weighted_kappa": 0.679,
+        "model_higher": 9,
+        "model_lower": 6
+      },
+      "severe_recall": {
+        "sev3": {
+          "labeled_panels": 44,
+          "panel_found_pct": 70.5,
+          "found_at_sev3plus_pct": 63.6
+        },
+        "sev4": {
+          "labeled_panels": 8,
+          "panel_found_pct": 100.0,
+          "found_at_sev4_pct": 87.5
+        }
+      },
+      "false_damage_on_undamaged": {
+        "denominator": 0,
+        "ids": []
+      },
+      "cost": {
+        "accuracy": "N/A: no public ground truth",
+        "status_counts": {
+          "estimated": 10,
+          "not_estimable": 7,
+          "no_damage": 4
+        },
+        "range_ratio_median": 4.25,
+        "range_width_usd_median": 2370,
+        "baseline_point_outside_engine_range": {
+          "denominator": "10 claims where the engine gave a full range",
+          "count": 3,
+          "pct": 30.0
+        },
+        "engine_not_estimable_but_baseline_guessed": {
+          "count": 7,
+          "baseline_point_median_usd": 5500
+        }
+      },
+      "routing": {
+        "denominator": 34,
+        "distribution": {
+          "request_more_photos": 18,
+          "fast_track_candidate": 2,
+          "adjuster_review": 10,
+          "possible_total_loss": 4
+        },
+        "abstain_or_human_pct": 94.1,
+        "request_more_photos_pct": 52.9,
+        "with_better_photos_note": 6
+      },
+      "latency_s": {
+        "cache": "image-hash cache OFF: all calls uncached",
+        "main_n": 34,
+        "main_p50": 4.84,
+        "main_max": 11.23,
+        "all_runs_n": 54,
+        "all_runs_p50": 4.66,
+        "p95": "not reported: n < 100",
+        "baseline_call_p50": 2.57
+      },
+      "cost_per_claim_usd": {
+        "extraction_mean": 0.01136,
+        "n": 34,
+        "baseline_call_mean": 0.00638,
+        "spend_this_model_total": 0.7322,
+        "at_volume_assumption": "ASSUMPTION 10,000 claims/month x extraction mean = $114/month (excludes baseline, retries, infra)"
+      },
+      "repeatability": {
+        "denominator": "10 subset images with all 3 runs",
+        "gate_same_pct": 100.0,
+        "routing_same_pct": 90.0,
+        "make_same_pct": 100.0,
+        "max_severity_same_pct": 100.0,
+        "cost_range_same_pct": 90.0,
+        "panel_set_jaccard_mean": 0.958
+      }
+    },
+    "claude-haiku-5-5": {
+      "n_images_run": 34,
+      "exceptions": [],
+      "gate": {
+        "denominator": 34,
+        "agree": 32,
+        "label_pass_model_pass": 28,
+        "label_pass_model_fail": 2,
+        "label_fail_model_pass": 0,
+        "label_fail_model_fail": 4,
+        "disagreements": [
+          {
+            "id": "eval_004",
+            "label": "pass",
+            "model": "gate_failed",
+            "model_codes": [
+              "bad_angle_or_crop",
+              "multiple_vehicles"
+            ]
+          },
+          {
+            "id": "eval_017",
+            "label": "pass",
+            "model": "gate_failed",
+            "model_codes": [
+              "multiple_vehicles"
+            ]
+          }
+        ]
+      },
+      "n_both_pass": 28,
+      "make": {
+        "denominator": 21,
+        "correct": 17,
+        "acc_pct": 81.0,
+        "model_said_unknown": 3,
+        "misses": [
+          {
+            "id": "eval_015",
+            "label": "citroen",
+            "model": "Citro\u00ebn"
+          },
+          {
+            "id": "eval_019",
+            "label": "subaru",
+            "model": "unknown"
+          },
+          {
+            "id": "eval_021",
+            "label": "peugeot",
+            "model": "unknown"
+          },
+          {
+            "id": "eval_023",
+            "label": "chery",
+            "model": "unknown"
+          }
+        ]
+      },
+      "model": {
+        "denominator": 18,
+        "correct": 8,
+        "acc_pct": 44.4,
+        "model_said_unknown": 10,
+        "misses": [
+          {
+            "id": "eval_005",
+            "label": "c-class",
+            "model": "unknown"
+          },
+          {
+            "id": "eval_015",
+            "label": "c5",
+            "model": "unknown"
+          },
+          {
+            "id": "eval_016",
+            "label": "wrangler",
+            "model": "unknown"
+          },
+          {
+            "id": "eval_019",
+            "label": "legacy",
+            "model": "unknown"
+          },
+          {
+            "id": "eval_021",
+            "label": "206",
+            "model": "unknown"
+          },
+          {
+            "id": "eval_023",
+            "label": "riich m1",
+            "model": "unknown"
+          },
+          {
+            "id": "eval_024",
+            "label": "cutlass ciera",
+            "model": "unknown"
+          },
+          {
+            "id": "eval_027",
+            "label": "stilo",
+            "model": "unknown"
+          },
+          {
+            "id": "eval_028",
+            "label": "javelin",
+            "model": "unknown"
+          },
+          {
+            "id": "eval_033",
+            "label": "sunny",
+            "model": "unknown"
+          }
+        ]
+      },
+      "color": {
+        "denominator": 28,
+        "correct": 27,
+        "acc_pct": 96.4,
+        "model_said_unknown": 0,
+        "misses": [
+          {
+            "id": "eval_026",
+            "label": "silver",
+            "model": "white"
+          }
+        ]
+      },
+      "panel": {
+        "denominator": "28 both-pass images; 76 labeled panels, 42 predicted panels",
+        "precision_pct": 90.5,
+        "recall_pct": 50.0,
+        "misses": [
+          {
+            "id": "eval_002",
+            "missed": [
+              "quarter_panel",
+              "side_mirror"
+            ]
+          },
+          {
+            "id": "eval_003",
+            "missed": [
+              "front_door"
+            ]
+          },
+          {
+            "id": "eval_005",
+            "missed": [
+              "front_bumper"
+            ]
+          },
+          {
+            "id": "eval_009",
+            "missed": [
+              "side_glass",
+              "side_mirror"
+            ]
+          },
+          {
+            "id": "eval_010",
+            "missed": [
+              "pillar",
+              "trunk_tailgate"
+            ]
+          },
+          {
+            "id": "eval_011",
+            "missed": [
+              "fender",
+              "front_bumper",
+              "roof"
+            ]
+          },
+          {
+            "id": "eval_014",
+            "missed": [
+              "trunk_tailgate"
+            ]
+          },
+          {
+            "id": "eval_015",
+            "missed": [
+              "headlamp",
+              "hood"
+            ]
+          },
+          {
+            "id": "eval_019",
+            "missed": [
+              "fender",
+              "grille",
+              "rear_door",
+              "rocker_panel"
+            ]
+          },
+          {
+            "id": "eval_021",
+            "missed": [
+              "wheel"
+            ]
+          },
+          {
+            "id": "eval_022",
+            "missed": [
+              "front_bumper",
+              "quarter_panel",
+              "taillamp",
+              "trunk_tailgate"
+            ]
+          },
+          {
+            "id": "eval_023",
+            "missed": [
+              "rear_door",
+              "taillamp"
+            ]
+          },
+          {
+            "id": "eval_024",
+            "missed": [
+              "front_bumper"
+            ]
+          },
+          {
+            "id": "eval_026",
+            "missed": [
+              "rear_bumper"
+            ]
+          },
+          {
+            "id": "eval_029",
+            "missed": [
+              "rear_door"
+            ]
+          },
+          {
+            "id": "eval_030",
+            "missed": [
+              "front_bumper",
+              "other_unknown",
+              "quarter_panel",
+              "roof"
+            ]
+          },
+          {
+            "id": "eval_032",
+            "missed": [
+              "front_bumper",
+              "other_unknown"
+            ]
+          },
+          {
+            "id": "eval_033",
+            "missed": [
+              "fender",
+              "front_bumper",
+              "headlamp"
+            ]
+          },
+          {
+            "id": "eval_035",
+            "missed": [
+              "other_unknown"
+            ]
+          }
+        ],
+        "extras": [
+          {
+            "id": "eval_009",
+            "extra": [
+              "rocker_panel"
+            ]
+          },
+          {
+            "id": "eval_016",
+            "extra": [
+              "front_bumper"
+            ]
+          },
+          {
+            "id": "eval_018",
+            "extra": [
+              "headlamp"
+            ]
+          },
+          {
+            "id": "eval_035",
+            "extra": [
+              "trunk_tailgate"
+            ]
+          }
+        ]
+      },
+      "damage_type": {
+        "denominator": "per-image type sets over 28 both-pass images (64 labeled, 38 predicted)",
+        "precision_pct": 78.9,
+        "recall_pct": 46.9
+      },
+      "side": {
+        "denominator": "23 matched panels whose label side is left/right",
+        "agree_pct": 95.7,
+        "mirrored": [
+          {
+            "id": "eval_021",
+            "panel": "headlamp",
+            "label": "left",
+            "model": "right"
+          }
+        ]
+      },
+      "severity": {
+        "denominator": "38 matched panels (max severity per panel)",
+        "exact_pct": 60.5,
+        "within1_pct": 100.0,
+        "weighted_kappa": 0.588,
+        "model_higher": 2,
+        "model_lower": 13
+      },
+      "severe_recall": {
+        "sev3": {
+          "labeled_panels": 48,
+          "panel_found_pct": 54.2,
+          "found_at_sev3plus_pct": 45.8
+        },
+        "sev4": {
+          "labeled_panels": 8,
+          "panel_found_pct": 75.0,
+          "found_at_sev4_pct": 0.0
+        }
+      },
+      "false_damage_on_undamaged": {
+        "denominator": 2,
+        "ids": []
+      },
+      "cost": {
+        "accuracy": "N/A: no public ground truth",
+        "status_counts": {
+          "estimated": 20,
+          "no_damage": 7,
+          "not_estimable": 1
+        },
+        "range_ratio_median": 5.39,
+        "range_width_usd_median": 3120,
+        "baseline_point_outside_engine_range": {
+          "denominator": "20 claims where the engine gave a full range",
+          "count": 4,
+          "pct": 20.0
+        },
+        "engine_not_estimable_but_baseline_guessed": {
+          "count": 1,
+          "baseline_point_median_usd": 9000
+        }
+      },
+      "routing": {
+        "denominator": 34,
+        "distribution": {
+          "request_more_photos": 15,
+          "fast_track_candidate": 3,
+          "adjuster_review": 16
+        },
+        "abstain_or_human_pct": 91.2,
+        "request_more_photos_pct": 44.1,
+        "with_better_photos_note": 7
+      },
+      "latency_s": {
+        "cache": "image-hash cache OFF: all calls uncached",
+        "main_n": 34,
+        "main_p50": 9.175,
+        "main_max": 16.89,
+        "all_runs_n": 54,
+        "all_runs_p50": 9.120000000000001,
+        "p95": "not reported: n < 100",
+        "baseline_call_p50": 2.365
+      },
+      "cost_per_claim_usd": {
+        "extraction_mean": 0.00114,
+        "n": 34,
+        "baseline_call_mean": 0.00037,
+        "spend_this_model_total": 0.0712,
+        "at_volume_assumption": "ASSUMPTION 10,000 claims/month x extraction mean = $11/month (excludes baseline, retries, infra)"
+      },
+      "repeatability": {
+        "denominator": "10 subset images with all 3 runs",
+        "gate_same_pct": 100.0,
+        "routing_same_pct": 100.0,
+        "make_same_pct": 100.0,
+        "max_severity_same_pct": 90.0,
+        "cost_range_same_pct": 70.0,
+        "panel_set_jaccard_mean": 0.92
+      }
+    }
+  }
+}

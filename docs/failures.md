@@ -95,3 +95,32 @@ Stated honestly so they can be raised in the demo; update as each is verified li
 - **Observed:** `case8_multiphoto_mercedes_a.jpg` (wheel severity 4 / low, fender severity 3 / low; 2 of 2 low confidence) routes to `adjuster_review`, not `request_more_photos`.
 - **Why, by design:** routing checks rule 4 (needs a human: any severity 4, or severity 3+ at low confidence, among others) before rule 5 (half or more low confidence -> ask for photos). Severe damage needs a person whatever the photos show; asking for photos first would only delay that person. Rule 5 decides only minor, uncertain claims, where a better photo could change the outcome, possibly to fast track.
 - **Gap and fix:** the photo request was lost on severe, low-confidence claims. routing_v1.1 keeps the outcome and adds a secondary note naming the areas better photos would help with (see HANDOFF, "Routing v1.1").
+
+## Phase 4 eval: not measurable or not measured (2026-11-10, commit 5015ec7)
+
+- **Accuracy against real adjusters:** not measurable. Labels are one model's (ChatGPT) and not human-verified; all metrics are agreement.
+- **Cost accuracy and range coverage:** N/A, no public ground truth repair costs.
+- **p95 latency:** not reported (n = 34 per model; p95 needs n of 100 or more).
+- **Statistical significance / confidence intervals:** not computed; n is too small to separate models on most metrics.
+- **ChatGPT labeling model/version:** not recorded by the candidate.
+- **Effort sweep, multi-photo claims, HEIC input:** not in the eval set.
+
+## F5: eval.py make normalization drops accented letters (OPEN, pending approval)
+
+- **Found:** after the run, while reading misses. `eval.py` `norm()` strips non-ASCII, so "Citroën" becomes "citron" and fails to match the label "citroen" (eval_015), costing every model one make point.
+- **Not fixed:** the candidate's rule forbids changing the harness after seeing results without approval. Proposed fix: accent folding (Unicode NFKD) as `eval.py` v2, re-scoring the SAVED runs (no new model calls, no cherry-picking), reported next to the as-run numbers.
+
+## F6: Haiku fast-tracks a claim the labels call replacement-level (eval_030)
+
+- **Input:** eval_030 (1976-era Honda Civic, labeled fender and door dents severity 3 and a deformed bumper).
+- **Expected:** not `fast_track_candidate` (severity 3 blocks fast track).
+- **Actual (Haiku 5.5):** findings at severity 1-2 with medium confidence, estimate $840-$2,110, routed `fast_track_candidate`. Opus and Sonnet did not fast-track it.
+- **Why it matters:** the one case in the eval where a model under-rating severity moves a claim toward automation. Fast track is still a candidate only (a human approves payment), but it is the failure mode the routing rules exist to prevent.
+
+## F1 at scale: Sonnet side mirroring in the eval
+
+- Sonnet 5.5 side agreement 70% (21/30 matched left/right panels), vs Opus 91% and Haiku 96%. Mirrored cases: eval_002, 005, 008, 021, 031.
+
+## Sonnet over-refuses at the gate as `multiple_vehicles`
+
+- 9 of 30 images the labels call assessable were refused by Sonnet, mostly single parked cars with other cars in the background (eval_026, 027, 028, 006, 003). Opus refused 3, Haiku 2.
