@@ -63,7 +63,7 @@ Stated honestly so they can be raised in the demo; update as each is verified li
 - **Rate limits and the concurrency cap are in memory, per instance:** they reset on restart and would not hold with more than 1 replica (railway.json pins 1). The daily call and spend caps are in SQLite and do survive restarts.
 - **Login brute-force protection is only a per-IP rate limit (10/min)**; no lockout, no CAPTCHA. A 24-character random code makes guessing impractical; a short code would not.
 - **URL input from Railway:** the rehearsal fetched a Wikimedia image fine from a home IP with the generic User-Agent; from a datacenter IP Wikimedia may block it (it blocked a burst earlier, F-note in Phase 1). Set `URL_FETCH_USER_AGENT` if so.
-- **Cold-start time and live p50/p95:** pending the live check (step 12).
+- **Cold-start time:** not captured (the service was already up when polling started). Needs polling started before pressing Redeploy.
 
 ## F3: First Railway deploys failed at startup (config + volume permissions)
 
@@ -72,3 +72,18 @@ Stated honestly so they can be raised in the demo; update as each is verified li
 - **Failure 2:** after the fix, `DATA_DIR '/data' is not writable.` Railway mounts the volume root-owned and the image ran as uid 10001 (`USER appuser`). This was listed as an untested risk before deploying.
 - **Fix (candidate chose option A):** the container starts as root only to run `docker/entrypoint.py`, which chowns `DATA_DIR` to 10001 (never following symlinks), drops privileges permanently, refuses to continue if still root, and execs uvicorn. The app never runs as root. Rejected: running the whole container as root (simpler, weaker isolation); an unconfirmed Railway setting.
 - **Verification:** root path unit-tested with recorded OS calls (`tests/test_entrypoint.py`); non-root path run for real locally. Live confirmation pending the redeploy.
+
+## F4: Per-IP rate limit does not trigger on Railway (OPEN, deferred by the candidate)
+
+- **Date:** 2026-11-10, live check (`runs/phase5/live_main_20261110T184705Z.json` and follow-up probes).
+- **Expected:** with `RATE_LIMIT_CLAIMS_PER_MIN=6`, a burst of 8 claim requests from one client gets 429 from the 7th. It does locally (`tests/test_limits.py`, local rehearsal).
+- **Actual (live):** 8/8 requests got through, three times: with `TRUST_PROXY_HOPS=0` (copied from `.env.example`), with `TRUST_PROXY_HOPS=1`, and with a fixed client-supplied `X-Forwarded-For`. `/metrics` showed no limit triggers.
+- **What this shows:** Railway puts a per-request-varying value in the last `X-Forwarded-For` position (or replaces the header), so "rightmost entry = client" is wrong behind Railway's edge. Every request lands in its own bucket.
+- **Side effect fixed along the way:** with `TRUST_PROXY_HOPS=0`, HSTS was also missing; with 1 it is present (Railway does send `X-Forwarded-Proto: https`).
+- **Still protecting the key:** access code gate, concurrency cap, daily call and USD caps (SQLite, fail closed).
+- **Next step (approved later):** temporary log fields (count of XFF entries, salted hash per position, salted hash of `X-Real-IP`), one marked burst, read which position is stable; then `TRUST_PROXY_HOPS=2`, use `X-Real-IP`, or fall back to per-session limiting. Do not guess a hop count: trusting a forgeable entry would let clients bypass the limit.
+
+## Live check notes (2026-11-10)
+
+- Railway's edge adds `server: railway-hikari`, `x-railway-edge` and `x-railway-request-id` to every response. Not the app (which sends no Server header) and not secret; reveals only the hosting provider. Cannot be removed from the app.
+- Two "timed" live runs were cache hits (photos already sent to this deployment by the candidate's own uploads), so the script's first latency summary was wrong. Model-call runs only: p50 about 5.7 s, max 7.6 s, n=6. The script now excludes cache hits from latency.

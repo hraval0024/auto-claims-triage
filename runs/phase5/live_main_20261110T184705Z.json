@@ -1,0 +1,222 @@
+{
+  "mode": "main",
+  "url": "https://auto-claims-triage-production.up.railway.app",
+  "at": "2026-11-10T18:44:10+00:00",
+  "healthz": {
+    "http": 200,
+    "body": {
+      "status": "ok",
+      "db": "writable"
+    }
+  },
+  "no_code": {
+    "http": 401,
+    "body": {
+      "error": "Unauthorized"
+    }
+  },
+  "wrong_code": {
+    "http": 401,
+    "body": {
+      "error": "Unauthorized"
+    }
+  },
+  "security_headers": {
+    "content-security-policy": "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'",
+    "strict-transport-security": null,
+    "x-frame-options": "DENY",
+    "x-content-type-options": "nosniff",
+    "referrer-policy": "no-referrer"
+  },
+  "unknown_route": {
+    "http": 404,
+    "body": "{\"error\":\"Not Found\"}"
+  },
+  "upload_claim": {
+    "http": 200,
+    "status": "ok",
+    "error": null,
+    "routing": "adjuster_review",
+    "request_id": "4edd1842-e548-4e5b-b2fc-b1f4fc54cabf",
+    "server_latency_ms": 5128,
+    "cost_usd": 0.02284,
+    "cached": false,
+    "gate_codes": [],
+    "client_s": 5.38
+  },
+  "url_claim": {
+    "http": 200,
+    "status": "ok",
+    "error": null,
+    "routing": "possible_total_loss",
+    "request_id": "1e23fbad-42f2-4848-a4df-e68afb5c8e9d",
+    "server_latency_ms": 6986,
+    "cost_usd": 0.01394,
+    "cached": false,
+    "gate_codes": [],
+    "client_s": 7.63,
+    "source": "Commons URL of DEV sample case3_multidamage_starex"
+  },
+  "gate_refusal": {
+    "http": 200,
+    "status": "gate_failed",
+    "error": null,
+    "routing": "request_more_photos",
+    "request_id": "6b69ec80-d3bb-4004-9140-f74e8f4f48a4",
+    "server_latency_ms": 3722,
+    "cost_usd": 0.00908,
+    "cached": false,
+    "gate_codes": [
+      "not_a_vehicle"
+    ],
+    "client_s": 4.1
+  },
+  "timed_runs": [
+    {
+      "http": 200,
+      "status": "gate_failed",
+      "error": null,
+      "routing": "request_more_photos",
+      "request_id": "4951804d-3d1d-4f6b-be38-3056b3dceb10",
+      "server_latency_ms": 5759,
+      "cost_usd": 0.00861,
+      "cached": false,
+      "gate_codes": [
+        "bad_angle_or_crop",
+        "damage_area_not_visible",
+        "multiple_vehicles"
+      ],
+      "image": "case2_hard_pohang.jpg",
+      "client_s": 6.04
+    },
+    {
+      "http": 200,
+      "status": "gate_failed",
+      "error": null,
+      "routing": "request_more_photos",
+      "request_id": "295cdfcb-79c0-4471-a8c9-a4954d85de55",
+      "server_latency_ms": 91,
+      "cost_usd": 0.0,
+      "cached": true,
+      "gate_codes": [
+        "bad_angle_or_crop",
+        "damage_area_not_visible",
+        "multiple_vehicles",
+        "too_blurry_or_dark"
+      ],
+      "image": "case4_night_crash.jpg",
+      "client_s": 0.37
+    },
+    {
+      "http": 200,
+      "status": "gate_failed",
+      "error": null,
+      "routing": "request_more_photos",
+      "request_id": "41797dc5-1c4a-40e5-b968-7d5a9f4697ed",
+      "server_latency_ms": 3577,
+      "cost_usd": 0.0092,
+      "cached": false,
+      "gate_codes": [
+        "not_a_vehicle"
+      ],
+      "image": "case5b_noncar_borderline.jpg",
+      "client_s": 4.02
+    },
+    {
+      "http": 200,
+      "status": "ok",
+      "error": null,
+      "routing": "adjuster_review",
+      "request_id": "38cdac58-826d-4a7c-aa7f-7ef5cb47b39b",
+      "server_latency_ms": 6328,
+      "cost_usd": 0.01199,
+      "cached": false,
+      "gate_codes": [
+        "embedded_instruction_text"
+      ],
+      "image": "case6_injection_cirrus.jpg",
+      "client_s": 6.56
+    },
+    {
+      "http": 200,
+      "status": "ok",
+      "error": null,
+      "routing": "adjuster_review",
+      "request_id": "48220811-69a5-4bfe-b4f6-9f81deadb0d7",
+      "server_latency_ms": 59,
+      "cost_usd": 0.0,
+      "cached": true,
+      "gate_codes": [],
+      "image": "case8_multiphoto_mercedes_a.jpg",
+      "client_s": 0.83
+    }
+  ],
+  "latency_client_s": {
+    "n": 5,
+    "p50": 4.02,
+    "p95_nearest_rank": 6.56,
+    "note": "n=5: p95 is the max"
+  },
+  "cost_per_claim_usd": {
+    "n": 6,
+    "mean": 0.01261,
+    "min": 0.00861,
+    "max": 0.02284
+  },
+  "persistence_marker": {
+    "request_id": "4edd1842-e548-4e5b-b2fc-b1f4fc54cabf",
+    "review_http": 200
+  },
+  "metrics": {
+    "claims_total": 10,
+    "cache_hits": 2,
+    "latency_ms": {
+      "n": 10,
+      "p50": 5443.5,
+      "p95": 6986
+    },
+    "model_spend_usd_total": 0.1238,
+    "usage_today": {
+      "day": "2026-11-10",
+      "calls": 8,
+      "spend_usd": 0.1238
+    },
+    "by_routing": {
+      "adjuster_review": 4,
+      "possible_total_loss": 1,
+      "request_more_photos": 5
+    },
+    "limits_triggered_since_start": {}
+  },
+  "rate_limit_demo": {
+    "burst_statuses": [
+      400,
+      400,
+      400,
+      400,
+      400,
+      400,
+      400,
+      400
+    ],
+    "first_429_at": null
+  },
+  "rate_limit_message": "Send at least one photo.",
+  "leaks_found": [
+    "/healthz: Server header present (railway-hikari)",
+    "/api/vocab: Server header present (railway-hikari)",
+    "/api/vocab: Server header present (railway-hikari)",
+    "/: Server header present (railway-hikari)",
+    "/nonexistent: Server header present (railway-hikari)",
+    "/api/claims: Server header present (railway-hikari)",
+    "/api/claims: Server header present (railway-hikari)",
+    "/api/claims: Server header present (railway-hikari)",
+    "/api/claims: Server header present (railway-hikari)",
+    "/api/claims: Server header present (railway-hikari)",
+    "/api/claims: Server header present (railway-hikari)",
+    "/api/claims: Server header present (railway-hikari)",
+    "/api/claims: Server header present (railway-hikari)",
+    "/api/claims/4edd1842-e548-4e5b-b2fc-b1f4fc54cabf/review: Server header present (railway-hikari)",
+    "/api/claims: Server header present (railway-hikari)"
+  ]
+}

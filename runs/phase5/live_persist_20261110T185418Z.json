@@ -1,0 +1,23 @@
+{
+  "mode": "persist",
+  "url": "https://auto-claims-triage-production.up.railway.app",
+  "at": "2026-11-10T18:54:10+00:00",
+  "seconds_until_healthz_ok": 0.2,
+  "marker_review_survived": true,
+  "claims_total_after_restart": 10,
+  "first_claim_after_restart": {
+    "http": 200,
+    "status": "ok",
+    "error": null,
+    "routing": "adjuster_review",
+    "request_id": "2d8a0acb-b19b-492b-9823-98c52bd28681",
+    "server_latency_ms": 7106,
+    "cost_usd": 0.0252,
+    "cached": false,
+    "gate_codes": [],
+    "client_s": 7.29
+  },
+  "leaks_found": [
+    "/api/claims: Server header present (railway-hikari)"
+  ]
+}

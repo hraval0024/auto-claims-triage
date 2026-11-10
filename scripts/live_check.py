@@ -35,8 +35,9 @@ def leak_check(r: httpx.Response, found: list) -> None:
     for m in LEAK_MARKERS + ([CODE] if CODE else []):
         if m and m in blob:
             found.append(f"{r.request.method} {r.request.url.path} -> {r.status_code}: contains {'the access code' if m == CODE else repr(m)}")
-    if "server" in {k.lower() for k in r.headers}:
-        found.append(f"{r.request.url.path}: Server header present ({r.headers.get('server')})")
+    srv = r.headers.get("server", "")
+    if srv and "railway" not in srv.lower():  # Railway's edge adds "railway-hikari"; not the app, not a secret
+        found.append(f"{r.request.url.path}: Server header present ({srv})")
 
 
 def claim(c: httpx.Client, files=None, urls=None):
@@ -104,9 +105,14 @@ def main(mode: str) -> int:
             time.sleep(PACE_S)
             r, t = claim(c, files=[("files", open(S / f, "rb"))]); leak_check(r, leaks)
             timed.append(summarize(r) | {"image": f, "client_s": t})
-        lat = sorted(x["client_s"] for x in timed)
         report["timed_runs"] = timed
-        report["latency_client_s"] = {"n": len(lat), "p50": median(lat), "p95_nearest_rank": lat[-1], "note": "n=5: p95 is the max"}
+        # Cache hits (photos this deployment has seen before) return in ~0.1 s: report them, don't mix them in.
+        model_runs = [x for x in [report["upload_claim"], report["url_claim"], report["gate_refusal"], *timed]
+                      if x.get("http") == 200 and not x.get("cached")]
+        lat = sorted(x["client_s"] for x in model_runs)
+        report["latency_client_s"] = {"n": len(lat), "p50": median(lat) if lat else None, "max": lat[-1] if lat else None,
+                                      "cache_hits_excluded": sum(1 for x in timed if x.get("cached")),
+                                      "note": "model-call runs only; n is too small for a meaningful p95"}
         costs = [x["cost_usd"] for x in [report["upload_claim"], report["url_claim"], report["gate_refusal"], *timed] if x.get("cost_usd")]
         report["cost_per_claim_usd"] = {"n": len(costs), "mean": round(sum(costs) / len(costs), 5) if costs else None,
                                         "min": min(costs) if costs else None, "max": max(costs) if costs else None}
