@@ -36,3 +36,13 @@ builder's visual read of the photo unless it says otherwise; it is not an adjust
 ## Known limitation: stock-photo detection
 
 Detecting a stock or press photo from pixels alone is unreliable: a well-lit original photo and a stock image can look alike. The `likely_screenshot_or_stock` verdict catches visible screenshot UI (case 7) but not a cropped web photo (F2). Real fraud checks would use reverse-image search and metadata, which are out of scope.
+
+## To review (not classified as failures yet)
+
+### R1: BMW hood rated severity 4 (case 7b)
+
+- **Run:** 2026-11-10, request `19c99af6-2235-4af1-8af9-dcfd9b93d640`, claude-sonnet-5-5, extract_v2.
+- **Input:** `data/samples/case7b_screenshot.png` (front view of a BMW with the hood buckled and lifted).
+- **Output:** `center hood deformation`, severity 4 (medium confidence). The rubric reserves level 4 for damage reaching structure or safety systems; a buckled hood alone would usually be level 3 (replace).
+- **Why it matters:** severity 4 makes the claim "cost not estimable" and sends it to a human, so an over-call costs adjuster time, not money.
+- **Status:** to review by the candidate. Not a bug until the candidate decides. Note: this image is being replaced by a CC-licensed screenshot, so the case may need re-running.

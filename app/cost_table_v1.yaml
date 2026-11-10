@@ -1,0 +1,122 @@
+# Cost table v1. A STAND-IN for real estimating data (CCC / Mitchell / Audatex).
+# This is NOT real pricing. Every value with source "assumption" is the builder's rough
+# placeholder (confidence low) and must be reviewed by the candidate before use.
+# Bands are deliberately wide: they must cover parts type (aftermarket..OEM) and repair
+# method uncertainty. Hidden damage is handled by a separate claim-level uplift below.
+#
+# How one damage item is priced (see app/cost_engine.py):
+#   rate  = labor.body_rate_usd_per_hour * region multiplier
+#   low   = (body_lo + refinish_lo) * rate + refinish_lo * materials_lo + parts_lo * class_lo
+#   high  = (body_hi + refinish_hi) * rate + refinish_hi * materials_hi + parts_hi * class_hi
+# Items on the same panel and side are priced once, at the highest severity.
+# Side (left/right) is never a key: a left fender and a right fender price the same.
+
+version: cost_table_v1
+currency: USD
+
+labor:
+  body_rate_usd_per_hour: 68
+  source: '2026 "Who Pays for What?" survey, median non-DRP body labor rate'
+  confidence: medium
+  note: Rates vary a lot by state. Refinish labor is billed at the same rate (see refinish_rate).
+
+refinish_rate:
+  same_as_body_rate: true
+  source: assumption
+  confidence: low
+
+materials_usd_per_refinish_hour:  # paint and materials, charged per refinish hour
+  low: 30
+  high: 50
+  source: assumption
+  confidence: low
+
+regions:  # multiplier on the labor rate. Tiers and values are assumptions with no source.
+  low_cost: {multiplier: 0.85, source: assumption, confidence: low}
+  standard: {multiplier: 1.00, source: assumption, confidence: low}
+  high_cost: {multiplier: 1.25, source: assumption, confidence: low}
+default_region: standard
+
+vehicle_classes:  # multiplier on PARTS only
+  economy: {multiplier: 0.85, source: assumption, confidence: low}
+  mainstream: {multiplier: 1.00, source: assumption, confidence: low}
+  luxury_truck: {multiplier: 1.60, source: assumption, confidence: low}
+# Make -> class. Anything not listed is mainstream. Economy is never inferred from make alone
+# (it depends on the model); an adjuster can set it. Unknown make: low uses economy, high uses
+# luxury_truck, so the range widens instead of guessing.
+luxury_makes:
+  source: assumption
+  confidence: low
+  makes: [acura, audi, bmw, cadillac, genesis, infiniti, jaguar, land rover, lexus, lincoln,
+          maserati, mercedes-benz, porsche, tesla, volvo, alfa romeo]
+
+hidden_damage_uplift:  # added to the HIGH end only
+  applies_when: any priced item has severity 3
+  high_pct: 25
+  source: assumption
+  confidence: low
+
+panel_classes:  # which panels share a row set
+  bumper_cover: [front_bumper, rear_bumper]
+  bolt_on_panel: [hood, trunk_tailgate, fender, front_door, rear_door]
+  welded_panel: [quarter_panel, rocker_panel, roof]
+  grille: [grille]
+  lamp: [headlamp, taillamp]
+  mirror: [side_mirror]
+  glass: [windshield, rear_glass, side_glass]
+  wheel: [wheel]
+  tire: [tire]
+  # Never priced: these return "cost not estimable" and go to a human.
+  not_estimable: [pillar, other_unknown]
+
+not_estimable_rules:
+  - rule: any item with severity 4
+    source: rubric (approved); severity 4 means structural or safety damage
+  - rule: any item on a not_estimable panel (pillar, other_unknown)
+    source: assumption (pillar damage is treated as structural at any severity)
+    confidence: low
+
+# Rows: panel_class x severity -> operation, hours and parts bands. [low, high]
+rows:
+  - {panel_class: bumper_cover, severity: 1, operation: refinish, body_hours: [0.0, 0.5], refinish_hours: [1.0, 2.5], parts_usd: [0, 0],    source: assumption, confidence: low}
+  - {panel_class: bumper_cover, severity: 2, operation: repair,   body_hours: [1.0, 3.0], refinish_hours: [2.0, 3.5], parts_usd: [0, 50],   source: assumption, confidence: low}
+  - {panel_class: bumper_cover, severity: 3, operation: replace,  body_hours: [1.0, 2.5], refinish_hours: [2.5, 4.0], parts_usd: [150, 900], source: assumption, confidence: low}
+
+  - {panel_class: bolt_on_panel, severity: 1, operation: refinish, body_hours: [0.0, 0.5], refinish_hours: [1.5, 3.0], parts_usd: [0, 0],     source: assumption, confidence: low}
+  - {panel_class: bolt_on_panel, severity: 2, operation: repair,   body_hours: [1.5, 5.0], refinish_hours: [2.5, 4.0], parts_usd: [0, 50],    source: assumption, confidence: low}
+  - {panel_class: bolt_on_panel, severity: 3, operation: replace,  body_hours: [1.5, 4.0], refinish_hours: [2.5, 4.5], parts_usd: [200, 1500], source: assumption, confidence: low}
+
+  - {panel_class: welded_panel, severity: 1, operation: refinish, body_hours: [0.0, 0.5],  refinish_hours: [1.5, 3.0], parts_usd: [0, 0],     source: assumption, confidence: low}
+  - {panel_class: welded_panel, severity: 2, operation: repair,   body_hours: [2.0, 7.0],  refinish_hours: [2.5, 4.5], parts_usd: [0, 50],    source: assumption, confidence: low}
+  - {panel_class: welded_panel, severity: 3, operation: replace,  body_hours: [8.0, 20.0], refinish_hours: [3.0, 5.0], parts_usd: [250, 1500], source: assumption, confidence: low}
+
+  - {panel_class: grille, severity: 1, operation: refinish, body_hours: [0.0, 0.3], refinish_hours: [0.0, 1.0], parts_usd: [0, 0],   source: assumption, confidence: low}
+  - {panel_class: grille, severity: 2, operation: repair,   body_hours: [0.3, 1.0], refinish_hours: [0.0, 0.5], parts_usd: [0, 150], source: assumption, confidence: low}
+  - {panel_class: grille, severity: 3, operation: replace,  body_hours: [0.3, 1.0], refinish_hours: [0.0, 0.5], parts_usd: [50, 600], source: assumption, confidence: low}
+
+  - {panel_class: lamp, severity: 1, operation: repair,  body_hours: [0.0, 0.5], refinish_hours: [0.0, 0.0], parts_usd: [0, 0],      source: assumption, confidence: low}
+  - {panel_class: lamp, severity: 2, operation: repair,  body_hours: [0.3, 1.5], refinish_hours: [0.0, 0.0], parts_usd: [0, 50],     source: assumption, confidence: low}
+  - {panel_class: lamp, severity: 3, operation: replace, body_hours: [0.3, 1.5], refinish_hours: [0.0, 0.0], parts_usd: [100, 1500], source: assumption, confidence: low}
+
+  - {panel_class: mirror, severity: 1, operation: refinish, body_hours: [0.0, 0.3], refinish_hours: [0.3, 1.0], parts_usd: [0, 0],    source: assumption, confidence: low}
+  - {panel_class: mirror, severity: 2, operation: repair,   body_hours: [0.3, 1.0], refinish_hours: [0.0, 0.5], parts_usd: [0, 100],  source: assumption, confidence: low}
+  - {panel_class: mirror, severity: 3, operation: replace,  body_hours: [0.5, 1.5], refinish_hours: [0.5, 1.0], parts_usd: [60, 900], source: assumption, confidence: low}
+
+  - {panel_class: glass, severity: 1, operation: repair,  body_hours: [0.0, 1.0], refinish_hours: [0.0, 0.0], parts_usd: [0, 0],      source: assumption, confidence: low}
+  - {panel_class: glass, severity: 2, operation: repair,  body_hours: [0.3, 1.0], refinish_hours: [0.0, 0.0], parts_usd: [0, 50],     source: assumption, confidence: low}
+  - {panel_class: glass, severity: 3, operation: replace, body_hours: [1.0, 3.0], refinish_hours: [0.0, 0.0], parts_usd: [200, 1500], source: assumption, confidence: low}
+
+  - {panel_class: wheel, severity: 1, operation: repair,  body_hours: [0.5, 1.5], refinish_hours: [0.0, 0.0], parts_usd: [0, 150],    source: assumption, confidence: low}
+  - {panel_class: wheel, severity: 2, operation: repair,  body_hours: [0.5, 1.5], refinish_hours: [0.0, 0.0], parts_usd: [0, 250],    source: assumption, confidence: low}
+  - {panel_class: wheel, severity: 3, operation: replace, body_hours: [0.3, 1.0], refinish_hours: [0.0, 0.0], parts_usd: [150, 1200], source: assumption, confidence: low}
+
+  - {panel_class: tire, severity: 1, operation: repair,  body_hours: [0.0, 0.0], refinish_hours: [0.0, 0.0], parts_usd: [0, 0],     source: assumption, confidence: low}
+  - {panel_class: tire, severity: 2, operation: repair,  body_hours: [0.3, 0.5], refinish_hours: [0.0, 0.0], parts_usd: [0, 40],    source: assumption, confidence: low}
+  - {panel_class: tire, severity: 3, operation: replace, body_hours: [0.3, 0.8], refinish_hours: [0.0, 0.0], parts_usd: [100, 400], source: assumption, confidence: low}
+
+caveats:  # always returned with an estimate
+  - "Stand-in table, not real pricing: every value marked 'assumption' is a placeholder pending real estimating data (CCC / Mitchell / Audatex)."
+  - "Hidden damage: only visible damage is priced. The high end includes an uplift when any item needs replacement, but structural, mechanical and underbody damage are not priced."
+  - "Parts type: the low end assumes aftermarket or repaired parts; the high end assumes OEM parts."
+  - "Region: labor uses the configured region tier; real body shop rates vary a lot by state."
+  - "Not included: ADAS sensor calibration, blend into adjacent panels, sublet, towing, storage, rental, taxes."

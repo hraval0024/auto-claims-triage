@@ -213,6 +213,49 @@ class Audit(BaseModel):
     input_hashes: list[str]  # sha256 of each original image's bytes
 
 
+class CostLine(BaseModel):
+    panel: Panel
+    side: Side
+    severity: int
+    operation: str | None  # refinish / repair / replace; None when not estimable
+    low_usd: float | None
+    high_usd: float | None
+    driver: str  # plain-English explanation of this line
+
+
+class CostEstimate(BaseModel):
+    status: Literal["estimated", "not_estimable", "no_damage"]
+    low_usd: float | None
+    mid_usd: float | None = Field(
+        description="Midpoint of low and high. Used for routing and eval only; the UI shows low-high."
+    )
+    high_usd: float | None
+    estimable_subtotal_low_usd: float | None  # when not_estimable: the part we could price
+    estimable_subtotal_high_usd: float | None
+    not_estimable_reasons: list[str]
+    lines: list[CostLine]
+    vehicle_class: str
+    region: str
+    labor_rate_usd_per_hour: float
+    hidden_damage_uplift_applied: bool
+    caveats: list[str]
+    cost_table_version: str
+    is_assumption: bool = True
+    assumption_notice: str = (
+        "Stand-in pricing table: every number is an assumption, not real estimating data. "
+        "Not a payout amount."
+    )
+
+
+RoutingOutcome = Literal["fast_track_candidate", "adjuster_review", "request_more_photos", "possible_total_loss"]
+
+
+class RoutingDecision(BaseModel):
+    outcome: RoutingOutcome
+    reasons: list[str]  # every rule that fired, in plain English
+    rules_version: str
+
+
 class ClaimResult(BaseModel):
     status: Literal["ok", "gate_failed", "error"]
     audit: Audit
