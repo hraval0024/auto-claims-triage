@@ -173,7 +173,7 @@ No time estimates. Move on only when the done-when list is true.
 
 ### Phase 4: Eval harness (FR8)
 - Dataset options and their license terms presented to me, and my choice confirmed, before any download (see the FR8 license warning).
-- Labeled set from real public data (license noted), `eval.py`, results table, two-model comparison with quality vs cost per claim, cost-at-volume line labeled as an assumption.
+- Labeled set from real public data (license noted), `eval.py`, results table, two-model comparison with qualit y vs cost per claim, cost-at-volume line labeled as an assumption.
 - **Done when:** I have seen a real run's full table; n and label provenance are printed in the header; the larger vs smaller model comparison is shown; results are saved to `eval/results/` with the commit hash.
 
 ### Phase 5: Hardening and deploy (NFRs)

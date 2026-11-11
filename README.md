@@ -55,7 +55,6 @@ curl -s -H "X-Access-Code: <code>" -F files=@data/samples/case1_clean_cirrus.jpg
 The server refuses to start, with a message naming the problem, if `ANTHROPIC_API_KEY` or `APP_ACCESS_CODE` is missing or the code is under 12 characters. Three sample entries are my own screenshots, kept local and not downloadable; `fetch_samples` reports them as missing, which is expected.
 
 Key settings (all in `.env.example`): `MODEL_ID` and `MODEL_EFFORT` (default `claude-sonnet-5-5`, medium), `DATA_DIR`, `DAILY_CALL_CAP`, `DAILY_SPEND_CAP_USD`, per-IP rate limits, `LABOR_RATE_USD_PER_HOUR`.
-<!-- UPDATE the default model above if it changes before submission. -->
 
 **Evaluation** (about $3, three models, 34 photos):
 
