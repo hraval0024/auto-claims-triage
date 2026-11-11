@@ -150,7 +150,7 @@ Common subset (21 images assessed by labels and all three models) and the sensit
 
 ## 7. Known limitations and "I don't know, here's how I'd find out"
 
-- **Accuracy against adjusters is unknown.** The eval measures agreement with one model's labels. To find out: label 100+ claims with adjusters, ideally with final repair invoices for cost coverage.
+- **Accuracy against adjusters is unknown.** The eval measures agreement with one model's labels. To find out: a few hours of appraiser time set the labeling standard (severity rubric, total-loss and referral thresholds), then expert labelers label 100+ real claims against that standard, ideally with final repair invoices for cost coverage.
 - **Side mirroring (F1)** on Sonnet (70% side agreement). Opus is better (91%). Fix candidates: a model switch, a second pass on the camera view, or a deterministic check against visible features. Measure with the side metric.
 - **Per-IP rate limit does not trigger behind Railway (F4, open).** How to find out: log the forwarded-address positions (hashed) for one burst and read which position is stable.
 - **Cropped web photos pass the gate (F2).** Needs reverse-image search or perceptual hashing against known images.
