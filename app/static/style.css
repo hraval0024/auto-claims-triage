@@ -107,13 +107,7 @@ select { appearance: none; padding-right: 30px; cursor: pointer;
 .form-status { font-size: .88rem; color: var(--fg-2); margin: 10px 0 0; min-height: 1.2em; }
 .form-status.error { color: var(--bad); }
 
-/* ---------- empty + loading ---------- */
-.empty { padding: 40px 32px; }
-.empty-inner { max-width: 520px; }
-.empty h2 { font-size: 1.15rem; margin-bottom: 14px; }
-.steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; color: var(--fg-2); }
-.steps li { display: flex; align-items: center; gap: 12px; margin: 0; }
-.steps span { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--primary-soft); color: var(--primary); font-weight: 700; font-size: .82rem; display: grid; place-items: center; }
+/* ---------- loading ---------- */
 .skeleton { padding: 22px; }
 .skeleton[hidden] { display: none; }
 .sk { background: linear-gradient(90deg, #eef2f6 25%, #f7f9fb 50%, #eef2f6 75%); background-size: 200% 100%; animation: shimmer 1.3s infinite; border-radius: 6px; }

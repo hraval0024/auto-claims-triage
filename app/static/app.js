@@ -89,7 +89,7 @@ function setBusy(busy) {
   b.classList.toggle("busy", busy);
   b.querySelector(".btn-label").textContent = busy ? "Assessing…" : "Assess claim";
   $("loading").hidden = !busy;
-  if (busy) { $("empty-state").hidden = true; $("result").hidden = true; }
+  if (busy) $("result").hidden = true;
 }
 
 // ---------- submitted photos (result area). Same order as the server: files first, then URLs. ----------
@@ -159,7 +159,6 @@ $("claim-form").addEventListener("submit", async (ev) => {
       const msg = body.error || `HTTP ${r.status}`;
       const label = r.status === 429 || r.status === 503 ? "Not run" : "Rejected";
       setStatus("form-status", `${label}: ${msg}`, "error");
-      $("empty-state").hidden = false;
       return;
     }
     setStatus("form-status", "");
@@ -167,7 +166,6 @@ $("claim-form").addEventListener("submit", async (ev) => {
     render(body);
   } catch (e) {
     setStatus("form-status", `Request failed: ${e.message || e}`, "error");
-    $("empty-state").hidden = false;
   } finally {
     clearTimeout(slow);
     setBusy(false);
@@ -182,7 +180,6 @@ function metric(label, value, cls = "") {
 function render(res) {
   CURRENT = res;
   REVIEWED = false;
-  $("empty-state").hidden = true;
   $("result").hidden = false;
   $("result").classList.remove("reviewed");
   setStatus("review-status", "");
@@ -563,7 +560,6 @@ function startNextClaim() {
   CURRENT = null;
   SNAPSHOT = null;
   REVIEWED = false;
-  $("empty-state").hidden = false;
   window.scrollTo({ top: 0, behavior: "smooth" });
   $("files").focus({ preventScroll: true }); // the file input sits inside the dropzone
   loadLog();
