@@ -29,7 +29,8 @@ function el(tag, attrs = {}, ...children) {
 }
 const usd = (x) => "$" + Math.round(x).toLocaleString("en-US");
 const clear = (id) => { const n = $(id); n.replaceChildren(); return n; };
-const conf = (c) => el("span", { class: `conf ${c}` }, `${c} confidence`);
+const conf = (c) => el("span", { class: `conf ${c}`, title: `Model confidence: ${c}` }, c);
+const human = (s) => String(s).replace(/_/g, " ");
 const OUTCOME_TEXT = {
   fast_track_candidate: "Fast-track candidate",
   adjuster_review: "Adjuster review",
@@ -42,11 +43,43 @@ const FLAG_TEXT = {
   embedded_instruction_text: "Text in photo that looks like instructions: ignored",
   route_to_human: "Routed to a human",
 };
+const REGION_TEXT = { standard: "Standard", low_cost: "Low cost", high_cost: "High cost" };
 
-function select(options, value, label) {
+function select(options, value, label, textFn = human) {
   const s = el("select", { "aria-label": label });
-  for (const o of options) s.append(el("option", { value: o, selected: String(o) === String(value) }, o));
+  for (const o of options) s.append(el("option", { value: o, selected: String(o) === String(value) }, textFn(o)));
   return s;
+}
+function setStatus(id, text, kind = "") {
+  const n = $(id);
+  n.textContent = text;
+  n.className = n.className.replace(/\b(ok|error)\b/g, "").trim() + (kind ? " " + kind : "");
+}
+
+// ---------- photo picker: thumbnails (local object URLs, never uploaded until submit) ----------
+let thumbUrls = [];
+function renderThumbs() {
+  thumbUrls.forEach((u) => URL.revokeObjectURL(u));
+  thumbUrls = [];
+  const list = clear("thumbs");
+  [...$("files").files].forEach((f, i) => {
+    const u = URL.createObjectURL(f);
+    thumbUrls.push(u);
+    list.append(el("li", { title: f.name }, el("img", { src: u, alt: `Photo ${i}: ${f.name}` }), el("span", { class: "idx" }, `Photo ${i}`)));
+  });
+}
+$("files").addEventListener("change", renderThumbs);
+const dz = $("dropzone");
+["dragenter", "dragover"].forEach((e) => dz.addEventListener(e, () => dz.classList.add("drag")));
+["dragleave", "drop"].forEach((e) => dz.addEventListener(e, () => dz.classList.remove("drag")));
+
+function setBusy(busy) {
+  const b = $("submit-btn");
+  b.disabled = busy;
+  b.classList.toggle("busy", busy);
+  b.querySelector(".btn-label").textContent = busy ? "Assessing…" : "Assess claim";
+  $("loading").hidden = !busy;
+  if (busy) { $("empty-state").hidden = true; $("result").hidden = true; }
 }
 
 // ---------- submit ----------
@@ -57,70 +90,79 @@ $("claim-form").addEventListener("submit", async (ev) => {
   for (const u of $("urls").value.split("\n").map((s) => s.trim()).filter(Boolean)) fd.append("urls", u);
   fd.append("region", $("region").value);
   if (![...fd.keys()].some((k) => k === "files" || k === "urls")) {
-    $("form-status").textContent = "Add at least one photo or URL.";
+    setStatus("form-status", "Add at least one photo or URL.", "error");
     return;
   }
-  $("submit-btn").disabled = true;
-  $("form-status").textContent = "Assessing... (a single photo usually takes 5-15 s; several photos take longer)";
-  const slow = setTimeout(() => { $("form-status").textContent = "Still working: the model is slow right now. If it takes over a minute, the claim is routed to a human adjuster instead."; }, 20000);
+  setBusy(true);
+  setStatus("form-status", "A single photo usually takes 5-15 s; several photos take longer.");
+  const slow = setTimeout(() => { setStatus("form-status", "Still working: the model is slow right now. If it takes over a minute, the claim is routed to a human adjuster instead."); }, 20000);
   try {
     const r = await api("/api/claims", { method: "POST", body: fd });
     const body = await r.json();
     if (!r.ok) {
       const msg = body.error || `HTTP ${r.status}`;
       const label = r.status === 429 || r.status === 503 ? "Not run" : "Rejected";
-      $("form-status").textContent = `${label}: ${msg}`;
-      $("result").hidden = true;
+      setStatus("form-status", `${label}: ${msg}`, "error");
+      $("empty-state").hidden = false;
       return;
     }
-    $("form-status").textContent = "";
+    setStatus("form-status", "");
     render(body);
   } catch (e) {
-    $("form-status").textContent = `Request failed: ${e.message || e}`;
+    setStatus("form-status", `Request failed: ${e.message || e}`, "error");
+    $("empty-state").hidden = false;
   } finally {
     clearTimeout(slow);
-    $("submit-btn").disabled = false;
+    setBusy(false);
   }
 });
 
 // ---------- render ----------
+function metric(label, value, cls = "") {
+  return el("span", { class: `metric ${cls}` }, label, el("strong", {}, value));
+}
+
 function render(res) {
   CURRENT = res;
+  $("empty-state").hidden = true;
   $("result").hidden = false;
-  $("review-status").textContent = "";
+  setStatus("review-status", "");
   $("boundary").textContent = res.boundary_notice;
 
   const bar = clear("summary-bar");
   const spend = (res.usage ? res.usage.cost_usd : 0) + (res.llm_baseline && res.llm_baseline.usage ? res.llm_baseline.usage.cost_usd : 0);
   bar.append(
-    el("span", {}, "Status: ", el("strong", {}, res.status)),
-    el("span", {}, "Latency: ", el("strong", {}, (res.latency_ms / 1000).toFixed(1) + " s")),
-    el("span", {}, "Model cost for this request: ", el("strong", {}, "$" + spend.toFixed(4)), res.usage && res.usage.cached ? " (identical photos seen before: no model call)" : ""),
-    el("span", { class: "muted" }, "Request ", res.audit.request_id),
+    metric("Latency", (res.latency_ms / 1000).toFixed(1) + " s"),
+    metric("Model cost", "$" + spend.toFixed(4) + (res.usage && res.usage.cached ? " · cached" : "")),
+    metric("Model", res.audit.model_id, "mono"),
+    metric("Request", res.audit.request_id.slice(0, 8), "mono"),
   );
+  if (res.usage && res.usage.cached) bar.lastChild.title = "Identical photos seen before: no model call";
 
   renderRouting(res.routing);
 
   const gate = clear("gate");
   if (res.status !== "ok") {
-    const box = el("div", { class: "box warn" }, el("strong", {}, res.status === "error" ? "Automated assessment unavailable" : "These photos can't be assessed"));
+    const box = el("div", { class: "box warn", role: "alert" }, el("strong", {}, res.status === "error" ? "Automated assessment unavailable" : "These photos can't be assessed"));
     if (res.error) box.append(el("p", {}, res.error));
-    if (res.gate.reasons.length) box.append(el("p", {}, "Why:"), el("ul", {}, res.gate.reasons.map((r) => el("li", {}, r))));
-    if (res.gate.retake_advice.length) box.append(el("p", {}, "What to send instead:"), el("ul", {}, res.gate.retake_advice.map((r) => el("li", {}, r))));
+    if (res.gate.reasons.length) box.append(el("p", { class: "box-label" }, "Why"), el("ul", {}, res.gate.reasons.map((r) => el("li", {}, r))));
+    if (res.gate.retake_advice.length) box.append(el("p", { class: "box-label" }, "What to send instead"), el("ul", {}, res.gate.retake_advice.map((r) => el("li", {}, r))));
     gate.append(box);
   } else if (res.gate.reasons.length) {
-    gate.append(el("div", { class: "box" }, el("strong", {}, "Photo notes"), el("ul", {}, res.gate.reasons.map((r) => el("li", {}, r)))));
+    gate.append(el("div", { class: "box info" }, el("strong", {}, "Photo notes"), el("ul", {}, res.gate.reasons.map((r) => el("li", {}, r)))));
   }
   const warnings = res.prechecks.flatMap((p) => p.warnings);
-  if (warnings.length) gate.append(el("p", { class: "muted" }, "Photo checks: " + warnings.join(" ")));
+  if (warnings.length) gate.append(el("p", { class: "muted prechecks" }, "Photo checks: " + warnings.join(" ")));
 
   const flags = clear("flags");
-  if (res.flags.length) flags.append(el("div", {}, "Flags: ", res.flags.map((f) => el("span", { class: "chip" }, FLAG_TEXT[f] || f))));
+  if (res.flags.length) flags.append(el("div", { class: "flagrow" }, el("span", { class: "small muted" }, "Flags"), res.flags.map((f) => el("span", { class: "chip" }, FLAG_TEXT[f] || human(f)))));
   const conflicts = clear("conflicts");
   if (res.conflicts.length) conflicts.append(el("div", { class: "box bad" }, el("strong", {}, "Photos disagree"), el("ul", {}, res.conflicts.map((c) => el("li", {}, c)))));
 
-  $("assessment").hidden = res.status !== "ok";
-  if (res.status === "ok") {
+  const ok = res.status === "ok";
+  $("assessment").hidden = !ok;
+  $("vehicle-card").hidden = !ok;
+  if (ok) {
     renderVehicle(res.vehicle);
     renderDamage(res.damage);
     $("summary-text").value = res.damage_summary || "";
@@ -130,59 +172,73 @@ function render(res) {
   renderBaseline(res.llm_baseline);
 
   const rr = clear("review-region");
-  for (const r of VOCAB.regions) rr.append(el("option", { value: r, selected: res.cost && res.cost.region === r }, r));
+  for (const r of VOCAB.regions) rr.append(el("option", { value: r, selected: res.cost ? res.cost.region === r : r === "standard" }, REGION_TEXT[r] || human(r)));
   $("accept-btn").disabled = false;
   $("reject-btn").disabled = false;
-  $("audit").textContent = JSON.stringify(res.audit, null, 2);
+  renderAudit(res.audit);
+  $("result").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function renderRouting(routing) {
   const n = clear("routing");
-  n.append(
-    el("h3", {}, "Recommended next step: ", el("span", { class: `badge ${routing.outcome}` }, OUTCOME_TEXT[routing.outcome] || routing.outcome)),
-    el("ul", {}, routing.reasons.map((r) => el("li", {}, r))),
+  n.className = `card decision ${routing.outcome}`;
+  // Filter: DOM append(null) would insert the text "null".
+  n.append(...[
+    el("div", { class: "decision-top" },
+      el("div", {},
+        el("div", { class: "eyebrow" }, "Recommended next step"),
+        el("h3", {}, el("span", { class: `badge ${routing.outcome}` }, OUTCOME_TEXT[routing.outcome] || routing.outcome)))),
+    el("ul", { class: "reasons" }, routing.reasons.map((r) => el("li", {}, r))),
     (routing.notes || []).length ? el("div", { class: "box warn" }, el("strong", {}, "Also recommended"),
       el("ul", {}, routing.notes.map((x) => el("li", {}, x)))) : null,
-    el("p", { class: "muted" }, `Rules ${routing.rules_version}. A recommendation, not a decision.`),
-  );
+    el("p", { class: "muted rules" }, `Rules ${routing.rules_version}. A recommendation, not a decision.`),
+  ].filter(Boolean));
 }
 
 function renderVehicle(v) {
   const t = clear("vehicle-table");
-  t.append(el("tr", {}, el("th", {}, "Field"), el("th", {}, "Value (editable)"), el("th", {}, "Confidence")));
   for (const k of ["make", "model", "color"]) {
-    t.append(el("tr", {}, el("td", {}, k), el("td", {}, el("input", { type: "text", id: `veh-${k}`, value: v[k].value, "aria-label": `vehicle ${k}` })), el("td", {}, conf(v[k].confidence))));
+    t.append(el("tr", {}, el("th", { scope: "row" }, k), el("td", {}, el("input", { type: "text", id: `veh-${k}`, value: v[k].value, "aria-label": `vehicle ${k}` })), el("td", {}, conf(v[k].confidence))));
   }
-  t.append(el("tr", {}, el("td", {}, "year range"),
-    el("td", {},
-      el("input", { type: "number", id: "veh-ys", value: v.year_range.start ?? "", "aria-label": "year from", style: "width:6em" }), " to ",
-      el("input", { type: "number", id: "veh-ye", value: v.year_range.end ?? "", "aria-label": "year to", style: "width:6em" })),
+  t.append(el("tr", {}, el("th", { scope: "row" }, "Year range"),
+    el("td", {}, el("div", { class: "years" },
+      el("input", { type: "number", id: "veh-ys", value: v.year_range.start ?? "", "aria-label": "year from", placeholder: "from" }), "to",
+      el("input", { type: "number", id: "veh-ye", value: v.year_range.end ?? "", "aria-label": "year to", placeholder: "to" }))),
     el("td", {}, conf(v.year_range.confidence))));
+}
+
+function sevBar(s) {
+  return el("span", { class: "sev-bar", "data-s": String(s), "aria-hidden": "true" }, el("i"), el("i"), el("i"), el("i"));
 }
 
 function damageRow(item, origIndex) {
   const tr = el("tr", { "data-orig": origIndex === null ? "" : String(origIndex) });
   const rm = el("input", { type: "checkbox", "aria-label": "remove this item", onchange: () => tr.classList.toggle("removed", rm.checked) });
+  const sevSel = select(VOCAB.severities, item.severity, "severity", String);
+  const bar = sevBar(item.severity);
+  sevSel.addEventListener("change", () => bar.setAttribute("data-s", sevSel.value));
   tr.append(
     el("td", {}, select(VOCAB.panels, item.panel, "panel")),
     el("td", {}, select(VOCAB.sides, item.side, "side")),
     el("td", {}, select(VOCAB.damage_types, item.damage_type, "damage type")),
-    el("td", {}, select(VOCAB.severities, item.severity, "severity")),
-    el("td", {}, item.confidence ? conf(item.confidence) : el("span", { class: "muted" }, "added by adjuster")),
-    el("td", { class: "muted" }, item.photo_indices ? item.photo_indices.join(", ") : ""),
-    el("td", { class: "muted" }, (item.cues || []).join(" | ")),
-    el("td", {}, el("label", {}, rm, " remove")),
+    el("td", {}, el("span", { class: "sev" }, sevSel, bar)),
+    el("td", {}, item.confidence ? conf(item.confidence) : el("span", { class: "conf adjuster" }, "adjuster")),
+    el("td", { class: "num muted" }, item.photo_indices ? item.photo_indices.join(", ") : "–"),
+    el("td", { class: "cues" }, (item.cues || []).join(" · ")),
+    el("td", { class: "rm-cell" }, rm),
   );
   return tr;
 }
 
 function renderDamage(items) {
   const t = clear("damage-table");
-  t.append(el("tr", {}, ["Panel", "Side (vehicle's own)", "Type", "Severity 1-4", "Confidence", "Photos", "Visible cues", ""].map((h) => el("th", {}, h))));
-  if (!items.length) t.append(el("tr", {}, el("td", { colspan: 8, class: "muted" }, "No visible damage reported.")));
+  t.append(el("tr", {}, ["Panel", "Side", "Type", "Severity 1-4", "Confidence", "Photo", "Visible cues", "Remove"].map((h) => el("th", {}, h))));
+  if (!items.length) t.append(el("tr", {}, el("td", { colspan: 8, class: "empty-row" }, "No visible damage reported.")));
   items.forEach((it, i) => t.append(damageRow(it, i)));
 }
 $("add-item").addEventListener("click", () => {
+  const empty = $("damage-table").querySelector(".empty-row");
+  if (empty) empty.parentElement.remove();
   $("damage-table").append(damageRow({ panel: "other_unknown", side: "unknown", damage_type: "dent", severity: 1 }, null));
 });
 
@@ -190,29 +246,33 @@ function renderCost(cost) {
   const n = clear("cost");
   const built = clear("cost-built");
   if (!cost) {
-    n.append(el("p", { class: "muted" }, "No estimate: the photos could not be assessed."));
+    n.append(el("div", { class: "cost-range text" }, "No estimate"), el("p", { class: "cost-sub" }, "The photos could not be assessed."));
     $("cost-details").hidden = true;
     return;
   }
   $("cost-details").hidden = false;
   if (cost.status === "estimated") {
     // Range only. mid_usd stays in the API (routing/eval); it is deliberately not shown.
-    n.append(el("div", { class: "cost-range" }, `${usd(cost.low_usd)} – ${usd(cost.high_usd)}`));
+    n.append(el("div", { class: "cost-range" }, `${usd(cost.low_usd)} – ${usd(cost.high_usd)}`),
+      el("p", { class: "cost-sub" }, `Low to high range · ${(cost.high_usd / cost.low_usd).toFixed(1)}× spread reflects hidden-damage and parts uncertainty`));
   } else if (cost.status === "no_damage") {
-    n.append(el("div", { class: "cost-range" }, "No visible damage to price"));
+    n.append(el("div", { class: "cost-range text" }, "No visible damage to price"));
   } else {
-    n.append(el("div", { class: "cost-range" }, "Cost not estimable"),
-      el("p", {}, `${usd(cost.partial_low_usd)} – ${usd(cost.partial_high_usd)} `, el("strong", {}, `(${cost.partial_label})`)),
+    n.append(el("div", { class: "cost-range text" }, "Cost not estimable"),
+      el("p", { class: "cost-partial" }, `${usd(cost.partial_low_usd)} – ${usd(cost.partial_high_usd)} `, el("strong", {}, `(${cost.partial_label})`)),
       el("ul", {}, cost.not_estimable_reasons.map((r) => el("li", {}, r))));
   }
-  n.append(el("p", { class: "muted" }, cost.assumption_notice));
+  n.append(el("p", { class: "assumption-note" }, cost.assumption_notice));
 
+  const meta = [`Table ${cost.cost_table_version}`, `Region: ${REGION_TEXT[cost.region] || human(cost.region)}`,
+    `Labor ${usd(cost.labor_rate_usd_per_hour)}/h`, `Vehicle class: ${human(cost.vehicle_class)}`];
+  if (cost.hidden_damage_uplift_applied) meta.push("Hidden-damage uplift on high end");
+  if (cost.claim_minimum_applied) meta.push("$100 claim minimum applied");
   built.append(
-    el("p", {}, `Table ${cost.cost_table_version} · region ${cost.region} · labor ${usd(cost.labor_rate_usd_per_hour)}/h · vehicle class ${cost.vehicle_class}` +
-      (cost.hidden_damage_uplift_applied ? " · hidden-damage uplift applied to the high end" : "") +
-      (cost.claim_minimum_applied ? " · $100 claim minimum applied" : "")),
+    el("div", { class: "meta-line" }, meta.map((m) => el("span", {}, m))),
     el("h4", {}, "Drivers"),
-    el("ul", {}, cost.lines.map((l) => el("li", {}, l.low_usd === null ? l.driver : `${l.driver} → ${usd(l.low_usd)} – ${usd(l.high_usd)}`))),
+    el("ul", { class: "drivers" }, cost.lines.map((l) => el("li", {}, el("span", {}, l.driver),
+      l.low_usd === null ? null : el("span", { class: "amt" }, `${usd(l.low_usd)} – ${usd(l.high_usd)}`)))),
     el("h4", {}, "Assumptions and caveats"),
     el("ul", {}, cost.caveats.map((c) => el("li", {}, c))),
   );
@@ -221,10 +281,19 @@ function renderCost(cost) {
 function renderBaseline(b) {
   const n = clear("baseline");
   if (!b) return; // hidden unless the server-side baseline flag is on
-  const box = el("div", { class: "box" }, el("strong", {}, "LLM free-guess baseline (eval only)"), el("p", { class: "muted" }, b.notice));
+  const box = el("div", { class: "box" }, el("strong", {}, "LLM free-guess baseline (eval only)"), el("p", { class: "muted small" }, b.notice));
   if (b.guess) box.append(el("p", {}, `${usd(b.guess.low_usd)} – ${usd(b.guess.high_usd)} (point ${usd(b.guess.point_usd)}): ${b.guess.rationale}`));
   else box.append(el("p", {}, `Baseline failed: ${b.error}`));
   n.append(box);
+}
+
+function renderAudit(a) {
+  const dl = clear("audit-kv");
+  const rows = [["Request id", a.request_id], ["Timestamp", a.timestamp], ["Model", `${a.model_id} (effort ${a.model_effort})`],
+    ["Prompt", a.prompt_version], ["Schema", a.schema_version], ["Cost table", a.cost_table_version],
+    ["Input hashes", a.input_hashes.map((h) => h.slice(0, 16) + "…").join(", ")]];
+  for (const [k, v] of rows) dl.append(el("dt", {}, k), el("dd", {}, v));
+  $("audit").textContent = JSON.stringify(a, null, 2);
 }
 
 // ---------- review ----------
@@ -253,12 +322,12 @@ async function sendReview(decision) {
     });
     const body = await r.json();
     if (!r.ok) throw new Error(body.error || `HTTP ${r.status}`);
-    $("review-status").textContent = `${decision === "accept" ? "Accepted" : "Rejected"}: ${body.corrections.length} correction(s) logged at ${body.logged_at}. ${body.note}`;
+    setStatus("review-status", `${decision === "accept" ? "Accepted" : "Rejected"}: ${body.corrections.length} correction(s) logged at ${body.logged_at}. ${body.note}`, "ok");
     renderRouting(body.routing);
     renderCost(body.cost);
     loadLog();
   } catch (e) {
-    $("review-status").textContent = `Review failed: ${e.message}`;
+    setStatus("review-status", `Review failed: ${e.message}`, "error");
     $("accept-btn").disabled = $("reject-btn").disabled = false;
   }
 }
@@ -271,13 +340,13 @@ async function loadLog() {
   t.append(el("tr", {}, ["Time (UTC)", "Request", "Field", "Original", "Corrected", "Decision"].map((h) => el("th", {}, h))));
   try {
     const { corrections } = await (await api("/api/corrections?limit=50")).json();
-    if (!corrections.length) t.append(el("tr", {}, el("td", { colspan: 6, class: "muted" }, "No corrections yet.")));
+    if (!corrections.length) t.append(el("tr", {}, el("td", { colspan: 6, class: "empty-row" }, "No corrections yet.")));
     for (const c of corrections) {
-      t.append(el("tr", {}, el("td", {}, c.created_at.replace("T", " ").slice(0, 19)), el("td", { class: "muted" }, c.request_id.slice(0, 8)),
-        el("td", {}, c.field), el("td", {}, c.original ?? ""), el("td", {}, c.corrected ?? ""), el("td", {}, c.decision ?? "")));
+      t.append(el("tr", {}, el("td", { class: "num" }, c.created_at.replace("T", " ").slice(0, 19)), el("td", { class: "mono" }, c.request_id.slice(0, 8)),
+        el("td", {}, human(c.field)), el("td", {}, c.original ?? ""), el("td", {}, c.corrected ?? ""), el("td", {}, c.decision ?? "")));
     }
   } catch (e) {
-    t.append(el("tr", {}, el("td", { colspan: 6 }, `Could not load the log: ${e}`)));
+    t.append(el("tr", {}, el("td", { colspan: 6, class: "empty-row" }, `Could not load the log: ${e}`)));
   }
 }
 $("refresh-log").addEventListener("click", loadLog);

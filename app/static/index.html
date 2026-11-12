@@ -7,90 +7,158 @@
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-<header>
-  <h1>Vehicle damage claims triage <span class="tag">prototype</span>
-    <form method="post" action="/logout" class="logout"><button type="submit" class="secondary small">Sign out</button></form></h1>
-  <p class="boundary" id="boundary">Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.</p>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 3 6v6c0 5 3.8 9.4 9 10 5.2-.6 9-5 9-10V6l-9-4Z" fill="currentColor" opacity=".18"/><path d="M12 2 3 6v6c0 5 3.8 9.4 9 10 5.2-.6 9-5 9-10V6l-9-4Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m8 12 3 3 5-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="brand-name">Claims Triage</span>
+      <span class="env-pill">Prototype</span>
+    </div>
+    <form method="post" action="/logout" class="logout"><button type="submit" class="btn ghost small">Sign out</button></form>
+  </div>
 </header>
 
-<main>
-  <section aria-labelledby="submit-h">
-    <h2 id="submit-h">1. Submit photos for one claim</h2>
-    <form id="claim-form">
-      <div class="row">
-        <label for="files">Upload photos (JPEG, PNG or WebP; up to 5)</label>
-        <input id="files" name="files" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+<div class="boundary-strip">
+  <div class="boundary-inner">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5M10 6.2v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <p class="boundary" id="boundary">Triage aid only. This system never decides coverage, liability, denial or payment. A human adjuster reviews anything uncertain.</p>
+  </div>
+</div>
+
+<main class="layout">
+  <aside class="intake">
+    <section class="card" aria-labelledby="submit-h">
+      <div class="card-head">
+        <h2 id="submit-h">New claim</h2>
+        <span class="muted small">Photos for one vehicle</span>
       </div>
-      <div class="row">
-        <label for="urls">Or paste image URLs (one per line)</label>
-        <textarea id="urls" name="urls" rows="2" placeholder="https://..."></textarea>
+      <form id="claim-form" class="card-body">
+        <label class="dropzone" id="dropzone" for="files">
+          <input id="files" name="files" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <span class="dz-title">Drop photos or <u>browse</u></span>
+          <span class="dz-sub">JPEG, PNG or WebP · up to 5 · not stored</span>
+        </label>
+        <ul id="thumbs" class="thumbs" aria-label="Selected photos"></ul>
+
+        <div class="field">
+          <label for="urls">Or paste image URLs <span class="muted">(one per line)</span></label>
+          <textarea id="urls" name="urls" rows="2" placeholder="https://…"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="region">Region <span class="muted">(labor-rate tier)</span></label>
+          <select id="region" name="region">
+            <option value="standard" selected>Standard</option>
+            <option value="low_cost">Low cost</option>
+            <option value="high_cost">High cost</option>
+          </select>
+        </div>
+
+        <button type="submit" id="submit-btn" class="btn primary block"><span class="spinner" aria-hidden="true"></span><span class="btn-label">Assess claim</span></button>
+        <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </aside>
+
+  <div class="workspace">
+    <section id="empty-state" class="card empty">
+      <div class="empty-inner">
+        <h2>No claim assessed yet</h2>
+        <ol class="steps">
+          <li><span>1</span>Add photos of the damaged vehicle</li>
+          <li><span>2</span>Review the next step, findings and cost range</li>
+          <li><span>3</span>Correct anything wrong, then accept or reject</li>
+        </ol>
       </div>
-      <div class="row inline">
-        <label for="region">Region (labor rate tier)</label>
-        <select id="region" name="region">
-          <option value="standard" selected>standard</option>
-          <option value="low_cost">low_cost</option>
-          <option value="high_cost">high_cost</option>
-        </select>
-        <button type="submit" id="submit-btn">Assess claim</button>
+    </section>
+
+    <section id="loading" class="card skeleton" hidden aria-hidden="true">
+      <div class="sk sk-title"></div><div class="sk sk-line"></div><div class="sk sk-line short"></div>
+      <div class="sk-grid"><div class="sk sk-block"></div><div class="sk sk-block"></div></div>
+    </section>
+
+    <section id="result" hidden aria-labelledby="result-h">
+      <div class="result-head">
+        <h2 id="result-h">Assessment</h2>
+        <div id="summary-bar" class="metrics"></div>
       </div>
-      <p id="form-status" role="status" aria-live="polite"></p>
-    </form>
-  </section>
 
-  <section id="result" hidden aria-labelledby="result-h">
-    <h2 id="result-h">2. Result</h2>
-    <div id="summary-bar" class="summary-bar"></div>
-    <div id="routing"></div>
-    <div id="gate"></div>
-    <div id="flags"></div>
-    <div id="conflicts"></div>
+      <div id="routing" class="card decision"></div>
+      <div id="gate"></div>
+      <div id="flags"></div>
+      <div id="conflicts"></div>
 
-    <div id="assessment">
-      <h3>Vehicle</h3>
-      <table id="vehicle-table" class="grid"></table>
+      <div class="grid-2">
+        <section class="card" id="vehicle-card">
+          <div class="card-head"><h3>Vehicle</h3><span class="muted small">Editable · "unknown" is a valid answer</span></div>
+          <div class="card-body"><table id="vehicle-table" class="kv"></table></div>
+        </section>
 
-      <h3>Damage</h3>
-      <table id="damage-table" class="grid"></table>
-      <button type="button" id="add-item">+ Add damage item</button>
+        <section class="card">
+          <div class="card-head"><h3>Estimated repair cost</h3><span class="assumption-pill" title="Stand-in pricing table, not real estimating data">Assumption-based</span></div>
+          <div class="card-body">
+            <div id="cost"></div>
+            <details id="cost-details" class="disclosure">
+              <summary>How this estimate was built</summary>
+              <div id="cost-built"></div>
+            </details>
+          </div>
+        </section>
+      </div>
 
-      <h3><label for="summary-text">Damage summary</label></h3>
-      <textarea id="summary-text" rows="2"></textarea>
+      <div id="assessment">
+        <section class="card">
+          <div class="card-head">
+            <div><h3>Damage findings</h3><span class="muted small">Side is the vehicle's own left/right (driver's view), not the camera's</span></div>
+            <button type="button" id="add-item" class="btn ghost small">+ Add item</button>
+          </div>
+          <div class="table-wrap"><table id="damage-table" class="data"></table></div>
+        </section>
 
-      <h3><label for="na-text">Not visible / cannot assess (one per line)</label></h3>
-      <textarea id="na-text" rows="3"></textarea>
-    </div>
+        <div class="grid-2">
+          <section class="card">
+            <div class="card-head"><h3><label for="summary-text">Damage summary</label></h3></div>
+            <div class="card-body"><textarea id="summary-text" rows="3"></textarea></div>
+          </section>
+          <section class="card">
+            <div class="card-head"><h3><label for="na-text">Not visible / cannot assess</label></h3><span class="muted small">One per line</span></div>
+            <div class="card-body"><textarea id="na-text" rows="3"></textarea></div>
+          </section>
+        </div>
+      </div>
 
-    <h3>Estimated repair cost</h3>
-    <div id="cost"></div>
-    <details id="cost-details">
-      <summary>How this estimate was built</summary>
-      <div id="cost-built"></div>
-    </details>
+      <div id="baseline"></div>
 
-    <div id="baseline"></div>
+      <section class="card review-actions" aria-labelledby="review-h">
+        <div class="review-text">
+          <h3 id="review-h">Adjuster review</h3>
+          <p class="hint">Edit any field above, then accept (corrections are logged and the estimate is re-priced) or reject.</p>
+        </div>
+        <div class="review-controls">
+          <label for="review-region" class="small muted">Re-price region</label>
+          <select id="review-region"></select>
+          <button type="button" id="reject-btn" class="btn secondary">Reject result</button>
+          <button type="button" id="accept-btn" class="btn primary">Accept with my corrections</button>
+        </div>
+        <p id="review-status" class="review-status" role="status" aria-live="polite"></p>
+      </section>
 
-    <div class="review-actions">
-      <h3>3. Adjuster review</h3>
-      <p class="hint">Edit any field above, then accept (corrections are logged and the estimate is re-priced) or reject.</p>
-      <label for="review-region">Region for re-pricing</label>
-      <select id="review-region"></select>
-      <button type="button" id="accept-btn">Accept with my corrections</button>
-      <button type="button" id="reject-btn" class="secondary">Reject result</button>
-      <p id="review-status" role="status" aria-live="polite"></p>
-    </div>
+      <details class="card disclosure audit">
+        <summary>Audit details</summary>
+        <div class="card-body"><dl id="audit-kv" class="audit-kv"></dl><pre id="audit"></pre></div>
+      </details>
+    </section>
 
-    <details>
-      <summary>Audit details</summary>
-      <pre id="audit"></pre>
-    </details>
-  </section>
-
-  <section aria-labelledby="log-h">
-    <h2 id="log-h">Corrections log <button type="button" id="refresh-log" class="secondary small">Refresh</button></h2>
-    <p class="hint">Every adjuster correction: original value, corrected value, timestamp, request id. This log is eval data.</p>
-    <table id="log-table" class="grid"></table>
-  </section>
+    <section class="card" aria-labelledby="log-h">
+      <div class="card-head">
+        <h2 id="log-h">Corrections log</h2>
+        <button type="button" id="refresh-log" class="btn ghost small">Refresh</button>
+      </div>
+      <p class="hint pad">Every adjuster correction: original value, corrected value, timestamp, request id. This log is eval data.</p>
+      <div class="table-wrap"><table id="log-table" class="data"></table></div>
+    </section>
+  </div>
 </main>
 <script src="/static/app.js"></script>
 </body>
