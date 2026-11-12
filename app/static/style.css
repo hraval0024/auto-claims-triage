@@ -331,3 +331,22 @@ input:disabled, select:disabled, textarea:disabled { background-color: var(--sur
 .audit-kv dt { color: var(--muted); }
 .audit-kv dd { margin: 0; font-family: var(--mono); font-size: .8rem; word-break: break-all; }
 pre { white-space: pre-wrap; word-break: break-all; font: .76rem/1.5 var(--mono); background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px; margin: 0; color: var(--fg-2); }
+
+/* ---------- adjuster-set final estimate ---------- */
+.range-field { border: 0; padding: 0; margin: 12px 0 0; min-width: 0; }
+.range-field legend { padding: 0; font-size: .88rem; font-weight: 550; color: var(--fg-2); margin-bottom: 6px; }
+.range-field:disabled { opacity: .6; }
+.range-inputs { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+.money { display: flex; flex-direction: column; gap: 4px; }
+.money-label { font-size: .8rem; color: var(--muted); }
+.money-box { position: relative; display: block; }
+.money-box > span { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: .93rem; pointer-events: none; }
+.money-box input { width: 9.5em; padding-left: 22px; font-variant-numeric: tabular-nums; }
+.money-box input.invalid { border-color: var(--bad); box-shadow: 0 0 0 3px rgba(185, 28, 28, .12); }
+.range-sep { color: var(--muted); padding-bottom: 9px; }
+.linklike { background: none; border: 0; padding: 4px 2px 9px; color: var(--primary); font-weight: 600; font-size: .86rem; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.linklike:disabled { color: var(--muted); cursor: default; }
+.range-field .hint { margin-top: 6px; }
+.adjuster-estimate { margin: 10px 0 0; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--info-soft); border: 1px solid var(--info-line); color: var(--fg); font-weight: 600; font-size: .92rem; }
+.adjuster-estimate[hidden] { display: none; }
+@media (max-width: 480px) { .money { flex: 1; } .money-box input { width: 100%; } .range-sep { display: none; } }

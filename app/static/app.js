@@ -239,6 +239,8 @@ function render(res) {
     fr.append(el("option", { value: o, selected: sys }, OUTCOME_TEXT[o] + (sys ? " (system recommendation)" : "")));
   }
   $("review-notes").value = "";
+  initRange(res);
+  $("adjuster-estimate").hidden = true;
   setReadOnly(false);
   $("review-form").hidden = false;
   $("review-card").hidden = false;
@@ -447,15 +449,80 @@ function needsPersonWarning() {
   return sev4 || CURRENT.flags.length > 0 || ["possible_total_loss", "adjuster_review"].includes(CURRENT.routing.outcome);
 }
 
+// ---------- adjuster-set final estimate (accept only; never re-routes, see app/review.py) ----------
+let SYS_RANGE = null; // {low, high} in whole dollars when the system priced the claim, else null
+let RANGE_TOUCHED = false; // only an edited range counts; untouched = send null so a re-priced range stands
+const USD_MAX = 500000;
+const fmtRange = (lo, hi) => (lo === null || lo === undefined ? "not estimated" : `${usd(lo)} – ${usd(hi)}`);
+function parseUsd(text) {
+  const t = text.replace(/[$,\s]/g, "");
+  if (t === "") return null;
+  return /^\d+$/.test(t) ? Number(t) : NaN;
+}
+function setRangeInputs(r) {
+  $("range-low").value = r ? r.low.toLocaleString("en-US") : "";
+  $("range-high").value = r ? r.high.toLocaleString("en-US") : "";
+}
+function setRangeError(msg) {
+  $("range-error").textContent = msg;
+  for (const id of ["range-low", "range-high"]) {
+    $(id).classList.toggle("invalid", !!msg);
+    $(id).setAttribute("aria-invalid", String(!!msg));
+  }
+}
+function initRange(res) {
+  const c = res.cost;
+  SYS_RANGE = c && c.status === "estimated" ? { low: Math.round(c.low_usd), high: Math.round(c.high_usd) } : null;
+  RANGE_TOUCHED = false;
+  setRangeInputs(SYS_RANGE);
+  setRangeError("");
+  $("range-field").disabled = !c; // gate_failed / error: nothing to estimate
+  $("range-help").textContent = !c ? "No estimate: the photos could not be assessed."
+    : SYS_RANGE ? "Pre-filled with the system range. Change it to set your own estimate. Not a payout amount."
+    : "The system could not price this claim. Enter your own range if you can. Not a payout amount.";
+}
+// changed = edited away from the pre-fill; error = why it can't be sent yet.
+function rangeState() {
+  if (!RANGE_TOUCHED || $("range-field").disabled) return { changed: false };
+  const low = parseUsd($("range-low").value), high = parseUsd($("range-high").value);
+  if (low === null && high === null) return { changed: false }; // both cleared: the system range (if any) stands
+  if (SYS_RANGE && low === SYS_RANGE.low && high === SYS_RANGE.high) return { changed: false };
+  let error = "";
+  if (Number.isNaN(low) || Number.isNaN(high)) error = "Enter whole dollars, for example 1,250.";
+  else if ((low === null) !== (high === null)) error = "Enter both a low and a high value.";
+  else if (low > USD_MAX || high > USD_MAX) error = "Enter a value between $0 and $500,000.";
+  else if (low > high) error = "Low must not be higher than High.";
+  return { changed: true, low, high, error };
+}
+for (const id of ["range-low", "range-high"]) {
+  $(id).addEventListener("input", () => {
+    RANGE_TOUCHED = true;
+    if ($("range-error").textContent) setRangeError(rangeState().error || "");
+  });
+  $(id).addEventListener("blur", () => { const v = parseUsd($(id).value); if (Number.isFinite(v)) $(id).value = v.toLocaleString("en-US"); });
+}
+$("range-reset").addEventListener("click", () => {
+  setRangeInputs(SYS_RANGE);
+  RANGE_TOUCHED = false;
+  setRangeError("");
+  updateReviewUI();
+});
+
+// "2 corrections, route override and range change"
+function changePhrase(n, route, range) {
+  const parts = [];
+  if (n) parts.push(plural(n, "correction"));
+  if (route) parts.push("route override");
+  if (range) parts.push("range change");
+  return parts.length < 2 ? parts[0] || "" : `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
+}
+
 function updateReviewUI() {
   if (!CURRENT || REVIEWED || !SNAPSHOT) return;
   const n = countChanges(SNAPSHOT, formState());
   const ov = isOverride();
-  let label = "Accept as is";
-  if (n && ov) label = `Accept with ${plural(n, "correction")} and route override`;
-  else if (n) label = `Accept with ${plural(n, "correction")}`;
-  else if (ov) label = "Accept with route override";
-  $("accept-btn").textContent = label;
+  const phrase = changePhrase(n, ov, rangeState().changed);
+  $("accept-btn").textContent = phrase ? `Accept with ${phrase}` : "Accept as is";
   $("override-hint").hidden = !ov;
   $("fasttrack-warn").hidden = !(ov && $("final-route").value === "fast_track_candidate" && needsPersonWarning());
   $("notes-label").textContent = ov ? "Adjuster notes (required: reason for the override)" : "Adjuster notes (optional)";
@@ -487,13 +554,16 @@ async function sendReview(decision) {
   const notes = $("review-notes").value.trim();
   // Override applies to Accept only: a reject never sends final_route (the server also refuses it).
   const override = decision === "accept" && isOverride();
-  if (override && !notes) {
-    setNotesError("Add a reason: overriding the system recommendation needs one.");
-    $("review-notes").focus();
-    return;
-  }
+  // The adjuster's range also applies to Accept only: a reject never sends it (the server refuses it too).
+  const range = decision === "accept" ? rangeState() : { changed: false };
+  const notesMissing = override && !notes;
+  if (notesMissing) setNotesError("Add a reason: overriding the system recommendation needs one.");
+  if (range.changed && range.error) setRangeError(range.error);
+  if (range.changed && range.error) { $("range-low").focus(); return; }
+  if (notesMissing) { $("review-notes").focus(); return; }
   const body = { ...collectReview(decision), notes: notes || null };
   if (override) body.final_route = $("final-route").value;
+  if (range.changed) { body.final_low_usd = range.low; body.final_high_usd = range.high; }
   $("accept-btn").disabled = $("reject-btn").disabled = true;
   try {
     const r = await api(`/api/claims/${CURRENT.audit.request_id}/review`, {
@@ -516,13 +586,18 @@ $("review-notes").addEventListener("input", updateNotesCount);
 // ---------- review completion ----------
 let LAST_REVIEW = null;
 
+const fieldCorrections = (list) => list.filter((c) => !c.field.startsWith("estimate."));
+
 function reviewLabel(res) {
-  const n = res.corrections.length;
   if (res.decision === "reject") return "Rejected";
-  if (n && res.route_overridden) return `Accepted with ${plural(n, "correction")} and route override`;
-  if (n) return `Accepted with ${plural(n, "correction")}`;
-  if (res.route_overridden) return "Accepted with route override";
-  return "Accepted as is";
+  const phrase = changePhrase(fieldCorrections(res.corrections).length, res.route_overridden, res.estimate_overridden);
+  return phrase ? `Accepted with ${phrase}` : "Accepted as is";
+}
+
+function estimateText(res) {
+  if (res.estimate_overridden) return `Adjuster-set estimate: ${fmtRange(res.final_low_usd, res.final_high_usd)} (system: ${fmtRange(res.system_low_usd, res.system_high_usd)})`;
+  if (res.final_low_usd !== null && res.final_low_usd !== undefined) return `System range: ${fmtRange(res.final_low_usd, res.final_high_usd)}`;
+  return "Not estimated";
 }
 
 function clearIntake() {
@@ -556,6 +631,9 @@ function showReviewed(res) {
   const route = clear("reviewed-route");
   route.append(el("span", { class: `badge small ${res.final_route}` }, OUTCOME_TEXT[res.final_route]));
   if (res.route_overridden) route.append(el("span", { class: "muted" }, ` Adjuster override. System recommended: ${OUTCOME_TEXT[res.routing.outcome]}`));
+  $("reviewed-estimate").textContent = estimateText(res);
+  $("adjuster-estimate").hidden = !res.estimate_overridden;
+  $("adjuster-estimate").textContent = res.estimate_overridden ? estimateText(res) : "";
   const notes = $("reviewed-notes");
   notes.textContent = res.notes || "None";
   notes.classList.toggle("muted", !res.notes);
@@ -585,6 +663,10 @@ function startNextClaim() {
   setNotesError("");
   setStatus("review-status", "");
   clear("final-route");
+  SYS_RANGE = null;
+  RANGE_TOUCHED = false;
+  setRangeInputs(null);
+  setRangeError("");
   renderOverride(null);
   $("reviewed-card").hidden = true;
   $("readonly-banner").hidden = true;
@@ -616,6 +698,10 @@ function correctionLine(c) {
   if (c.field === "damage[+]") return `Damage added: ${human(n)}`;
   if (c.field === "damage_summary") return `Damage summary: "${o}" → "${n}"`;
   if (c.field === "not_assessable") return `Not visible / cannot assess: ${o} → ${n}`;
+  if ((m = c.field.match(/^estimate\.(low|high)$/))) {
+    const money = (v) => (/^\d+$/.test(String(v)) ? usd(Number(v)) : v);
+    return `Estimate ${m[1]}: ${money(o)} → ${money(n)}`;
+  }
   if (c.field === "cost.region") return `Re-price region: ${REGION_TEXT[c.original] || o} → ${REGION_TEXT[c.corrected] || n}`;
   return `${human(c.field)}: ${o} → ${n}`;
 }
@@ -628,8 +714,9 @@ function routeCell(v) {
 }
 
 function historyRows(v) {
-  const n = v.n_corrections;
-  const decision = (v.decision === "accept" ? "Accepted" : "Rejected") + (n ? `, ${plural(n, "correction")}` : "");
+  const n = fieldCorrections(v.corrections).length; // the estimate rows are shown as "range change"
+  const decision = (v.decision === "accept" ? "Accepted" : "Rejected") + (n ? `, ${plural(n, "correction")}` : "") +
+    (v.estimate_overridden ? ", range change" : "");
   const expandable = v.corrections.length > 0 || !!v.notes || v.route_overridden;
   const detailId = `hist-detail-${v.id}`;
   const row = el("tr", { class: expandable ? "hist-row expandable" : "hist-row" });

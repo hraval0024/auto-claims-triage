@@ -74,6 +74,7 @@
       </div>
       <dl class="reviewed-kv">
         <dt>Final route</dt><dd id="reviewed-route"></dd>
+        <dt>Final estimate</dt><dd id="reviewed-estimate"></dd>
         <dt>Notes</dt><dd id="reviewed-notes"></dd>
       </dl>
       <div class="reviewed-actions">
@@ -114,6 +115,7 @@
           <div class="card-head"><h3>Estimated repair cost</h3><span class="assumption-pill" title="Stand-in pricing table, not real estimating data">Assumption-based</span></div>
           <div class="card-body">
             <div id="cost"></div>
+            <p id="adjuster-estimate" class="adjuster-estimate" hidden></p>
             <details id="cost-details" class="disclosure">
               <summary>How this estimate was built</summary>
               <div id="cost-built"></div>
@@ -172,6 +174,19 @@
               <select id="final-route"></select>
             </div>
           </div>
+          <fieldset class="range-field" id="range-field" aria-describedby="range-help">
+            <legend>Final estimate range <span class="muted">(applies to Accept only)</span></legend>
+            <div class="range-inputs">
+              <label class="money"><span class="money-label">Low</span>
+                <span class="money-box"><span aria-hidden="true">$</span><input id="range-low" type="text" inputmode="numeric" autocomplete="off" aria-describedby="range-error"></span></label>
+              <span class="range-sep" aria-hidden="true">to</span>
+              <label class="money"><span class="money-label">High</span>
+                <span class="money-box"><span aria-hidden="true">$</span><input id="range-high" type="text" inputmode="numeric" autocomplete="off" aria-describedby="range-error"></span></label>
+              <button type="button" id="range-reset" class="linklike">Reset to system range</button>
+            </div>
+            <p id="range-help" class="hint">Pre-filled with the system range. Change it to set your own estimate. Not a payout amount.</p>
+            <span id="range-error" class="field-error" role="alert"></span>
+          </fieldset>
           <p id="override-hint" class="inline-note warn" hidden>Overriding the system recommendation. A reason is required.</p>
           <p id="fasttrack-warn" class="inline-note bad" role="alert" hidden>The system found damage or flags that normally need a person.</p>
 
