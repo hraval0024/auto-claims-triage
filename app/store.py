@@ -217,3 +217,24 @@ def recent_reviews(limit: int = 100) -> list[dict]:
     with _lock, _connect() as c:
         rows = c.execute("SELECT * FROM reviews ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
     return [{**dict(r), "route_overridden": bool(r["route_overridden"])} for r in rows]
+
+
+def reviews_with_corrections(limit: int = 20) -> list[dict]:
+    """Newest reviews first, each with its own field corrections. log_review writes a review and
+    its corrections with the same (request_id, created_at), so that pair groups them, also when
+    one request was reviewed more than once."""
+    with _lock, _connect() as c:
+        reviews = [{**dict(r), "route_overridden": bool(r["route_overridden"]), "corrections": []}
+                   for r in c.execute("SELECT * FROM reviews ORDER BY id DESC LIMIT ?", (limit,)).fetchall()]
+        if not reviews:
+            return []
+        ids = sorted({r["request_id"] for r in reviews})
+        rows = c.execute(
+            f"SELECT request_id, created_at, field, original, corrected FROM corrections "
+            f"WHERE request_id IN ({','.join('?' * len(ids))}) ORDER BY id", ids).fetchall()
+    by_key = {(r["request_id"], r["created_at"]): r for r in reviews}
+    for row in rows:
+        review = by_key.get((row["request_id"], row["created_at"]))
+        if review is not None:
+            review["corrections"].append({"field": row["field"], "original": row["original"], "corrected": row["corrected"]})
+    return reviews

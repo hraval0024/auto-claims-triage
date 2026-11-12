@@ -241,7 +241,10 @@ function render(res) {
   $("review-notes").value = "";
   setReadOnly(false);
   $("review-form").hidden = false;
-  $("review-done").hidden = true;
+  $("review-card").hidden = false;
+  $("readonly-banner").hidden = true;
+  $("reviewed-card").hidden = true; // a new result replaces the completion card
+  LAST_REVIEW = null;
   $("accept-btn").disabled = false;
   $("reject-btn").disabled = false;
   SNAPSHOT = formState();
@@ -510,91 +513,161 @@ $("accept-btn").addEventListener("click", () => sendReview("accept"));
 $("reject-btn").addEventListener("click", () => sendReview("reject"));
 $("review-notes").addEventListener("input", updateNotesCount);
 
-function reviewSummary(res) {
+// ---------- review completion ----------
+let LAST_REVIEW = null;
+
+function reviewLabel(res) {
   const n = res.corrections.length;
-  const at = localTime(res.logged_at);
-  if (res.decision === "reject") return { banner: "Claim reviewed: rejected", status: `Rejected at ${at}.` };
-  if (n && res.route_overridden) return { banner: `Claim reviewed: accepted with ${plural(n, "correction")} and route override`, status: `Accepted with ${plural(n, "correction")} and a route override at ${at}. Re-priced and re-routed.` };
-  if (n) return { banner: `Claim reviewed: accepted with ${plural(n, "correction")}`, status: `Accepted with ${plural(n, "correction")} at ${at}. Re-priced and re-routed.` };
-  if (res.route_overridden) return { banner: "Claim reviewed: accepted with route override", status: `Accepted with a route override at ${at}.` };
-  return { banner: "Claim reviewed: accepted as is", status: `Accepted as is at ${at}.` };
+  if (res.decision === "reject") return "Rejected";
+  if (n && res.route_overridden) return `Accepted with ${plural(n, "correction")} and route override`;
+  if (n) return `Accepted with ${plural(n, "correction")}`;
+  if (res.route_overridden) return "Accepted with route override";
+  return "Accepted as is";
 }
 
+function clearIntake() {
+  $("files").value = "";
+  renderThumbs(); // revokes the intake thumbnails' object URLs only
+  $("urls").value = "";
+  $("region").value = "standard";
+  setStatus("form-status", "");
+}
+
+function announce(text) {
+  const n = $("announce");
+  n.textContent = "";
+  setTimeout(() => { n.textContent = text; }, 50); // re-announce even if the text is the same
+}
+
+// The whole result collapses into one "Claim reviewed" card. The result stays in the DOM, read-only,
+// for "View reviewed claim"; the photo viewer's object URLs (PHOTOS) stay alive until the next claim.
 function showReviewed(res) {
+  LAST_REVIEW = res;
   renderRouting(res.routing);
   renderCost(res.cost);
   renderOverride(res);
   setReadOnly(true);
   $("result").classList.add("reviewed");
-  const s = reviewSummary(res);
-  const banner = clear("done-banner");
-  banner.className = `done-banner ${res.decision}`;
-  banner.append(el("strong", {}, s.banner),
-    res.decision === "accept"
-      ? el("span", {}, "Final route: ", el("span", { class: `badge small ${res.final_route}` }, OUTCOME_TEXT[res.final_route]), res.route_overridden ? " (adjuster override)" : "")
-      : el("span", { class: "muted" }, `The system's recommendation (${OUTCOME_TEXT[res.routing.outcome]}) was not accepted.`));
-  const dn = clear("done-notes");
-  if (res.notes) dn.append(el("p", { class: "box-label" }, "Adjuster notes"), el("p", { class: "notes-readonly" }, res.notes));
-  $("review-form").hidden = true;
-  $("review-done").hidden = false;
-  setStatus("review-status", s.status, "ok");
-  $("done-banner").focus();
+  $("review-card").hidden = true;
+  $("readonly-banner").hidden = false;
+  setStatus("review-status", "");
+
+  $("reviewed-sub").textContent = `${reviewLabel(res)} · ${localTime(res.logged_at)} · claim ${res.request_id.slice(0, 8)}`;
+  const route = clear("reviewed-route");
+  route.append(el("span", { class: `badge small ${res.final_route}` }, OUTCOME_TEXT[res.final_route]));
+  if (res.route_overridden) route.append(el("span", { class: "muted" }, ` Adjuster override. System recommended: ${OUTCOME_TEXT[res.routing.outcome]}`));
+  const notes = $("reviewed-notes");
+  notes.textContent = res.notes || "None";
+  notes.classList.toggle("muted", !res.notes);
+
+  setViewReviewed(false);
+  $("reviewed-card").hidden = false;
+  clearIntake();
+  announce("Claim reviewed");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  $("next-claim-btn").focus({ preventScroll: true });
 }
+
+function setViewReviewed(open) {
+  $("result").hidden = !open;
+  const b = $("view-reviewed-btn");
+  b.textContent = open ? "Hide reviewed claim" : "View reviewed claim";
+  b.setAttribute("aria-expanded", String(open));
+}
+$("view-reviewed-btn").addEventListener("click", () => setViewReviewed($("result").hidden));
 
 // ---------- next claim ----------
 function startNextClaim() {
-  $("files").value = "";
-  renderThumbs(); // revokes the intake object URLs
-  releasePhotos(); // revokes the result-area object URLs
+  clearIntake();
+  releasePhotos(); // revokes the photo viewer's object URLs
   renderPhotos();
-  $("urls").value = "";
-  $("region").value = "standard";
-  setStatus("form-status", "");
   $("review-notes").value = "";
   setNotesError("");
   setStatus("review-status", "");
   clear("final-route");
   renderOverride(null);
-  $("result").hidden = true;
+  $("reviewed-card").hidden = true;
+  $("readonly-banner").hidden = true;
+  $("review-card").hidden = false;
+  setViewReviewed(false);
   $("result").classList.remove("reviewed");
   CURRENT = null;
   SNAPSHOT = null;
   REVIEWED = false;
+  LAST_REVIEW = null;
   window.scrollTo({ top: 0, behavior: "smooth" });
   $("files").focus({ preventScroll: true }); // the file input sits inside the dropzone
   loadLog();
 }
 $("next-claim-btn").addEventListener("click", startNextClaim);
-$("next-claim-link").addEventListener("click", startNextClaim);
 
-// ---------- review + corrections log ----------
+// ---------- review history ----------
+const FIELD_TEXT = { make: "make", model: "model", color: "color", year_start: "year from", year_end: "year to",
+  panel: "panel", side: "side", damage_type: "type", severity: "severity" };
+const shown = (v) => (v === null || v === undefined || v === "" || v === "None" ? "(empty)" : v);
+
+// One readable line per stored correction (field names as written by app/review.py diff).
+function correctionLine(c) {
+  const o = shown(c.original), n = shown(c.corrected);
+  let m;
+  if ((m = c.field.match(/^vehicle\.(\w+)$/))) return `Vehicle ${FIELD_TEXT[m[1]] || human(m[1])}: ${o} → ${n}`;
+  if ((m = c.field.match(/^damage\[(\d+)\]\.(\w+)$/))) return `Damage ${Number(m[1]) + 1} ${FIELD_TEXT[m[2]] || human(m[2])}: ${human(o)} → ${human(n)}`;
+  if ((m = c.field.match(/^damage\[(\d+)\]$/))) return `Damage ${Number(m[1]) + 1} removed: ${human(o)}`;
+  if (c.field === "damage[+]") return `Damage added: ${human(n)}`;
+  if (c.field === "damage_summary") return `Damage summary: "${o}" → "${n}"`;
+  if (c.field === "not_assessable") return `Not visible / cannot assess: ${o} → ${n}`;
+  if (c.field === "cost.region") return `Re-price region: ${REGION_TEXT[c.original] || o} → ${REGION_TEXT[c.corrected] || n}`;
+  return `${human(c.field)}: ${o} → ${n}`;
+}
+
+function routeCell(v) {
+  // Rows from before route tracking have no route columns.
+  if (v.route_overridden) return el("span", { class: "route-cell" }, `${OUTCOME_TEXT[v.system_route] || v.system_route} → ${OUTCOME_TEXT[v.final_route] || v.final_route} `, el("span", { class: "override-badge" }, "Override"));
+  if (v.final_route) return OUTCOME_TEXT[v.final_route] || v.final_route;
+  return el("span", { class: "muted" }, "–");
+}
+
+function historyRows(v) {
+  const n = v.n_corrections;
+  const decision = (v.decision === "accept" ? "Accepted" : "Rejected") + (n ? `, ${plural(n, "correction")}` : "");
+  const expandable = v.corrections.length > 0 || !!v.notes || v.route_overridden;
+  const detailId = `hist-detail-${v.id}`;
+  const row = el("tr", { class: expandable ? "hist-row expandable" : "hist-row" });
+  let btn = null;
+  if (expandable) {
+    btn = el("button", { type: "button", class: "chev", "aria-expanded": "false", "aria-controls": detailId,
+      "aria-label": `Details for claim ${v.request_id.slice(0, 8)}` });
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const open = btn.getAttribute("aria-expanded") !== "true";
+      btn.setAttribute("aria-expanded", String(open));
+      $(detailId).hidden = !open;
+    });
+    row.addEventListener("click", () => btn.click()); // the whole row is a mouse target; the button is the keyboard one
+  }
+  row.append(el("td", { class: "num" }, localDateTime(v.created_at)), el("td", { class: "mono" }, v.request_id.slice(0, 8)),
+    el("td", {}, decision), el("td", {}, routeCell(v)), el("td", { class: "chev-cell" }, btn));
+  if (!expandable) return [row];
+  const box = el("div", { class: "hist-detail-box" });
+  if (v.corrections.length) box.append(el("p", { class: "box-label" }, "Corrections"), el("ul", {}, v.corrections.map((c) => el("li", {}, correctionLine(c)))));
+  if (v.notes) box.append(el("p", { class: "box-label" }, "Notes"), el("p", { class: "hist-notes" }, v.notes));
+  if (v.route_overridden) box.append(el("p", { class: "box-label" }, "System recommended"), el("p", {}, OUTCOME_TEXT[v.system_route] || v.system_route));
+  const detail = el("tr", { id: detailId, class: "hist-detail", hidden: true }, el("td", { colspan: 5 }, box));
+  return [row, detail];
+}
+
 async function loadLog() {
-  const rt = clear("reviews-table");
-  const t = clear("log-table");
-  rt.append(el("tr", {}, ["Time (local)", "Request", "Decision", "Corrections", "Route", "Notes"].map((h) => el("th", {}, h))));
-  t.append(el("tr", {}, ["Time (UTC)", "Request", "Field", "Original", "Corrected", "Decision"].map((h) => el("th", {}, h))));
+  const t = clear("history-table");
+  t.append(el("thead", {}, el("tr", {}, ["Time", "Claim", "Decision", "Final route"].map((h) => el("th", { scope: "col" }, h)),
+    el("th", { scope: "col" }, el("span", { class: "sr-only" }, "Details")))));
+  const body = el("tbody");
+  t.append(body);
   try {
-    const { corrections, reviews } = await (await api("/api/corrections?limit=50")).json();
-    if (!reviews.length) rt.append(el("tr", {}, el("td", { colspan: 6, class: "empty-row" }, "No reviews yet.")));
-    for (const v of reviews) {
-      // Rows from before route tracking have no route columns.
-      let route = el("span", { class: "muted" }, "–");
-      if (v.route_overridden) {
-        route = el("span", { class: "route-cell" }, `${OUTCOME_TEXT[v.system_route] || v.system_route} → ${OUTCOME_TEXT[v.final_route] || v.final_route} `, el("span", { class: "override-badge" }, "Override"));
-      } else if (v.final_route) {
-        route = OUTCOME_TEXT[v.final_route] || v.final_route;
-      }
-      rt.append(el("tr", {}, el("td", { class: "num" }, localDateTime(v.created_at)), el("td", { class: "mono" }, v.request_id.slice(0, 8)),
-        el("td", {}, v.decision), el("td", { class: "num" }, String(v.n_corrections)), el("td", {}, route),
-        el("td", { class: "notes-cell" }, v.notes || "")));
-    }
-    if (!corrections.length) t.append(el("tr", {}, el("td", { colspan: 6, class: "empty-row" }, "No corrections yet.")));
-    for (const c of corrections) {
-      t.append(el("tr", {}, el("td", { class: "num" }, c.created_at.replace("T", " ").slice(0, 19)), el("td", { class: "mono" }, c.request_id.slice(0, 8)),
-        el("td", {}, human(c.field)), el("td", {}, c.original ?? ""), el("td", {}, c.corrected ?? ""), el("td", {}, c.decision ?? "")));
-    }
+    const { reviews } = await (await api("/api/reviews?limit=20")).json();
+    if (!reviews.length) body.append(el("tr", {}, el("td", { colspan: 5, class: "empty-row" }, "No reviews yet.")));
+    for (const v of reviews) body.append(...historyRows(v));
   } catch (e) {
-    rt.append(el("tr", {}, el("td", { colspan: 6, class: "empty-row" }, `Could not load the log: ${e}`)));
+    body.append(el("tr", {}, el("td", { colspan: 5, class: "empty-row" }, `Could not load the review history: ${e}`)));
   }
 }
 $("refresh-log").addEventListener("click", loadLog);

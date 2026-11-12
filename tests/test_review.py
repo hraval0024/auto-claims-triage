@@ -278,3 +278,57 @@ def test_review_notes_never_reach_the_app_log(capsys):
     out = capsys.readouterr().out
     assert "review" in out  # the request itself is logged...
     assert "Jane Q. Example" not in out and "555-0100" not in out  # ...its notes are not
+
+
+# ---------- GET /api/reviews (review history) ----------
+def test_reviews_endpoint_groups_corrections_under_the_right_review():
+    c = new_claim()
+    items = items_as_sent(c)
+    items[0]["severity"] = 1
+    review_post(c, **unedited(c, damage=items))  # review 1 of this request: 1 correction
+    items2 = items_as_sent(c)
+    items2[1]["side"] = "right"
+    review_post(c, **unedited(c, damage=items2, vehicle=vehicle_as_sent(c) | {"model": "Camry"},
+                              final_route="possible_total_loss", notes="  second look  "))  # review 2: 2 corrections
+    c2 = new_claim()
+    review_post(c2, decision="reject")  # another request, nothing to group
+    rows = client.get("/api/reviews").json()["reviews"]
+    assert [r["request_id"] for r in rows] == [c2["audit"]["request_id"], c["audit"]["request_id"], c["audit"]["request_id"]]
+    newest, second, first = rows
+    assert newest["corrections"] == [] and newest["decision"] == "reject"
+    assert {x["field"] for x in second["corrections"]} == {"vehicle.model", "damage[1].side"} and second["n_corrections"] == 2
+    assert first["corrections"] == [{"field": "damage[0].severity", "original": str(c["damage"][0]["severity"]), "corrected": "1"}]
+    assert (second["notes"], second["system_route"], second["final_route"], second["route_overridden"]) == (
+        "second look", c["routing"]["outcome"], "possible_total_loss", True)
+    assert first["notes"] is None and first["route_overridden"] is False
+    assert set(newest) == {"id", "request_id", "decision", "n_corrections", "created_at", "notes", "system_route",
+                           "final_route", "route_overridden", "corrections"}
+
+
+def test_reviews_endpoint_respects_limit():
+    c = new_claim()
+    for _ in range(4):
+        review_post(c, decision="reject")
+    assert len(client.get("/api/reviews?limit=3").json()["reviews"]) == 3
+    assert len(client.get("/api/reviews").json()["reviews"]) == 4  # default 20
+
+
+def test_reviews_endpoint_loads_old_rows(tmp_db):
+    old = sqlite3.connect(tmp_db)  # pre-migration schema, as on the first deploy
+    old.execute("CREATE TABLE reviews (id INTEGER PRIMARY KEY AUTOINCREMENT, request_id TEXT NOT NULL, "
+                "decision TEXT NOT NULL, n_corrections INTEGER NOT NULL, created_at TEXT NOT NULL)")
+    old.execute("CREATE TABLE corrections (id INTEGER PRIMARY KEY AUTOINCREMENT, request_id TEXT NOT NULL, field TEXT NOT NULL, "
+                "original TEXT, corrected TEXT, created_at TEXT NOT NULL)")
+    ts = "2026-11-10T04:22:55.197723+00:00"
+    old.execute("INSERT INTO reviews (request_id, decision, n_corrections, created_at) VALUES ('old1', 'accept', 1, ?)", (ts,))
+    old.execute("INSERT INTO corrections (request_id, field, original, corrected, created_at) VALUES ('old1', 'vehicle.model', 'Cirrus', 'Cirrus LX', ?)", (ts,))
+    old.commit()
+    old.close()
+    (row,) = client.get("/api/reviews").json()["reviews"]
+    assert row["notes"] is None and row["system_route"] is None and row["final_route"] is None and row["route_overridden"] is False
+    assert row["corrections"] == [{"field": "vehicle.model", "original": "Cirrus", "corrected": "Cirrus LX"}]
+
+
+def test_reviews_endpoint_requires_auth():
+    assert TestClient(app).get("/api/reviews").status_code == 401
+    assert client.get("/api/reviews").status_code == 200

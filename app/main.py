@@ -234,6 +234,12 @@ def corrections(limit: int = 100) -> dict:
     return {"corrections": store.recent_corrections(min(limit, 500)), "reviews": store.recent_reviews(min(limit, 500))}
 
 
+@app.get("/api/reviews")
+def reviews(limit: int = 20) -> dict:
+    """Review history for the UI: each review with its field corrections grouped under it."""
+    return {"reviews": store.reviews_with_corrections(max(1, min(limit, 100)))}
+
+
 @app.get("/metrics")
 def metrics() -> dict:
     """Summary from the audit log: outcomes, failure reasons, latency, spend, cache hits, limit triggers."""

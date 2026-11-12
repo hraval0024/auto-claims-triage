@@ -175,7 +175,7 @@ select { appearance: none; padding-right: 30px; cursor: pointer;
 .years { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: .88rem; }
 .years input { flex: 1; min-width: 0; max-width: 6.5em; }
 @media (max-width: 480px) { .years { gap: 4px; } .years input { padding: 8px 4px; font-size: .86rem; } }
-.table-wrap { overflow-x: auto; }
+.table-wrap { overflow-x: auto; position: relative; } /* relative: keeps .sr-only header text inside the scroller */
 .data { width: 100%; border-collapse: collapse; font-size: .9rem; }
 .data th { text-align: left; font-size: .72rem; font-weight: 650; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: var(--surface-2); padding: 9px 10px; border-bottom: 1px solid var(--line); }
 .data td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
@@ -237,13 +237,7 @@ textarea.invalid { border-color: var(--bad); box-shadow: 0 0 0 3px rgba(185, 28,
 .review-status:empty { display: none; }
 .review-status.ok { color: var(--ok); background: var(--ok-soft); border: 1px solid var(--ok-line); border-radius: var(--radius-sm); padding: 8px 12px; }
 .review-status.error { color: var(--bad); }
-.review-done[hidden], .review-form[hidden] { display: none; }
-.review-done { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
-.done-banner { display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 12px 16px; border-radius: var(--radius); border: 1px solid var(--ok-line); background: var(--ok-soft); }
-.done-banner strong { font-size: 1.02rem; color: var(--ok); }
-.done-banner.reject { border-color: var(--line-2); background: var(--surface-2); }
-.done-banner.reject strong { color: var(--fg); }
-.notes-readonly { white-space: pre-wrap; margin: 2px 0 0; padding: 8px 12px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.review-form[hidden], .review-actions[hidden] { display: none; }
 @media (max-width: 700px) { .review-fields { grid-template-columns: 1fr; } .review-controls { justify-content: stretch; } .review-controls .btn { flex: 1; } }
 
 /* ---------- read-only after review ---------- */
@@ -290,9 +284,46 @@ input:disabled, select:disabled, textarea:disabled { background-color: var(--sur
 }
 
 /* ---------- log ---------- */
-.log-sub { padding: 14px 18px 6px; font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
-.notes-cell { white-space: pre-wrap; max-width: 320px; color: var(--fg-2); }
 .route-cell { white-space: nowrap; }
+
+/* ---------- utilities ---------- */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ---------- claim reviewed card ---------- */
+.reviewed-card { padding: 22px 24px; display: flex; flex-direction: column; gap: 16px; border-left: 5px solid var(--ok); }
+.reviewed-card[hidden] { display: none; }
+.reviewed-head { display: flex; gap: 14px; align-items: center; }
+.reviewed-icon { width: 40px; height: 40px; flex: none; color: var(--ok); }
+.reviewed-head h2 { font-size: 1.2rem; }
+.reviewed-head p { margin: 2px 0 0; font-size: .92rem; }
+.reviewed-kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 20px; margin: 0; padding-top: 14px; border-top: 1px solid var(--line); }
+.reviewed-kv dt { color: var(--muted); font-size: .88rem; font-weight: 550; }
+.reviewed-kv dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.reviewed-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+@media (max-width: 480px) { .reviewed-kv { grid-template-columns: minmax(0, 1fr); gap: 2px; } .reviewed-kv dd { margin-bottom: 8px; } .reviewed-actions .btn { flex: 1; } }
+.readonly-banner { margin: 0; padding: 8px 14px; border-radius: var(--radius-sm); background: var(--surface-2); border: 1px solid var(--line-2); color: var(--fg-2); font-size: .9rem; font-weight: 600; }
+.readonly-banner[hidden] { display: none; }
+
+/* ---------- review history ---------- */
+.history > summary { cursor: pointer; list-style: none; border-bottom: 0; }
+.history > summary::-webkit-details-marker { display: none; }
+.history > summary h2::before { content: "▸"; display: inline-block; margin-right: 8px; font-size: .8em; color: var(--muted); transition: transform .12s; }
+.history[open] > summary { border-bottom: 1px solid var(--line); }
+.history[open] > summary h2::before { transform: rotate(90deg); }
+.history-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px 10px; }
+.history-top .hint { margin: 0; }
+.hist-row.expandable { cursor: pointer; }
+.chev-cell { width: 1%; text-align: right; }
+.chev { width: 30px; height: 30px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--muted); cursor: pointer; display: inline-grid; place-items: center; }
+.chev::before { content: "▸"; font-size: 1rem; line-height: 1; transition: transform .12s; }
+.chev[aria-expanded="true"]::before { transform: rotate(90deg); }
+.chev:hover { background: var(--primary-soft); color: var(--primary); }
+.hist-detail td { background: var(--surface-2); }
+.data tr.hist-detail:hover td { background: var(--surface-2); }
+.hist-detail-box { padding: 2px 4px 6px; }
+.hist-detail-box .box-label:first-child { margin-top: 0; }
+.hist-detail-box ul { margin: 4px 0; }
+.hist-notes { white-space: pre-wrap; margin: 4px 0; }
 
 /* ---------- audit ---------- */
 .audit > summary { padding: 14px 18px; color: var(--fg-2); }

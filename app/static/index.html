@@ -62,6 +62,26 @@
   </aside>
 
   <div class="workspace">
+    <p id="announce" class="sr-only" aria-live="polite"></p>
+
+    <section id="reviewed-card" class="card reviewed-card" hidden aria-labelledby="reviewed-h">
+      <div class="reviewed-head">
+        <svg class="reviewed-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor" opacity=".14"/><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m7.5 12.3 3 3 6-6.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div>
+          <h2 id="reviewed-h">Claim reviewed</h2>
+          <p id="reviewed-sub" class="muted"></p>
+        </div>
+      </div>
+      <dl class="reviewed-kv">
+        <dt>Final route</dt><dd id="reviewed-route"></dd>
+        <dt>Notes</dt><dd id="reviewed-notes"></dd>
+      </dl>
+      <div class="reviewed-actions">
+        <button type="button" id="next-claim-btn" class="btn primary">Start next claim</button>
+        <button type="button" id="view-reviewed-btn" class="btn secondary" aria-expanded="false" aria-controls="result">View reviewed claim</button>
+      </div>
+    </section>
+
     <section id="loading" class="card skeleton" hidden aria-hidden="true">
       <div class="sk sk-title"></div><div class="sk sk-line"></div><div class="sk sk-line short"></div>
       <div class="sk-grid"><div class="sk sk-block"></div><div class="sk sk-block"></div></div>
@@ -72,9 +92,9 @@
         <h2 id="result-h">Assessment</h2>
         <div class="result-head-right">
           <div id="summary-bar" class="metrics"></div>
-          <button type="button" id="next-claim-link" class="btn ghost small">Start next claim</button>
         </div>
       </div>
+      <p id="readonly-banner" class="readonly-banner" hidden>Read-only: this claim has already been reviewed</p>
 
       <div id="decision-row" class="decision-row">
         <div id="routing" class="card decision"></div>
@@ -171,12 +191,6 @@
           </div>
         </div>
 
-        <div id="review-done" class="review-done" hidden>
-          <div class="done-banner" id="done-banner" tabindex="-1"></div>
-          <div id="done-notes"></div>
-          <button type="button" id="next-claim-btn" class="btn primary">Start next claim</button>
-        </div>
-
         <p id="review-status" class="review-status" role="status" aria-live="polite"></p>
       </section>
 
@@ -186,17 +200,14 @@
       </details>
     </section>
 
-    <section class="card" aria-labelledby="log-h">
-      <div class="card-head">
-        <h2 id="log-h">Corrections log</h2>
+    <details class="card history" id="history">
+      <summary class="card-head"><h2 id="history-h">Review history</h2><span class="muted small">Newest 20</span></summary>
+      <div class="history-top">
+        <p class="hint">Every review: decision, final route, notes and each field correction. This history is eval data.</p>
         <button type="button" id="refresh-log" class="btn ghost small">Refresh</button>
       </div>
-      <p class="hint pad">Every review (decision, final route, notes) and every field correction (original value, corrected value, timestamp, request id). This log is eval data.</p>
-      <h3 class="log-sub">Reviews</h3>
-      <div class="table-wrap"><table id="reviews-table" class="data"></table></div>
-      <h3 class="log-sub">Corrections</h3>
-      <div class="table-wrap"><table id="log-table" class="data"></table></div>
-    </section>
+      <div class="table-wrap"><table id="history-table" class="data history-table" aria-labelledby="history-h"></table></div>
+    </details>
   </div>
 </main>
 <script src="/static/app.js"></script>
