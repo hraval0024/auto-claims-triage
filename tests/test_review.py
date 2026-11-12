@@ -260,11 +260,13 @@ def test_migration_adds_columns_to_old_schema_and_is_idempotent(tmp_db):
     rows = store.recent_reviews()  # first connection runs the migration
     assert rows == [{"id": 1, "request_id": "old1", "decision": "accept", "n_corrections": 2,
                      "created_at": "2026-11-10T00:00:00+00:00", "notes": None, "system_route": None,
-                     "final_route": None, "route_overridden": False}]
+                     "final_route": None, "route_overridden": False, "system_low_usd": None, "system_high_usd": None,
+                     "final_low_usd": None, "final_high_usd": None, "estimate_overridden": False}]
     conn = sqlite3.connect(tmp_db)
     assert store._migrate(conn) == []  # second run: nothing to add
     cols = [r[1] for r in conn.execute("PRAGMA table_info(reviews)")]
-    assert cols[-4:] == ["notes", "system_route", "final_route", "route_overridden"]
+    assert cols[5:] == ["notes", "system_route", "final_route", "route_overridden", "system_low_usd",
+                        "system_high_usd", "final_low_usd", "final_high_usd", "estimate_overridden"]
     conn.close()
     store.log_review("new1", "accept", [], notes="n", system_route="adjuster_review", final_route="adjuster_review")
     assert [r["request_id"] for r in store.recent_reviews()] == ["new1", "old1"]
@@ -302,7 +304,8 @@ def test_reviews_endpoint_groups_corrections_under_the_right_review():
         "second look", c["routing"]["outcome"], "possible_total_loss", True)
     assert first["notes"] is None and first["route_overridden"] is False
     assert set(newest) == {"id", "request_id", "decision", "n_corrections", "created_at", "notes", "system_route",
-                           "final_route", "route_overridden", "corrections"}
+                           "final_route", "route_overridden", "system_low_usd", "system_high_usd",
+                           "final_low_usd", "final_high_usd", "estimate_overridden", "corrections"}
 
 
 def test_reviews_endpoint_respects_limit():
@@ -332,3 +335,94 @@ def test_reviews_endpoint_loads_old_rows(tmp_db):
 def test_reviews_endpoint_requires_auth():
     assert TestClient(app).get("/api/reviews").status_code == 401
     assert client.get("/api/reviews").status_code == 200
+
+
+
+# ---------- adjuster-set final estimate range ----------
+def sev4_claim(monkeypatch):
+    damage = [{"photo_index": 0, "panel": "fender", "side": "right", "damage_type": "deformation", "severity": 4,
+               "confidence": "medium", "cues": "crushed"}]
+    monkeypatch.setattr(pipeline, "call_model", lambda images, **kw: (
+        ModelOutput.model_validate(model_output_dict(damage=damage)), UsageTally("claude-sonnet-5-5", 1000, 0, 0, 200, 1)))
+    c = new_claim()
+    assert c["cost"]["status"] == "not_estimable"
+    return c
+
+
+def sys_range(c):
+    return round(c["cost"]["low_usd"]), round(c["cost"]["high_usd"])
+
+
+@pytest.mark.parametrize("extra,what", [
+    ({"final_low_usd": 500}, "both"),
+    ({"final_high_usd": 900}, "both"),
+    ({"final_low_usd": 900, "final_high_usd": 500}, "low must not be higher"),
+])
+def test_estimate_range_rule_errors(extra, what):
+    c = new_claim()
+    r = review_post(c, **unedited(c, **extra))
+    assert r.status_code == 422 and what in r.json()["error"]
+    assert client.get("/api/reviews").json()["reviews"] == []  # refused, nothing logged
+
+
+@pytest.mark.parametrize("low,high", [(-1, 500), (0, 500_001), (10.5, 20)])
+def test_estimate_range_bounds_and_whole_dollars(low, high):
+    c = new_claim()
+    r = review_post(c, **unedited(c, final_low_usd=low, final_high_usd=high))
+    assert r.status_code == 422 and r.json()["error"] == "Invalid request."
+
+
+def test_estimate_range_with_reject_is_refused():
+    c = new_claim()
+    r = review_post(c, decision="reject", final_low_usd=100, final_high_usd=200)
+    assert r.status_code == 422 and "only allowed with accept" in r.json()["error"]
+
+
+def test_estimate_override_stored_logged_and_does_not_reroute():
+    c = new_claim()
+    lo, hi = sys_range(c)
+    r = review_post(c, **unedited(c, final_low_usd=lo + 50, final_high_usd=hi - 100)).json()
+    assert r["estimate_overridden"] is True
+    assert (r["system_low_usd"], r["system_high_usd"], r["final_low_usd"], r["final_high_usd"]) == (lo, hi, lo + 50, hi - 100)
+    assert r["routing"] == c["routing"] and r["final_route"] == c["routing"]["outcome"] and r["cost"] == c["cost"]
+    assert r["corrections"] == [{"field": "estimate.low", "original": str(lo), "corrected": str(lo + 50)},
+                                {"field": "estimate.high", "original": str(hi), "corrected": str(hi - 100)}]
+    row = client.get("/api/reviews").json()["reviews"][0]
+    assert (row["system_low_usd"], row["system_high_usd"], row["final_low_usd"], row["final_high_usd"], row["estimate_overridden"]) == (
+        lo, hi, lo + 50, hi - 100, True)
+    assert row["n_corrections"] == 2 and {x["field"] for x in row["corrections"]} == {"estimate.low", "estimate.high"}
+
+
+def test_untouched_range_is_not_an_override_even_after_repricing():
+    c = new_claim()
+    items = items_as_sent(c)
+    items[0]["severity"] = 1  # a finding correction re-prices the claim
+    r = review_post(c, **unedited(c, damage=items)).json()  # range fields not sent (null)
+    assert r["estimate_overridden"] is False and r["cost"] != c["cost"]
+    assert (r["system_low_usd"], r["system_high_usd"]) == sys_range(c)
+    assert (r["final_low_usd"], r["final_high_usd"]) == (round(r["cost"]["low_usd"]), round(r["cost"]["high_usd"]))
+    assert all(not x["field"].startswith("estimate.") for x in r["corrections"])
+
+
+def test_sending_the_system_range_is_not_an_override():
+    c = new_claim()
+    lo, hi = sys_range(c)
+    r = review_post(c, **unedited(c, final_low_usd=lo, final_high_usd=hi)).json()
+    assert r["estimate_overridden"] is False and r["corrections"] == []
+
+
+def test_estimate_override_on_a_not_estimable_claim(monkeypatch):
+    c = sev4_claim(monkeypatch)
+    r = review_post(c, **unedited(c, final_low_usd=3000, final_high_usd=8000)).json()
+    assert r["estimate_overridden"] is True and r["system_low_usd"] is None and r["system_high_usd"] is None
+    assert (r["final_low_usd"], r["final_high_usd"]) == (3000, 8000)
+    assert {"field": "estimate.low", "original": "not estimable", "corrected": "3000"} in r["corrections"]
+    assert r["routing"] == c["routing"] and r["cost"] == c["cost"]  # route and cost untouched by the range
+
+
+def test_estimate_override_with_route_override_keeps_them_separate():
+    c = new_claim()
+    lo, hi = sys_range(c)
+    r = review_post(c, **unedited(c, final_low_usd=lo, final_high_usd=hi + 1, final_route="possible_total_loss", notes="x")).json()
+    assert r["estimate_overridden"] is True and r["route_overridden"] is True
+    assert r["routing"] == c["routing"] and r["final_route"] == "possible_total_loss"

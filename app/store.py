@@ -41,7 +41,12 @@ CREATE TABLE IF NOT EXISTS reviews (
     notes TEXT,
     system_route TEXT,
     final_route TEXT,
-    route_overridden INTEGER NOT NULL DEFAULT 0
+    route_overridden INTEGER NOT NULL DEFAULT 0,
+    system_low_usd INTEGER,
+    system_high_usd INTEGER,
+    final_low_usd INTEGER,
+    final_high_usd INTEGER,
+    estimate_overridden INTEGER NOT NULL DEFAULT 0
 );
 CREATE TABLE IF NOT EXISTS usage_daily (
     day TEXT PRIMARY KEY,
@@ -74,6 +79,11 @@ REVIEWS_ADDED_COLUMNS = {
     "system_route": "TEXT",
     "final_route": "TEXT",
     "route_overridden": "INTEGER NOT NULL DEFAULT 0",
+    "system_low_usd": "INTEGER",
+    "system_high_usd": "INTEGER",
+    "final_low_usd": "INTEGER",
+    "final_high_usd": "INTEGER",
+    "estimate_overridden": "INTEGER NOT NULL DEFAULT 0",
 }
 _migrated: set[str] = set()
 
@@ -190,7 +200,9 @@ def get_result(request_id: str) -> dict | None:
 
 
 def log_review(request_id: str, decision: str, corrections: list[tuple[str, str, str]], notes: str | None = None,
-               system_route: str | None = None, final_route: str | None = None, route_overridden: bool = False) -> str:
+               system_route: str | None = None, final_route: str | None = None, route_overridden: bool = False,
+               system_low_usd: int | None = None, system_high_usd: int | None = None, final_low_usd: int | None = None,
+               final_high_usd: int | None = None, estimate_overridden: bool = False) -> str:
     """Notes may hold personal data: they are stored only in reviews.notes, never logged."""
     ts = _now()
     with _lock, _connect() as c:
@@ -199,8 +211,10 @@ def log_review(request_id: str, decision: str, corrections: list[tuple[str, str,
             [(request_id, f, o, n, ts) for f, o, n in corrections],
         )
         c.execute("INSERT INTO reviews (request_id, decision, n_corrections, created_at, notes, system_route, "
-                  "final_route, route_overridden) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                  (request_id, decision, len(corrections), ts, notes, system_route, final_route, int(route_overridden)))
+                  "final_route, route_overridden, system_low_usd, system_high_usd, final_low_usd, final_high_usd, "
+                  "estimate_overridden) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                  (request_id, decision, len(corrections), ts, notes, system_route, final_route, int(route_overridden),
+                   system_low_usd, system_high_usd, final_low_usd, final_high_usd, int(estimate_overridden)))
     return ts
 
 
@@ -216,7 +230,8 @@ def recent_corrections(limit: int = 100) -> list[dict]:
 def recent_reviews(limit: int = 100) -> list[dict]:
     with _lock, _connect() as c:
         rows = c.execute("SELECT * FROM reviews ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
-    return [{**dict(r), "route_overridden": bool(r["route_overridden"])} for r in rows]
+    return [{**dict(r), "route_overridden": bool(r["route_overridden"]), "estimate_overridden": bool(r["estimate_overridden"])}
+            for r in rows]
 
 
 def reviews_with_corrections(limit: int = 20) -> list[dict]:
@@ -224,7 +239,8 @@ def reviews_with_corrections(limit: int = 20) -> list[dict]:
     its corrections with the same (request_id, created_at), so that pair groups them, also when
     one request was reviewed more than once."""
     with _lock, _connect() as c:
-        reviews = [{**dict(r), "route_overridden": bool(r["route_overridden"]), "corrections": []}
+        reviews = [{**dict(r), "route_overridden": bool(r["route_overridden"]),
+                    "estimate_overridden": bool(r["estimate_overridden"]), "corrections": []}
                    for r in c.execute("SELECT * FROM reviews ORDER BY id DESC LIMIT ?", (limit,)).fetchall()]
         if not reviews:
             return []
