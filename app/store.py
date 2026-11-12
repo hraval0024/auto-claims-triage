@@ -37,7 +37,11 @@ CREATE TABLE IF NOT EXISTS reviews (
     request_id TEXT NOT NULL,
     decision TEXT NOT NULL,
     n_corrections INTEGER NOT NULL,
-    created_at TEXT NOT NULL
+    created_at TEXT NOT NULL,
+    notes TEXT,
+    system_route TEXT,
+    final_route TEXT,
+    route_overridden INTEGER NOT NULL DEFAULT 0
 );
 CREATE TABLE IF NOT EXISTS usage_daily (
     day TEXT PRIMARY KEY,
@@ -62,6 +66,29 @@ CREATE TABLE IF NOT EXISTS health (
 """
 
 
+# Columns added to `reviews` after the first deploy. CREATE TABLE IF NOT EXISTS never adds columns
+# to an existing table (production has one on the Railway volume), so _migrate() adds any that are
+# missing. Idempotent; old rows get NULL / 0.
+REVIEWS_ADDED_COLUMNS = {
+    "notes": "TEXT",
+    "system_route": "TEXT",
+    "final_route": "TEXT",
+    "route_overridden": "INTEGER NOT NULL DEFAULT 0",
+}
+_migrated: set[str] = set()
+
+
+def _migrate(conn: sqlite3.Connection) -> list[str]:
+    """Add missing `reviews` columns. Returns the names added (empty when up to date)."""
+    have = {r[1] for r in conn.execute("PRAGMA table_info(reviews)").fetchall()}
+    added = []
+    for name, decl in REVIEWS_ADDED_COLUMNS.items():
+        if name not in have:
+            conn.execute(f"ALTER TABLE reviews ADD COLUMN {name} {decl}")  # names/decls are constants above
+            added.append(name)
+    return added
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -74,6 +101,10 @@ def _connect():
     with closing(sqlite3.connect(path, timeout=10)) as conn:
         conn.row_factory = sqlite3.Row
         conn.executescript(SCHEMA)
+        if str(path) not in _migrated:  # once per database file per process
+            with conn:
+                _migrate(conn)
+            _migrated.add(str(path))
         with conn:
             yield conn
 
@@ -158,15 +189,18 @@ def get_result(request_id: str) -> dict | None:
     return json.loads(row["result_json"]) if row else None
 
 
-def log_review(request_id: str, decision: str, corrections: list[tuple[str, str, str]]) -> str:
+def log_review(request_id: str, decision: str, corrections: list[tuple[str, str, str]], notes: str | None = None,
+               system_route: str | None = None, final_route: str | None = None, route_overridden: bool = False) -> str:
+    """Notes may hold personal data: they are stored only in reviews.notes, never logged."""
     ts = _now()
     with _lock, _connect() as c:
         c.executemany(
             "INSERT INTO corrections (request_id, field, original, corrected, created_at) VALUES (?, ?, ?, ?, ?)",
             [(request_id, f, o, n, ts) for f, o, n in corrections],
         )
-        c.execute("INSERT INTO reviews (request_id, decision, n_corrections, created_at) VALUES (?, ?, ?, ?)",
-                  (request_id, decision, len(corrections), ts))
+        c.execute("INSERT INTO reviews (request_id, decision, n_corrections, created_at, notes, system_route, "
+                  "final_route, route_overridden) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                  (request_id, decision, len(corrections), ts, notes, system_route, final_route, int(route_overridden)))
     return ts
 
 
@@ -182,4 +216,4 @@ def recent_corrections(limit: int = 100) -> list[dict]:
 def recent_reviews(limit: int = 100) -> list[dict]:
     with _lock, _connect() as c:
         rows = c.execute("SELECT * FROM reviews ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
-    return [dict(r) for r in rows]
+    return [{**dict(r), "route_overridden": bool(r["route_overridden"])} for r in rows]

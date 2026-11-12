@@ -90,7 +90,8 @@ def test_no_note_outside_rule_4(items, kw):
     assert d.notes == [], (d.outcome, d.notes)
 
 
-# 7. After an adjuster accepts corrections, items count as high confidence: the note goes away
+# 7. After an adjuster accepts corrections, items count as high confidence: the note goes away.
+#    An unedited accept changes nothing (review_ux), so the note stays.
 def test_note_disappears_after_adjuster_review(monkeypatch):
     damage = [
         {"photo_index": 0, "panel": "wheel", "side": "right", "damage_type": "misalignment", "severity": 4, "confidence": "low", "cues": "a"},
@@ -103,8 +104,12 @@ def test_note_disappears_after_adjuster_review(monkeypatch):
     assert claim["routing"]["notes"] and claim["routing"]["outcome"] == "adjuster_review"
     items = [{"orig_index": i, "removed": False, "panel": d["panel"], "side": d["side"], "damage_type": d["damage_type"],
               "severity": d["severity"]} for i, d in enumerate(claim["damage"])]
-    rev = c.post(f"/api/claims/{claim['audit']['request_id']}/review", json={"decision": "accept", "damage": items}).json()
-    assert rev["routing"]["notes"] == []
+    url = f"/api/claims/{claim['audit']['request_id']}/review"
+    as_is = c.post(url, json={"decision": "accept", "damage": items}).json()
+    assert as_is["corrections"] == [] and as_is["routing"] == claim["routing"]
+    items[1]["severity"] = 2  # one real correction: fender severity 3 -> 2
+    rev = c.post(url, json={"decision": "accept", "damage": items}).json()
+    assert len(rev["corrections"]) == 1 and rev["routing"]["notes"] == []
 
 
 # 8. API carries the new versions and field; the UI renders notes as text

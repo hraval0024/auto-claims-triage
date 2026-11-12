@@ -135,3 +135,146 @@ def test_ui_page_and_vocab_served():
     js = client.get("/static/app.js").text
     assert ".innerHTML" not in js  # model text is always inserted as text
     assert "mid_usd" in js and "deliberately not shown" in js
+
+
+# ---------- review UX: no-op accept, notes, route override, migration ----------
+def review_post(c, **body):
+    return client.post(f"/api/claims/{c['audit']['request_id']}/review", json=body)
+
+
+def unedited(c, **extra):
+    return {"decision": "accept", "vehicle": vehicle_as_sent(c), "damage": items_as_sent(c),
+            "damage_summary": c["damage_summary"], "not_assessable": c["not_assessable"], "region": "standard", **extra}
+
+
+def test_accept_as_is_keeps_stored_cost_and_routing():
+    c = new_claim()
+    r = review_post(c, **unedited(c)).json()
+    assert r["corrections"] == [] and r["note"] == "Accepted as is. No changes were made."
+    assert r["cost"] == c["cost"] and r["routing"] == c["routing"]
+    assert r["system_route"] == r["final_route"] == c["routing"]["outcome"] and r["route_overridden"] is False
+
+
+def test_accept_as_is_does_not_reroute_a_low_confidence_claim(monkeypatch):
+    """The old code rebuilt items as adjuster-set (high confidence) on every accept, so an unedited
+    accept could turn 'request more photos' into a different route."""
+    damage = [{"photo_index": 0, "panel": "front_door", "side": "left", "damage_type": "dent",
+               "severity": 2, "confidence": "low", "cues": "faint dent"}]
+    monkeypatch.setattr(pipeline, "call_model", lambda images, **kw: (
+        ModelOutput.model_validate(model_output_dict(damage=damage)), UsageTally("claude-sonnet-5-5", 1000, 0, 0, 200, 1)))
+    c = new_claim()
+    assert c["routing"]["outcome"] == "request_more_photos"
+    r = review_post(c, **unedited(c)).json()
+    assert r["routing"] == c["routing"] and r["final_route"] == "request_more_photos" and r["cost"] == c["cost"]
+    # Contrast: the same claim with one real correction is re-routed with adjuster-set (high) confidence.
+    items = items_as_sent(c)
+    items[0]["severity"] = 1
+    assert review_post(c, **unedited(c, damage=items)).json()["routing"]["outcome"] != "request_more_photos"
+
+
+def test_correction_still_reprices_and_reroutes():
+    c = new_claim()
+    items = items_as_sent(c)
+    next(i for i in items if i["panel"] == "taillamp")["severity"] = 4
+    r = review_post(c, **unedited(c, damage=items)).json()
+    assert len(r["corrections"]) == 1 and "Re-priced" in r["note"]
+    assert r["cost"] != c["cost"] and r["cost"]["status"] == "not_estimable"
+    assert r["routing"] != c["routing"] and any("Severity-4" in x for x in r["routing"]["reasons"])  # re-routed
+    assert r["final_route"] == r["routing"]["outcome"]
+    assert r["route_overridden"] is False
+
+
+def test_notes_are_trimmed_stored_and_returned():
+    c = new_claim()
+    r = review_post(c, **unedited(c, notes="  checked against photo 1  ")).json()
+    assert r["notes"] == "checked against photo 1"
+    assert client.get("/api/corrections").json()["reviews"][0]["notes"] == "checked against photo 1"
+    r2 = review_post(c, **unedited(c, notes="   ")).json()
+    assert r2["notes"] is None
+
+
+def test_notes_over_1000_chars_are_rejected():
+    c = new_claim()
+    assert review_post(c, **unedited(c, notes="x" * 1000)).status_code == 200
+    r = review_post(c, **unedited(c, notes="x" * 1001))
+    assert r.status_code == 422 and r.json()["fields"] == ["notes"]
+
+
+def test_route_override_is_stored_and_does_not_change_cost():
+    c = new_claim()
+    assert c["routing"]["outcome"] != "possible_total_loss"
+    r = review_post(c, **unedited(c, final_route="possible_total_loss", notes="Frame looks bent in photo 1")).json()
+    assert r["route_overridden"] is True and r["final_route"] == "possible_total_loss"
+    assert r["system_route"] == c["routing"]["outcome"]
+    assert r["routing"] == c["routing"] and r["cost"] == c["cost"]  # recommendation and cost untouched
+    row = client.get("/api/corrections").json()["reviews"][0]
+    assert (row["system_route"], row["final_route"], row["route_overridden"], row["notes"]) == (
+        c["routing"]["outcome"], "possible_total_loss", True, "Frame looks bent in photo 1")
+
+
+def test_route_override_requires_notes():
+    c = new_claim()
+    for notes in (None, "", "   "):
+        r = review_post(c, **unedited(c, final_route="possible_total_loss", notes=notes))
+        assert r.status_code == 422 and "reason" in r.json()["error"]
+    assert client.get("/api/corrections").json()["reviews"] == []  # refused requests are not logged
+
+
+def test_selecting_the_system_route_is_not_an_override():
+    c = new_claim()
+    r = review_post(c, **unedited(c, final_route=c["routing"]["outcome"])).json()  # no notes needed
+    assert r["route_overridden"] is False and r["final_route"] == c["routing"]["outcome"]
+
+
+def test_route_override_with_reject_is_refused():
+    c = new_claim()
+    r = review_post(c, decision="reject", final_route="possible_total_loss", notes="x")
+    assert r.status_code == 422 and "only allowed with accept" in r.json()["error"]
+
+
+def test_override_with_correction_reprices_then_applies_final_route():
+    c = new_claim()
+    items = items_as_sent(c)
+    next(i for i in items if i["panel"] == "taillamp")["severity"] = 4
+    r = review_post(c, **unedited(c, damage=items, final_route="fast_track_candidate", notes="Adjuster judgment")).json()
+    assert r["cost"]["status"] == "not_estimable"  # re-priced with the correction
+    assert r["routing"]["outcome"] != "fast_track_candidate"  # the system's re-routed recommendation
+    assert r["final_route"] == "fast_track_candidate" and r["route_overridden"] is True
+
+
+def test_corrections_endpoint_returns_review_fields():
+    c = new_claim()
+    review_post(c, **unedited(c, notes="ok"))
+    row = client.get("/api/corrections").json()["reviews"][0]
+    assert {"notes", "system_route", "final_route", "route_overridden", "n_corrections", "decision"} <= row.keys()
+
+
+def test_migration_adds_columns_to_old_schema_and_is_idempotent(tmp_db):
+    from app import store
+    old = sqlite3.connect(tmp_db)  # the reviews table as first deployed
+    old.execute("CREATE TABLE reviews (id INTEGER PRIMARY KEY AUTOINCREMENT, request_id TEXT NOT NULL, "
+                "decision TEXT NOT NULL, n_corrections INTEGER NOT NULL, created_at TEXT NOT NULL)")
+    old.execute("INSERT INTO reviews (request_id, decision, n_corrections, created_at) VALUES ('old1', 'accept', 2, '2026-11-10T00:00:00+00:00')")
+    old.commit()
+    old.close()
+    rows = store.recent_reviews()  # first connection runs the migration
+    assert rows == [{"id": 1, "request_id": "old1", "decision": "accept", "n_corrections": 2,
+                     "created_at": "2026-11-10T00:00:00+00:00", "notes": None, "system_route": None,
+                     "final_route": None, "route_overridden": False}]
+    conn = sqlite3.connect(tmp_db)
+    assert store._migrate(conn) == []  # second run: nothing to add
+    cols = [r[1] for r in conn.execute("PRAGMA table_info(reviews)")]
+    assert cols[-4:] == ["notes", "system_route", "final_route", "route_overridden"]
+    conn.close()
+    store.log_review("new1", "accept", [], notes="n", system_route="adjuster_review", final_route="adjuster_review")
+    assert [r["request_id"] for r in store.recent_reviews()] == ["new1", "old1"]
+
+
+def test_review_notes_never_reach_the_app_log(capsys):
+    from app.logs import setup_logging
+    setup_logging()
+    c = new_claim()
+    review_post(c, **unedited(c, final_route="possible_total_loss", notes="Owner Jane Q. Example, 555-0100"))
+    out = capsys.readouterr().out
+    assert "review" in out  # the request itself is logged...
+    assert "Jane Q. Example" not in out and "555-0100" not in out  # ...its notes are not

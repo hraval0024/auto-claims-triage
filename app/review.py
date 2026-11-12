@@ -3,11 +3,19 @@
 Originals come from the stored result (app/store.py), never from the client. Every changed
 field becomes one corrections row: (field, original, corrected, timestamp, request id).
 Items an adjuster sets are treated as high confidence: a human has confirmed them.
+
+An accept with zero corrections changes nothing: the stored cost and route stand. Only an accept
+with at least one correction re-prices and re-routes.
+
+Route override (accept only): the adjuster may set a final route different from the system's
+recommendation, with a required reason in `notes`. It changes ONLY the route: never the cost, and
+there is no approved/paid state. Notes may contain personal data: stored in reviews.notes only,
+never logged.
 """
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app import store
 from app.cost_engine import estimate
@@ -20,8 +28,11 @@ from app.schemas import (
     MergedDamageItem,
     Panel,
     RoutingDecision,
+    RoutingOutcome,
     Side,
 )
+
+NOTES_MAX = 1000
 
 
 class ReviewDamageItem(BaseModel):
@@ -51,6 +62,16 @@ class ReviewRequest(BaseModel):
     damage_summary: str | None = None
     not_assessable: list[str] | None = None
     region: Literal["low_cost", "standard", "high_cost"] | None = None
+    notes: str | None = Field(default=None, max_length=NOTES_MAX)
+    final_route: RoutingOutcome | None = None  # None or the system's own route = no override
+
+    @field_validator("notes", mode="before")
+    @classmethod
+    def _trim_notes(cls, v):
+        if isinstance(v, str):
+            v = v.strip()
+            return v or None
+        return v
 
 
 class ReviewResult(BaseModel):
@@ -59,8 +80,12 @@ class ReviewResult(BaseModel):
     corrections: list[dict]
     logged_at: str
     cost: CostEstimate | None
-    routing: RoutingDecision
+    routing: RoutingDecision  # the system's recommendation (re-routed only if there were corrections)
     note: str
+    notes: str | None
+    system_route: RoutingOutcome  # what the stored result recommended
+    final_route: RoutingOutcome  # the route that stands after the review
+    route_overridden: bool
 
 
 def _item_str(panel, side, dtype, sev) -> str:
@@ -113,11 +138,19 @@ def review(request_id: str, req: ReviewRequest) -> ReviewResult:
     if stored is None:
         raise KeyError(request_id)
     orig = ClaimResult.model_validate(stored)
-    corrections = diff(orig, req)
-    logged_at = store.log_review(request_id, req.decision, corrections)
+    system_route = orig.routing.outcome
+    # Selecting the system's own route is not an override.
+    overridden = req.final_route is not None and req.final_route != system_route
+    if overridden and req.decision != "accept":
+        raise ValueError("A route override is only allowed with accept, not reject.")
+    if overridden and not req.notes:
+        raise ValueError("A route override needs a reason: add it in the adjuster notes.")
+    corrections = diff(orig, req)  # validates before anything is logged
 
     cost, routing, note = orig.cost, orig.routing, "No re-pricing: the claim was rejected or had no assessment."
-    if req.decision == "accept" and orig.status == "ok":
+    if req.decision == "accept" and not corrections:
+        note = "Accepted as is. No changes were made."
+    elif req.decision == "accept" and orig.status == "ok":
         if req.damage:
             items = [MergedDamageItem(panel=i.panel, side=i.side, damage_type=i.damage_type, severity=i.severity,
                                       confidence=Confidence.high, photo_indices=[], cues=["set by adjuster"],
@@ -130,6 +163,11 @@ def review(request_id: str, req: ReviewRequest) -> ReviewResult:
         cost = estimate(items, make=make, region=region)
         routing = route("ok", items, cost, orig.flags, orig.conflicts, orig.gate.reasons)
         note = "Re-priced and re-routed with the adjuster's corrections (adjuster-set items count as high confidence)."
+    # The override replaces the route that stands after any re-routing; the cost is untouched.
+    final_route = req.final_route if overridden else routing.outcome
+    logged_at = store.log_review(request_id, req.decision, corrections, notes=req.notes, system_route=system_route,
+                                 final_route=final_route, route_overridden=overridden)
     return ReviewResult(request_id=request_id, decision=req.decision,
                         corrections=[{"field": f, "original": o, "corrected": n} for f, o, n in corrections],
-                        logged_at=logged_at, cost=cost, routing=routing, note=note)
+                        logged_at=logged_at, cost=cost, routing=routing, note=note, notes=req.notes,
+                        system_route=system_route, final_route=final_route, route_overridden=overridden)
