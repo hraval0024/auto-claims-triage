@@ -1,9 +1,13 @@
 // One-page UI. All server/model text is inserted with textContent (via el()), never innerHTML,
-// so text read from a photo can't inject markup.
+// so text read from a photo can't inject markup. Adjuster notes are rendered the same way.
 "use strict";
 
 let VOCAB = null;
 let CURRENT = null; // last ClaimResult
+let SNAPSHOT = null; // review payload as rendered, to count the adjuster's edits
+let REVIEWED = false; // double-submit guard: one review per claim in this screen
+let PHOTOS = []; // photos of the claim on screen: {kind: "file", url, name} | {kind: "url", text}
+let SELECTED = 0;
 
 const $ = (id) => document.getElementById(id);
 // All API calls go through here: session cookie is sent automatically (same origin); a 401 means
@@ -31,12 +35,17 @@ const usd = (x) => "$" + Math.round(x).toLocaleString("en-US");
 const clear = (id) => { const n = $(id); n.replaceChildren(); return n; };
 const conf = (c) => el("span", { class: `conf ${c}`, title: `Model confidence: ${c}` }, c);
 const human = (s) => String(s).replace(/_/g, " ");
+const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+// Stored timestamps are UTC ISO; show them in the viewer's local time.
+const localTime = (iso) => new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+const localDateTime = (iso) => new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 const OUTCOME_TEXT = {
   fast_track_candidate: "Fast-track candidate",
   adjuster_review: "Adjuster review",
   request_more_photos: "Request more photos",
   possible_total_loss: "Possible total loss",
 };
+const ROUTES = ["fast_track_candidate", "adjuster_review", "request_more_photos", "possible_total_loss"];
 const FLAG_TEXT = {
   license_plate_visible: "License plate visible (not stored)",
   person_face_visible: "Person's face visible (not stored)",
@@ -44,6 +53,7 @@ const FLAG_TEXT = {
   route_to_human: "Routed to a human",
 };
 const REGION_TEXT = { standard: "Standard", low_cost: "Low cost", high_cost: "High cost" };
+const NOTES_MAX = 1000;
 
 function select(options, value, label, textFn = human) {
   const s = el("select", { "aria-label": label });
@@ -65,7 +75,7 @@ function renderThumbs() {
   [...$("files").files].forEach((f, i) => {
     const u = URL.createObjectURL(f);
     thumbUrls.push(u);
-    list.append(el("li", { title: f.name }, el("img", { src: u, alt: `Photo ${i}: ${f.name}` }), el("span", { class: "idx" }, `Photo ${i}`)));
+    list.append(el("li", { title: f.name }, el("img", { src: u, alt: `Photo ${i + 1}: ${f.name}` }), el("span", { class: "idx" }, `Photo ${i + 1}`)));
   });
 }
 $("files").addEventListener("change", renderThumbs);
@@ -82,14 +92,60 @@ function setBusy(busy) {
   if (busy) { $("empty-state").hidden = true; $("result").hidden = true; }
 }
 
+// ---------- submitted photos (result area). Same order as the server: files first, then URLs. ----------
+function releasePhotos() {
+  PHOTOS.forEach((p) => p.url && URL.revokeObjectURL(p.url));
+  PHOTOS = [];
+  SELECTED = 0;
+}
+function capturePhotos(files, urls) {
+  releasePhotos();
+  // Separate object URLs from the intake thumbnails, so changing the file input later can't
+  // break the result preview. Nothing is uploaded or stored by this.
+  for (const f of files) PHOTOS.push({ kind: "file", url: URL.createObjectURL(f), name: f.name });
+  for (const u of urls) PHOTOS.push({ kind: "url", text: u });
+}
+function renderPhotos() {
+  const main = clear("photo-main");
+  const strip = clear("photo-strip");
+  $("photos-card").hidden = PHOTOS.length === 0;
+  if (!PHOTOS.length) return;
+  const p = PHOTOS[SELECTED];
+  if (p.kind === "file") {
+    main.append(el("a", { href: p.url, target: "_blank", rel: "noopener", title: "Open full size in a new tab" },
+      el("img", { src: p.url, alt: `Photo ${SELECTED + 1}: ${p.name}` })),
+      el("p", { class: "photo-caption muted small" }, `Photo ${SELECTED + 1} · ${p.name} · click to open full size`));
+  } else {
+    // The CSP allows only 'self', data: and blob: images, so a pasted URL can't be shown here.
+    main.append(el("div", { class: "photo-placeholder" },
+      el("strong", {}, `Photo ${SELECTED + 1}: photo from URL (preview not available)`), el("span", { class: "url-text" }, p.text)));
+  }
+  if (PHOTOS.length > 1) {
+    PHOTOS.forEach((q, i) => {
+      const inner = q.kind === "file" ? el("img", { src: q.url, alt: "" }) : el("span", { class: "url-tile" }, "URL");
+      strip.append(el("li", {}, el("button", {
+        type: "button", class: i === SELECTED ? "selected" : null, "aria-pressed": String(i === SELECTED),
+        "aria-label": `Show photo ${i + 1}`, onclick: () => selectPhoto(i),
+      }, inner, el("span", { class: "idx" }, `Photo ${i + 1}`))));
+    });
+  }
+}
+function selectPhoto(i) {
+  if (i < 0 || i >= PHOTOS.length) return;
+  SELECTED = i;
+  renderPhotos();
+}
+
 // ---------- submit ----------
 $("claim-form").addEventListener("submit", async (ev) => {
   ev.preventDefault();
+  const files = [...$("files").files];
+  const urls = $("urls").value.split("\n").map((s) => s.trim()).filter(Boolean);
   const fd = new FormData();
-  for (const f of $("files").files) fd.append("files", f);
-  for (const u of $("urls").value.split("\n").map((s) => s.trim()).filter(Boolean)) fd.append("urls", u);
+  for (const f of files) fd.append("files", f);
+  for (const u of urls) fd.append("urls", u);
   fd.append("region", $("region").value);
-  if (![...fd.keys()].some((k) => k === "files" || k === "urls")) {
+  if (!files.length && !urls.length) {
     setStatus("form-status", "Add at least one photo or URL.", "error");
     return;
   }
@@ -107,6 +163,7 @@ $("claim-form").addEventListener("submit", async (ev) => {
       return;
     }
     setStatus("form-status", "");
+    capturePhotos(files, urls);
     render(body);
   } catch (e) {
     setStatus("form-status", `Request failed: ${e.message || e}`, "error");
@@ -124,8 +181,10 @@ function metric(label, value, cls = "") {
 
 function render(res) {
   CURRENT = res;
+  REVIEWED = false;
   $("empty-state").hidden = true;
   $("result").hidden = false;
+  $("result").classList.remove("reviewed");
   setStatus("review-status", "");
   $("boundary").textContent = res.boundary_notice;
 
@@ -140,6 +199,7 @@ function render(res) {
   if (res.usage && res.usage.cached) bar.lastChild.title = "Identical photos seen before: no model call";
 
   renderRouting(res.routing);
+  renderOverride(null);
 
   const gate = clear("gate");
   if (res.status !== "ok") {
@@ -160,21 +220,35 @@ function render(res) {
   if (res.conflicts.length) conflicts.append(el("div", { class: "box bad" }, el("strong", {}, "Photos disagree"), el("ul", {}, res.conflicts.map((c) => el("li", {}, c)))));
 
   const ok = res.status === "ok";
-  $("assessment").hidden = !ok;
   $("vehicle-card").hidden = !ok;
+  // Photos stay visible on a refusal too: the adjuster sees what was refused.
+  $("assessment").hidden = false;
+  $("assessment").classList.toggle("no-findings", !ok);
   if (ok) {
     renderVehicle(res.vehicle);
     renderDamage(res.damage);
     $("summary-text").value = res.damage_summary || "";
     $("na-text").value = (res.not_assessable || []).join("\n");
   }
+  renderPhotos();
   renderCost(res.cost);
   renderBaseline(res.llm_baseline);
 
   const rr = clear("review-region");
   for (const r of VOCAB.regions) rr.append(el("option", { value: r, selected: res.cost ? res.cost.region === r : r === "standard" }, REGION_TEXT[r] || human(r)));
+  const fr = clear("final-route");
+  for (const o of ROUTES) {
+    const sys = o === res.routing.outcome;
+    fr.append(el("option", { value: o, selected: sys }, OUTCOME_TEXT[o] + (sys ? " (system recommendation)" : "")));
+  }
+  $("review-notes").value = "";
+  setReadOnly(false);
+  $("review-form").hidden = false;
+  $("review-done").hidden = true;
   $("accept-btn").disabled = false;
   $("reject-btn").disabled = false;
+  SNAPSHOT = formState();
+  updateReviewUI();
   renderAudit(res.audit);
   $("result").scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -195,6 +269,22 @@ function renderRouting(routing) {
   ].filter(Boolean));
 }
 
+// Shown beside the recommendation after an accepted override. States what happened; never
+// judges whether the override was right.
+function renderOverride(rev) {
+  const n = clear("override-panel");
+  const on = !!(rev && rev.route_overridden);
+  n.hidden = !on;
+  $("decision-row").classList.toggle("has-override", on);
+  if (!on) return;
+  n.append(
+    el("div", { class: "eyebrow" }, "Adjuster override"),
+    el("h3", {}, "Final route: ", el("span", { class: `badge ${rev.final_route}` }, OUTCOME_TEXT[rev.final_route]), " (adjuster override)"),
+    el("p", {}, "System recommended: ", el("strong", {}, OUTCOME_TEXT[rev.routing.outcome])),
+    el("p", { class: "override-reason" }, el("span", { class: "muted" }, "Reason: "), rev.notes || ""),
+  );
+}
+
 function renderVehicle(v) {
   const t = clear("vehicle-table");
   for (const k of ["make", "model", "color"]) {
@@ -211,6 +301,14 @@ function sevBar(s) {
   return el("span", { class: "sev-bar", "data-s": String(s), "aria-hidden": "true" }, el("i"), el("i"), el("i"), el("i"));
 }
 
+// Photo references in the findings are 1-based to match the photo labels ("Photo 1").
+function photoRefs(indices) {
+  if (!indices || !indices.length) return "–";
+  return indices.map((i) => PHOTOS[i]
+    ? el("button", { type: "button", class: "photo-ref", "aria-label": `Show photo ${i + 1}`, onclick: () => selectPhoto(i) }, String(i + 1))
+    : el("span", {}, String(i + 1)));
+}
+
 function damageRow(item, origIndex) {
   const tr = el("tr", { "data-orig": origIndex === null ? "" : String(origIndex) });
   const rm = el("input", { type: "checkbox", "aria-label": "remove this item", onchange: () => tr.classList.toggle("removed", rm.checked) });
@@ -223,7 +321,7 @@ function damageRow(item, origIndex) {
     el("td", {}, select(VOCAB.damage_types, item.damage_type, "damage type")),
     el("td", {}, el("span", { class: "sev" }, sevSel, bar)),
     el("td", {}, item.confidence ? conf(item.confidence) : el("span", { class: "conf adjuster" }, "adjuster")),
-    el("td", { class: "num muted" }, item.photo_indices ? item.photo_indices.join(", ") : "–"),
+    el("td", { class: "num photo-refs" }, photoRefs(item.photo_indices)),
     el("td", { class: "cues" }, (item.cues || []).join(" · ")),
     el("td", { class: "rm-cell" }, rm),
   );
@@ -240,6 +338,7 @@ $("add-item").addEventListener("click", () => {
   const empty = $("damage-table").querySelector(".empty-row");
   if (empty) empty.parentElement.remove();
   $("damage-table").append(damageRow({ panel: "other_unknown", side: "unknown", damage_type: "dent", severity: 1 }, null));
+  updateReviewUI();
 });
 
 function renderCost(cost) {
@@ -314,17 +413,96 @@ function collectReview(decision) {
   return body;
 }
 
+// The editable findings as collectReview() sends them (decision, notes and final route excluded).
+function formState() {
+  const s = collectReview("accept");
+  delete s.decision;
+  return s;
+}
+
+// Count edits against the render-time snapshot, one per field, the way the server logs them
+// (app/review.py diff): a removed item counts once, an added item counts once. The server's count
+// is authoritative; this only drives the button label.
+function countChanges(a, b) {
+  let n = 0;
+  if (a.vehicle && b.vehicle) for (const k of Object.keys(a.vehicle)) n += String(a.vehicle[k]) !== String(b.vehicle[k]);
+  const orig = new Map((a.damage || []).map((d) => [d.orig_index, d]));
+  for (const d of b.damage || []) {
+    if (d.orig_index === null) { n += !d.removed; continue; }
+    const o = orig.get(d.orig_index);
+    if (d.removed) { n += 1; continue; }
+    for (const k of ["panel", "side", "damage_type", "severity"]) n += String(o[k]) !== String(d[k]);
+  }
+  if (a.damage_summary !== undefined) n += a.damage_summary !== b.damage_summary;
+  if (a.not_assessable) n += a.not_assessable.join("\n") !== b.not_assessable.join("\n");
+  if (CURRENT.cost) n += a.region !== b.region; // the server ignores region when there is no estimate
+  return n;
+}
+
+const isOverride = () => $("final-route").value !== CURRENT.routing.outcome;
+
+function needsPersonWarning() {
+  const sev4 = (CURRENT.damage || []).some((d) => d.severity === 4) ||
+    (SNAPSHOT && (formState().damage || []).some((d) => !d.removed && d.severity === 4));
+  return sev4 || CURRENT.flags.length > 0 || ["possible_total_loss", "adjuster_review"].includes(CURRENT.routing.outcome);
+}
+
+function updateReviewUI() {
+  if (!CURRENT || REVIEWED || !SNAPSHOT) return;
+  const n = countChanges(SNAPSHOT, formState());
+  const ov = isOverride();
+  let label = "Accept as is";
+  if (n && ov) label = `Accept with ${plural(n, "correction")} and route override`;
+  else if (n) label = `Accept with ${plural(n, "correction")}`;
+  else if (ov) label = "Accept with route override";
+  $("accept-btn").textContent = label;
+  $("override-hint").hidden = !ov;
+  $("fasttrack-warn").hidden = !(ov && $("final-route").value === "fast_track_candidate" && needsPersonWarning());
+  $("notes-label").textContent = ov ? "Adjuster notes (required: reason for the override)" : "Adjuster notes (optional)";
+  $("review-notes").required = ov;
+  $("review-notes").setAttribute("aria-required", String(ov));
+  if (!ov || $("review-notes").value.trim()) setNotesError("");
+  updateNotesCount();
+}
+function updateNotesCount() {
+  const left = NOTES_MAX - $("review-notes").value.length;
+  $("notes-count").textContent = `${left} ${left === 1 ? "character" : "characters"} left`;
+}
+function setNotesError(msg) {
+  $("notes-error").textContent = msg;
+  $("review-notes").classList.toggle("invalid", !!msg);
+  $("review-notes").setAttribute("aria-invalid", String(!!msg));
+}
+// Any edit in the result area (fields, rows, textareas, region, final route) updates the label live.
+$("result").addEventListener("input", updateReviewUI);
+$("result").addEventListener("change", updateReviewUI);
+
+function setReadOnly(ro) {
+  for (const n of document.querySelectorAll("#vehicle-table input, #damage-table select, #damage-table input, #summary-text, #na-text")) n.disabled = ro;
+  $("add-item").hidden = ro;
+}
+
 async function sendReview(decision) {
+  if (REVIEWED) return; // double-submit guard
+  const notes = $("review-notes").value.trim();
+  // Override applies to Accept only: a reject never sends final_route (the server also refuses it).
+  const override = decision === "accept" && isOverride();
+  if (override && !notes) {
+    setNotesError("Add a reason: overriding the system recommendation needs one.");
+    $("review-notes").focus();
+    return;
+  }
+  const body = { ...collectReview(decision), notes: notes || null };
+  if (override) body.final_route = $("final-route").value;
   $("accept-btn").disabled = $("reject-btn").disabled = true;
   try {
     const r = await api(`/api/claims/${CURRENT.audit.request_id}/review`, {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(collectReview(decision)),
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
     });
-    const body = await r.json();
-    if (!r.ok) throw new Error(body.error || `HTTP ${r.status}`);
-    setStatus("review-status", `${decision === "accept" ? "Accepted" : "Rejected"}: ${body.corrections.length} correction(s) logged at ${body.logged_at}. ${body.note}`, "ok");
-    renderRouting(body.routing);
-    renderCost(body.cost);
+    const res = await r.json();
+    if (!r.ok) throw new Error(res.error || `HTTP ${r.status}`);
+    REVIEWED = true;
+    showReviewed(res);
     loadLog();
   } catch (e) {
     setStatus("review-status", `Review failed: ${e.message}`, "error");
@@ -333,20 +511,94 @@ async function sendReview(decision) {
 }
 $("accept-btn").addEventListener("click", () => sendReview("accept"));
 $("reject-btn").addEventListener("click", () => sendReview("reject"));
+$("review-notes").addEventListener("input", updateNotesCount);
 
-// ---------- corrections log ----------
+function reviewSummary(res) {
+  const n = res.corrections.length;
+  const at = localTime(res.logged_at);
+  if (res.decision === "reject") return { banner: "Claim reviewed: rejected", status: `Rejected at ${at}.` };
+  if (n && res.route_overridden) return { banner: `Claim reviewed: accepted with ${plural(n, "correction")} and route override`, status: `Accepted with ${plural(n, "correction")} and a route override at ${at}. Re-priced and re-routed.` };
+  if (n) return { banner: `Claim reviewed: accepted with ${plural(n, "correction")}`, status: `Accepted with ${plural(n, "correction")} at ${at}. Re-priced and re-routed.` };
+  if (res.route_overridden) return { banner: "Claim reviewed: accepted with route override", status: `Accepted with a route override at ${at}.` };
+  return { banner: "Claim reviewed: accepted as is", status: `Accepted as is at ${at}.` };
+}
+
+function showReviewed(res) {
+  renderRouting(res.routing);
+  renderCost(res.cost);
+  renderOverride(res);
+  setReadOnly(true);
+  $("result").classList.add("reviewed");
+  const s = reviewSummary(res);
+  const banner = clear("done-banner");
+  banner.className = `done-banner ${res.decision}`;
+  banner.append(el("strong", {}, s.banner),
+    res.decision === "accept"
+      ? el("span", {}, "Final route: ", el("span", { class: `badge small ${res.final_route}` }, OUTCOME_TEXT[res.final_route]), res.route_overridden ? " (adjuster override)" : "")
+      : el("span", { class: "muted" }, `The system's recommendation (${OUTCOME_TEXT[res.routing.outcome]}) was not accepted.`));
+  const dn = clear("done-notes");
+  if (res.notes) dn.append(el("p", { class: "box-label" }, "Adjuster notes"), el("p", { class: "notes-readonly" }, res.notes));
+  $("review-form").hidden = true;
+  $("review-done").hidden = false;
+  setStatus("review-status", s.status, "ok");
+  $("done-banner").focus();
+}
+
+// ---------- next claim ----------
+function startNextClaim() {
+  $("files").value = "";
+  renderThumbs(); // revokes the intake object URLs
+  releasePhotos(); // revokes the result-area object URLs
+  renderPhotos();
+  $("urls").value = "";
+  $("region").value = "standard";
+  setStatus("form-status", "");
+  $("review-notes").value = "";
+  setNotesError("");
+  setStatus("review-status", "");
+  clear("final-route");
+  renderOverride(null);
+  $("result").hidden = true;
+  $("result").classList.remove("reviewed");
+  CURRENT = null;
+  SNAPSHOT = null;
+  REVIEWED = false;
+  $("empty-state").hidden = false;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  $("files").focus({ preventScroll: true }); // the file input sits inside the dropzone
+  loadLog();
+}
+$("next-claim-btn").addEventListener("click", startNextClaim);
+$("next-claim-link").addEventListener("click", startNextClaim);
+
+// ---------- review + corrections log ----------
 async function loadLog() {
+  const rt = clear("reviews-table");
   const t = clear("log-table");
+  rt.append(el("tr", {}, ["Time (local)", "Request", "Decision", "Corrections", "Route", "Notes"].map((h) => el("th", {}, h))));
   t.append(el("tr", {}, ["Time (UTC)", "Request", "Field", "Original", "Corrected", "Decision"].map((h) => el("th", {}, h))));
   try {
-    const { corrections } = await (await api("/api/corrections?limit=50")).json();
+    const { corrections, reviews } = await (await api("/api/corrections?limit=50")).json();
+    if (!reviews.length) rt.append(el("tr", {}, el("td", { colspan: 6, class: "empty-row" }, "No reviews yet.")));
+    for (const v of reviews) {
+      // Rows from before route tracking have no route columns.
+      let route = el("span", { class: "muted" }, "–");
+      if (v.route_overridden) {
+        route = el("span", { class: "route-cell" }, `${OUTCOME_TEXT[v.system_route] || v.system_route} → ${OUTCOME_TEXT[v.final_route] || v.final_route} `, el("span", { class: "override-badge" }, "Override"));
+      } else if (v.final_route) {
+        route = OUTCOME_TEXT[v.final_route] || v.final_route;
+      }
+      rt.append(el("tr", {}, el("td", { class: "num" }, localDateTime(v.created_at)), el("td", { class: "mono" }, v.request_id.slice(0, 8)),
+        el("td", {}, v.decision), el("td", { class: "num" }, String(v.n_corrections)), el("td", {}, route),
+        el("td", { class: "notes-cell" }, v.notes || "")));
+    }
     if (!corrections.length) t.append(el("tr", {}, el("td", { colspan: 6, class: "empty-row" }, "No corrections yet.")));
     for (const c of corrections) {
       t.append(el("tr", {}, el("td", { class: "num" }, c.created_at.replace("T", " ").slice(0, 19)), el("td", { class: "mono" }, c.request_id.slice(0, 8)),
         el("td", {}, human(c.field)), el("td", {}, c.original ?? ""), el("td", {}, c.corrected ?? ""), el("td", {}, c.decision ?? "")));
     }
   } catch (e) {
-    t.append(el("tr", {}, el("td", { colspan: 6, class: "empty-row" }, `Could not load the log: ${e}`)));
+    rt.append(el("tr", {}, el("td", { colspan: 6, class: "empty-row" }, `Could not load the log: ${e}`)));
   }
 }
 $("refresh-log").addEventListener("click", loadLog);

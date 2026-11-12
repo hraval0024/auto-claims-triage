@@ -81,10 +81,16 @@
     <section id="result" hidden aria-labelledby="result-h">
       <div class="result-head">
         <h2 id="result-h">Assessment</h2>
-        <div id="summary-bar" class="metrics"></div>
+        <div class="result-head-right">
+          <div id="summary-bar" class="metrics"></div>
+          <button type="button" id="next-claim-link" class="btn ghost small">Start next claim</button>
+        </div>
       </div>
 
-      <div id="routing" class="card decision"></div>
+      <div id="decision-row" class="decision-row">
+        <div id="routing" class="card decision"></div>
+        <div id="override-panel" class="card override" hidden></div>
+      </div>
       <div id="gate"></div>
       <div id="flags"></div>
       <div id="conflicts"></div>
@@ -108,13 +114,23 @@
       </div>
 
       <div id="assessment">
-        <section class="card">
-          <div class="card-head">
-            <div><h3>Damage findings</h3><span class="muted small">Side is the vehicle's own left/right (driver's view), not the camera's</span></div>
-            <button type="button" id="add-item" class="btn ghost small">+ Add item</button>
-          </div>
-          <div class="table-wrap"><table id="damage-table" class="data"></table></div>
-        </section>
+        <div class="findings-row">
+          <section class="card photos-card" id="photos-card" aria-labelledby="photos-h">
+            <div class="card-head"><h3 id="photos-h">Submitted photos</h3><span class="muted small">In this browser only · not stored</span></div>
+            <div class="card-body">
+              <div id="photo-main" class="photo-main"></div>
+              <ul id="photo-strip" class="photo-strip" aria-label="Choose a photo"></ul>
+            </div>
+          </section>
+
+          <section class="card findings-card">
+            <div class="card-head">
+              <div><h3>Damage findings</h3><span class="muted small">Side is the vehicle's own left/right (driver's view), not the camera's</span></div>
+              <button type="button" id="add-item" class="btn ghost small">+ Add item</button>
+            </div>
+            <div class="table-wrap"><table id="damage-table" class="data"></table></div>
+          </section>
+        </div>
 
         <div class="grid-2">
           <section class="card">
@@ -130,17 +146,48 @@
 
       <div id="baseline"></div>
 
-      <section class="card review-actions" aria-labelledby="review-h">
+      <section class="card review-actions" id="review-card" aria-labelledby="review-h">
         <div class="review-text">
           <h3 id="review-h">Adjuster review</h3>
-          <p class="hint">Edit any field above, then accept (corrections are logged and the estimate is re-priced) or reject.</p>
+          <p class="hint" id="review-hint">Check the findings against the photos. Edit anything that is wrong, then accept or reject.</p>
         </div>
-        <div class="review-controls">
-          <label for="review-region" class="small muted">Re-price region</label>
-          <select id="review-region"></select>
-          <button type="button" id="reject-btn" class="btn secondary">Reject result</button>
-          <button type="button" id="accept-btn" class="btn primary">Accept with my corrections</button>
+
+        <div id="review-form" class="review-form">
+          <div class="review-fields">
+            <div class="field">
+              <label for="review-region">Re-price region</label>
+              <select id="review-region"></select>
+            </div>
+            <div class="field">
+              <label for="final-route">Final route <span class="muted">(applies to Accept only)</span></label>
+              <select id="final-route"></select>
+            </div>
+          </div>
+          <p id="override-hint" class="inline-note warn" hidden>Overriding the system recommendation. A reason is required.</p>
+          <p id="fasttrack-warn" class="inline-note bad" role="alert" hidden>The system found damage or flags that normally need a person.</p>
+
+          <div class="field">
+            <label for="review-notes" id="notes-label">Adjuster notes (optional)</label>
+            <textarea id="review-notes" rows="3" maxlength="1000" aria-describedby="notes-count notes-error"
+              placeholder="Why you accepted or rejected, or anything the next person should know"></textarea>
+            <div class="notes-meta">
+              <span id="notes-error" class="field-error" role="alert"></span>
+              <span id="notes-count" class="muted small" aria-live="polite">1000 characters left</span>
+            </div>
+          </div>
+
+          <div class="review-controls">
+            <button type="button" id="reject-btn" class="btn secondary">Reject result</button>
+            <button type="button" id="accept-btn" class="btn primary">Accept as is</button>
+          </div>
         </div>
+
+        <div id="review-done" class="review-done" hidden>
+          <div class="done-banner" id="done-banner" tabindex="-1"></div>
+          <div id="done-notes"></div>
+          <button type="button" id="next-claim-btn" class="btn primary">Start next claim</button>
+        </div>
+
         <p id="review-status" class="review-status" role="status" aria-live="polite"></p>
       </section>
 
@@ -155,7 +202,10 @@
         <h2 id="log-h">Corrections log</h2>
         <button type="button" id="refresh-log" class="btn ghost small">Refresh</button>
       </div>
-      <p class="hint pad">Every adjuster correction: original value, corrected value, timestamp, request id. This log is eval data.</p>
+      <p class="hint pad">Every review (decision, final route, notes) and every field correction (original value, corrected value, timestamp, request id). This log is eval data.</p>
+      <h3 class="log-sub">Reviews</h3>
+      <div class="table-wrap"><table id="reviews-table" class="data"></table></div>
+      <h3 class="log-sub">Corrections</h3>
       <div class="table-wrap"><table id="log-table" class="data"></table></div>
     </section>
   </div>
