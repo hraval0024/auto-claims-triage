@@ -320,7 +320,15 @@ input:disabled, select:disabled, textarea:disabled { background-color: var(--sur
 .chev:hover { background: var(--primary-soft); color: var(--primary); }
 .hist-detail td { background: var(--surface-2); }
 .data tr.hist-detail:hover td { background: var(--surface-2); }
-.hist-detail-box { padding: 2px 4px 6px; }
+/* width 0 + min-width 100%: the detail never widens the table, so headers don't shift on open */
+.hist-detail-box { padding: 2px 4px 6px; width: 0; min-width: 100%; }
+.hist-dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 18px; margin: 0; font-size: .9rem; }
+.hist-dl dt { color: var(--muted); font-weight: 600; font-size: .82rem; }
+.hist-dl dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.hist-dl dd ul { margin: 0; padding-left: 18px; }
+.hist-dl .override-badge { margin-left: 6px; }
+.hist-id { font-family: var(--mono); font-size: .8rem; user-select: all; word-break: break-all; }
+@media (max-width: 480px) { .hist-dl { grid-template-columns: minmax(0, 1fr); gap: 2px; } .hist-dl dd { margin-bottom: 8px; } }
 .hist-detail-box .box-label:first-child { margin-top: 0; }
 .hist-detail-box ul { margin: 4px 0; }
 .hist-notes { white-space: pre-wrap; margin: 4px 0; }

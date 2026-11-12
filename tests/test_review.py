@@ -426,3 +426,12 @@ def test_estimate_override_with_route_override_keeps_them_separate():
     r = review_post(c, **unedited(c, final_low_usd=lo, final_high_usd=hi + 1, final_route="possible_total_loss", notes="x")).json()
     assert r["estimate_overridden"] is True and r["route_overridden"] is True
     assert r["routing"] == c["routing"] and r["final_route"] == "possible_total_loss"
+
+
+def test_history_ui_expands_every_row_and_handles_old_rows():
+    """Every history row gets a detail panel; missing (old-row) values read "Not recorded"."""
+    js = client.get("/static/app.js").text
+    assert "const expandable" not in js  # no longer conditional
+    for text in ('"No corrections"', '"No notes"', '"Not recorded"', "System recommended: ", "Final route: "):
+        assert text in js
+    assert ".innerHTML" not in js

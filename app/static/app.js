@@ -713,33 +713,61 @@ function routeCell(v) {
   return el("span", { class: "muted" }, "–");
 }
 
+const NOT_RECORDED = "Not recorded"; // old rows (before route/estimate tracking) have null columns
+const routeLabel = (r) => (r ? OUTCOME_TEXT[r] || human(r) : NOT_RECORDED);
+const exactLocal = (iso) => new Date(iso).toLocaleString([], { dateStyle: "medium", timeStyle: "medium" });
+
+function detailItem(label, ...content) {
+  return [el("dt", {}, label), el("dd", {}, ...content)];
+}
+
+// Built once per row with the table; opening/closing only toggles `hidden` on the detail row.
+function historyDetail(v) {
+  const dl = el("dl", { class: "hist-dl" });
+  dl.append(...detailItem("Claim", el("code", { class: "hist-id" }, v.request_id), el("span", { class: "muted" }, ` · ${exactLocal(v.created_at)}`)));
+
+  const route = [el("div", {}, "System recommended: ", routeLabel(v.system_route)),
+    el("div", {}, "Final route: ", routeLabel(v.final_route), v.route_overridden ? el("span", { class: "override-badge" }, "Override") : null)];
+  if (v.route_overridden) route.push(el("div", {}, "Reason: ", v.notes || NOT_RECORDED));
+  // A different final route without an override comes from re-routing after finding corrections.
+  else if (v.system_route && v.final_route && v.system_route !== v.final_route) route.push(el("div", { class: "muted" }, "Re-routed after the adjuster's corrections (not an override)."));
+  dl.append(...detailItem("Route", route));
+
+  dl.append(...detailItem("Corrections", v.corrections.length
+    ? el("ul", {}, v.corrections.map((c) => el("li", {}, correctionLine(c)))) : el("span", { class: "muted" }, "No corrections")));
+  dl.append(...detailItem("Notes", v.notes ? el("span", { class: "hist-notes" }, v.notes) : el("span", { class: "muted" }, "No notes")));
+
+  let est;
+  if (v.system_route === null || v.system_route === undefined) est = el("span", { class: "muted" }, NOT_RECORDED);
+  else if (v.estimate_overridden) est = `Adjuster-set estimate: ${fmtRange(v.final_low_usd, v.final_high_usd)} (system: ${fmtRange(v.system_low_usd, v.system_high_usd)})`;
+  else {
+    est = [el("div", {}, `System range: ${fmtRange(v.system_low_usd, v.system_high_usd)}`)];
+    if (v.final_low_usd !== v.system_low_usd || v.final_high_usd !== v.system_high_usd) {
+      est.push(el("div", {}, `After corrections: ${fmtRange(v.final_low_usd, v.final_high_usd)}`));
+    }
+  }
+  dl.append(...detailItem("Estimate", est));
+  return el("div", { class: "hist-detail-box" }, dl);
+}
+
 function historyRows(v) {
   const n = fieldCorrections(v.corrections).length; // the estimate rows are shown as "range change"
   const decision = (v.decision === "accept" ? "Accepted" : "Rejected") + (n ? `, ${plural(n, "correction")}` : "") +
     (v.estimate_overridden ? ", range change" : "");
-  const expandable = v.corrections.length > 0 || !!v.notes || v.route_overridden;
   const detailId = `hist-detail-${v.id}`;
-  const row = el("tr", { class: expandable ? "hist-row expandable" : "hist-row" });
-  let btn = null;
-  if (expandable) {
-    btn = el("button", { type: "button", class: "chev", "aria-expanded": "false", "aria-controls": detailId,
-      "aria-label": `Details for claim ${v.request_id.slice(0, 8)}` });
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const open = btn.getAttribute("aria-expanded") !== "true";
-      btn.setAttribute("aria-expanded", String(open));
-      $(detailId).hidden = !open;
-    });
-    row.addEventListener("click", () => btn.click()); // the whole row is a mouse target; the button is the keyboard one
-  }
+  const row = el("tr", { class: "hist-row expandable" });
+  const btn = el("button", { type: "button", class: "chev", "aria-expanded": "false", "aria-controls": detailId,
+    "aria-label": `Details for claim ${v.request_id.slice(0, 8)}` });
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const open = btn.getAttribute("aria-expanded") !== "true";
+    btn.setAttribute("aria-expanded", String(open));
+    $(detailId).hidden = !open;
+  });
+  row.addEventListener("click", () => btn.click()); // the whole row is a mouse target; the button is the keyboard one
   row.append(el("td", { class: "num" }, localDateTime(v.created_at)), el("td", { class: "mono" }, v.request_id.slice(0, 8)),
     el("td", {}, decision), el("td", {}, routeCell(v)), el("td", { class: "chev-cell" }, btn));
-  if (!expandable) return [row];
-  const box = el("div", { class: "hist-detail-box" });
-  if (v.corrections.length) box.append(el("p", { class: "box-label" }, "Corrections"), el("ul", {}, v.corrections.map((c) => el("li", {}, correctionLine(c)))));
-  if (v.notes) box.append(el("p", { class: "box-label" }, "Notes"), el("p", { class: "hist-notes" }, v.notes));
-  if (v.route_overridden) box.append(el("p", { class: "box-label" }, "System recommended"), el("p", {}, OUTCOME_TEXT[v.system_route] || v.system_route));
-  const detail = el("tr", { id: detailId, class: "hist-detail", hidden: true }, el("td", { colspan: 5 }, box));
+  const detail = el("tr", { id: detailId, class: "hist-detail", hidden: true }, el("td", { colspan: 5 }, historyDetail(v)));
   return [row, detail];
 }
 
