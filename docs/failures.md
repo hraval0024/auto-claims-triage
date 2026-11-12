@@ -11,6 +11,7 @@ builder's visual read confirmed by the candidate, unless it says otherwise; it i
 | F4 | Per-IP rate limit does not trigger on Railway | **Open** (deferred by the candidate) |
 | F5 | Eval scoring dropped accented letters | Fixed (scoring bug found after viewing results) |
 | F6 | Haiku fast-tracks eval_030, labeled replacement-level | **Disputed label** |
+| F7 | Completion card shows an override as "System recommended: <same route>" after a re-route | **Open** (fix on a branch, not deployed) |
 
 ## F1: Side mirrored (vehicle left reported as right)
 
@@ -69,6 +70,14 @@ builder's visual read confirmed by the candidate, unless it says otherwise; it i
 - **Actual (Haiku 5.5, run 5015ec7):** findings at severity 1-2, medium confidence; $840-$2,110; `fast_track_candidate`. Opus and Sonnet did not fast-track it.
 - **Why it matters:** the only eval case where a model under-rating severity moves a claim toward automation (fast track is still a candidate; a human approves payment).
 - **Status: disputed label (candidate decision).** The car looks worn and rusty; whether the "dents" are claim damage or wear can't be settled without a human. In the label audit; excluded in the sensitivity view.
+
+## F7: Completion card names the re-routed recommendation in an override
+
+- **Input:** live claim `ad50b973` (eval_031), 2026-11-12, commit 47ffac7. System recommended Fast-track candidate. The adjuster changed a severity 2 -> 3 (which re-routes the claim to Adjuster review) and chose final route Adjuster review with a reason.
+- **Expected:** the card says the adjuster overrode Fast-track candidate (the stored recommendation; the server compares the final route with it, so this is an override).
+- **Actual:** "Final route: Adjuster review. Adjuster override. System recommended: Adjuster review" (the override panel says the same): it names the re-routed recommendation, so it reads like an override of a route by itself. Stored data and the Review history ("Fast-track candidate -> Adjuster review") are correct.
+- **Cause:** the card and the override panel use `routing.outcome` (after re-routing) instead of `system_route`.
+- **Status: open.** Display-only fix prepared on a branch (not deployed).
 
 ## Other findings at scale (eval, run 5015ec7)
 
